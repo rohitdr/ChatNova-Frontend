@@ -1,17 +1,18 @@
-import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-export default function Login() {
+import { EnvelopeIcon, LockClosedIcon ,UserIcon,PhoneIcon  } from "@heroicons/react/24/outline";
+
+export default function SignUp() {
   return (
-    <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
+   <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
       <div className="">
         <div className=" my-5 flex text-3xl font-medium justify-center">
           <h1>ChatNova</h1>
         </div>
         <div className=" my-5 flex flex-col items-center">
-          <h2 className="text-2xl pb-2 font-medium">Sign in</h2>{" "}
-          <p>Sign in to continue to ChatNova</p>
+          <h2 className="text-2xl pb-2 font-medium">Register</h2>{" "}
+          <p>Get your ChatNova account now.</p>
         </div>
 
-        <div className="px-7 pt-1 md:pt-7  pb-4 bg-white w-[320px] sm:w-[450px] rounded-lg shadow-md ">
+        <div className="px-7 pt-0 md:pt-2 md:pb-4  pb-1 bg-white w-[320px] sm:w-[450px] rounded-lg shadow-md ">
           <form action="" className="my-3 py-3">
             <div className="m-1 p-1 flex w-full flex-col">
               <label htmlFor="Login-email" className="pb-2">
@@ -30,12 +31,46 @@ export default function Login() {
                 />
               </div>
             </div>
-            <div className="m-1 p-1 w-full flex flex-col">
+              <div className="m-1 p-1 flex w-full flex-col">
+              <label htmlFor="Login-username" className="pb-2">
+                Username
+              </label>
+              <div className="flex items-center">
+                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
+                  <UserIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
+                </div>
+                <input
+                  className="pl-2  h-[45px]  w-full border border-gray-300"
+                  placeholder="   Enter your Username"
+                  type="text"
+                  name="Login-username"
+                  id="Login-username"
+                />
+              </div>
+            </div>
+              <div className="m-1 p-1 flex w-full flex-col">
+              <label htmlFor="Login-email" className="pb-2">
+                Phone number
+              </label>
+              <div className="flex items-center">
+                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
+                  <PhoneIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
+                </div>
+                <input
+                  className=" h-[45px] pl-2 w-full border border-gray-300"
+                  placeholder="   Enter your Number"
+                  type="tel"
+                  name="Login-phonenumber"
+                  id="Login-phonenumber"
+                />
+              </div>
+            </div>
+            <div className="m-1 mb-4 p-1 w-full flex flex-col">
               <div className="flex justify-between">
                 <label htmlFor="Login-password" className="pb-2">
                   Passoword
                 </label>
-                <p className="pb-2 text-gray-500"> Forget password? </p>
+               
               </div>
               <div className="flex items-center border border-gray-300">
                 <div className="w-10 bg-[#F8F9FA] flex justify-center">
@@ -51,19 +86,7 @@ export default function Login() {
               </div>{" "}
             </div>
 
-            <div className="flex m-2 justify-between">
-              <div className="m-1 p-1">
-                <input
-                  type="checkbox"
-                  name="Login-remeberme"
-                  id="Login-remeberme"
-                  className=" accent-gray-400"
-                />
-                <label htmlFor="Login-remeberme " className="px-2">
-                  Remember me
-                </label>
-              </div>
-            </div>
+            
             <div className="m-1 p-1">
               <input
                 type="button"
@@ -71,17 +94,18 @@ export default function Login() {
                 value="Sign in"
               />
             </div>
+          
           </form>
         </div>
         <div className="flex justify-center m-4">
           <div>
             <p>
-              Don't have an account?{" "}
-              <a className="text-blue-500"> Signup now</a>
+              Already have an account?{" "}
+              <a className="text-blue-500"> Signup in</a>
             </p>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
