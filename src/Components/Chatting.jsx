@@ -87,7 +87,7 @@ return ()=>{ window.removeEventListener('popstate',handleBack)}
       </div>
       <div className='px-6 overflow-y-auto scrollbar-hide flex-auto  '> 
         {currentUsersMessages && currentUsersMessages.map((element)=>{
-          return <Message send={currentChatUserId === element.receiverId && user._id === element.senderId } time={new Date(element.createdAt).toLocaleTimeString([],{ hour: "2-digit",
+          return <Message send={currentChatUserId === element.receiverId && user?._id === element.senderId } time={new Date(element.createdAt).toLocaleTimeString([],{ hour: "2-digit",
   minute: "2-digit"})} Message={element.message}></Message>
         })}
        <div ref={messageEndRef}></div>
