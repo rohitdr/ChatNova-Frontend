@@ -3,7 +3,7 @@ import ChatNovaContext from "./ChatNovaContext";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import api from "../api/axios.jsx";
 
 export default function ChatNovaState(props) {
   const [dataBaseUsers,setDataBaseUsers]=useState(null)
