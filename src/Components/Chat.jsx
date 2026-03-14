@@ -1,8 +1,8 @@
-import React, { act, useContext } from 'react'
+import  {  useContext } from 'react'
 import SideBar from './SideBar'
 import Users from './Users'
 import Chatting from './Chatting'
-import Profile from './Profile'
+
 import ChatNovaContext from '../Context/ChatNovaContext'
 export default function Chat() {
   const context = useContext(ChatNovaContext)
