@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react'
 import AuthContext from './AuthContext'
-import api from "../api/axios";
+import api from "../api/axios.jsx";
 import { useNavigate } from 'react-router-dom';
 
 export default function AuthState(props) {
