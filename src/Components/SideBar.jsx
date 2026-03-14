@@ -1,31 +1,61 @@
-import React from 'react'
-import { UserCircleIcon,ChatBubbleLeftRightIcon,Cog6ToothIcon,UserGroupIcon } from "@heroicons/react/24/outline";
+import React, { useContext, useState } from 'react'
+import { UserCircleIcon,ChatBubbleLeftRightIcon,Cog6ToothIcon,UserGroupIcon,PowerIcon  } from "@heroicons/react/24/outline";
+import AuthContext from '../Context/AuthContext';
 
 export default function SideBar() {
+    const  context = useContext(AuthContext)
+    const {logout}=context
+  const [profileOptionsActive,setProfileOptionsActive]=useState(false)
+  const logoutHandler=()=>{
+ logout()
+  }
   return (
    <>
-   <div className=' bg-white py-2 lg:p-0 grid border border-emerald-200 lg:h-screen lg:grid-cols-1 grid-cols-[35%_30%_35%] lg:grid-rows-[35%_30%_35%] '>
-     <div className='flex items-start lg:items-start lg:mt-2 mt-0 lg:justify-center lg:mb-2 justify-start'>
+   <div className=' h-16 lg:h-full lg:grid lg:grid-rows-[35%_30%_35%] lg:static bg-white fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center  ' >
+     <div className='flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start'>
 
-   <img src="https://res.cloudinary.com/do2twyxai/image/upload/v1772522690/users/u7rrlkdxjfr7y7f64oss.jpg" alt="" className=' lg:h-10 lg:w-10 h-8 w-8 rounded-full' />
+   <img src="https://res.cloudinary.com/do2twyxai/image/upload/v1772522690/users/u7rrlkdxjfr7y7f64oss.jpg" alt="" className='border-black border-2 lg:h-10 lg:w-10 h-8 w-8 ml-5 lg:mx-0 rounded-full' />
    </div>
-   <div className='flex  flex-row lg:flex-col items-center justify-between'>
-    <div>    <UserCircleIcon className="w-7  mx-2 h-7 text-black" /></div>
-    <div> <ChatBubbleLeftRightIcon className="w-7 mx-2 h-7 text-black" /></div>
-    <div> <UserGroupIcon className="w-7 h-7 mx-2 text-black" /></div>
-    <div> <Cog6ToothIcon className="w-7 mx-2 h-7 text-black" /></div>
+   <div className='flex lg:h-[20rem] h-full flex-row lg:flex-col items-center justify-between'>
+    <div className='hover:bg-red-600'>    <UserCircleIcon className="w-9 sm:ml-12 lg:w-9 lg:h-9 lg:mb-4 mx-4 lg:mx-2 h-9 text-black" /></div>
+    <div> <ChatBubbleLeftRightIcon className="lg:w-9 sm:ml-12 w-9 h-9 mx-4 lg:my-2 lg:mx-2 lg:h-9 text-black" /></div>
+    <div> <UserGroupIcon className="lg:w-9 w-9 lg:my- h-9 sm:ml-12 lg:h-9 mx-4 lg:mx-2 text-black" /></div>
+    <div> <Cog6ToothIcon className="lg:w-9 w-9 sm:ml-12 lg:my-6 h-9 mx-4 lg:mx-2 lg:h-9 text-black" /></div>
  
-
+   
 
 
 
 
    </div>
-   <div className='flex items-end lg:items-end lg:justify-center lg:mb-2 justify-end'>
+   <div className='flex items-end lg:items-end lg:justify-center mb-4  justify-end '>
 
-   <img src="https://res.cloudinary.com/do2twyxai/image/upload/v1772522690/users/u7rrlkdxjfr7y7f64oss.jpg" alt="" className=' lg:h-10 lg:w-10 h-8 w-8 rounded-full' />
+   <img onClick={()=>{profileOptionsActive?setProfileOptionsActive(false):setProfileOptionsActive(true)}} src="https://res.cloudinary.com/do2twyxai/image/upload/v1772522690/users/u7rrlkdxjfr7y7f64oss.jpg" alt="" className='border-black cursor-pointer border-2 mr-5 lg:mx-0 lg:h-10 lg:w-10 h-8 w-8 rounded-full' />
    </div>
+
    </div>
+
+
+   {profileOptionsActive &&  <div className='fixed inset-0 bg-black/20 ' onClick={()=>{setProfileOptionsActive(false)}}> 
+    <div className='fixed shadow-xl   bg-white h-44 w-44 bottom-14 right-4 lg:bottom-14 lg:left-4' onClick={(e)=>{e.stopPropagation()}}>
+    <div className=' cursor-pointer'>
+   <div className='border   border-gray-50 hover:bg-slate-100'>
+
+    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium'><div>Profile</div> <div><UserCircleIcon  className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
+    </div>
+     <div className='border   cursor-pointer border-gray-50  hover:bg-slate-100'>
+
+    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium'><div>Settings</div> <div><Cog6ToothIcon  className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
+    </div>
+    
+    </div>
+    <div className='border  cursor-pointer  border-gray-50 border-t-gray-300 hover:bg-slate-100' onClick={logoutHandler}>
+
+    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium'><div>Log Out</div> <div><PowerIcon  className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
+    </div>
+   
+   </div>
+   </div> }
    </>
   )
 }

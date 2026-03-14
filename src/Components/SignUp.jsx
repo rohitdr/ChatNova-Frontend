@@ -1,5 +1,5 @@
 import { EnvelopeIcon, LockClosedIcon ,UserIcon,PhoneIcon  } from "@heroicons/react/24/outline";
-
+import { Link } from "react-router-dom";
 export default function SignUp() {
   return (
    <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
@@ -7,7 +7,7 @@ export default function SignUp() {
         <div className=" my-5 flex text-3xl font-medium justify-center">
           <h1>ChatNova</h1>
         </div>
-        <div className=" my-5 flex flex-col items-center">
+        <div className=" mb-5 mt-1  flex flex-col items-center">
           <h2 className="text-2xl pb-2 font-medium">Register</h2>{" "}
           <p>Get your ChatNova account now.</p>
         </div>
@@ -101,7 +101,7 @@ export default function SignUp() {
           <div>
             <p>
               Already have an account?{" "}
-              <a className="text-blue-500"> Signup in</a>
+              <Link className="text-blue-500" to="/"> Signup in</Link>
             </p>
           </div>
         </div>
