@@ -6,9 +6,12 @@ import Message from './Message';
 import ChatNovaContext from '../Context/ChatNovaContext';
 import { useRef } from 'react';
 import SocketContext from '../Context/SocketContext';
+import AuthContext from '../Context/AuthContext';
 export default function Chatting() {
 const [sendingMessage,setSendingMessage]=useState("")
 const messageEndRef = useRef(null)
+const authContext=useState(AuthContext)
+const {user}=authContext
   const Context = useContext(ChatNovaContext)
   const {getCureentChattingUser,currentChatUser,setActiveChat,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages}=Context
  const socketcontext = useContext(SocketContext)
@@ -84,7 +87,7 @@ return ()=>{ window.removeEventListener('popstate',handleBack)}
       </div>
       <div className='px-6 overflow-y-auto scrollbar-hide flex-auto  '> 
         {currentUsersMessages && currentUsersMessages.map((element)=>{
-          return <Message send={currentChatUserId === element.receiverId} time={new Date(element.createdAt).toLocaleTimeString([],{ hour: "2-digit",
+          return <Message send={currentChatUserId === element.receiverId && user._id === element.senderId } time={new Date(element.createdAt).toLocaleTimeString([],{ hour: "2-digit",
   minute: "2-digit"})} Message={element.message}></Message>
         })}
        <div ref={messageEndRef}></div>
