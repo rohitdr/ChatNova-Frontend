@@ -11,7 +11,7 @@ export default function ChatNovaState(props) {
   const[chattedOnlineUsers,setChattedOnlineUsers]=useState(null)
   const [currentChatUserId,setCurrentChatUserId]=useState(null)
   const [currentChatUser,setCurrentChatUser]=useState(null)
-  const [currentUsersMessages,setCurrentUsersMessages]=useState(null)
+  const [currentUsersMessages,setCurrentUsersMessages]=useState([])
   const [activeChat , setActiveChat]=useState(false)
   let Navigate = useNavigate();
 /// function to get User whom with logged in user has chats
@@ -79,7 +79,7 @@ export default function ChatNovaState(props) {
  try{
      const res = await api.post(`/messages/sendMessage/${id}`,{message})
      if(res.status===200){
-      setCurrentUsersMessages([...currentUsersMessages,res.data.message])
+     
   
      
    

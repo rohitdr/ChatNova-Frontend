@@ -30,13 +30,25 @@ messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
 useEffect(() => {
   if (!socket) return;
 
+
   const handleNewMessage = (newMessage) => {
- const audio = new Audio('/universfield-happy-message-ping-351298.mp3');
-    audio.play().catch(err => console.log('Audio play error:', err));
-    setCurrentUsersMessages((prevMessages) => [...prevMessages, newMessage])
- 
+
+  if(newMessage.senderId !== currentChatUserId && 
+     newMessage.receiverId !== currentChatUserId){
+    return
   }
 
+  setCurrentUsersMessages(prev=>{
+    if(!prev) return [newMessage]
+
+    const exists = prev.some(msg=>msg._id === newMessage._id)
+    if(exists) return prev
+ const audio = new Audio('/universfield-happy-message-ping-351298.mp3');
+    audio.play().catch(err => console.log('Audio play error:', err));
+    return [...prev,newMessage]
+  })
+
+} 
   socket.on("newMessage", handleNewMessage)
 
   return () => {
