@@ -41,6 +41,14 @@ useEffect(() => {
     socket.off("newMessage", handleNewMessage)
   }
 }, [socket])
+
+useEffect(()=>{
+  const handleBack=()=>{
+    setActiveChat(false)
+  }
+window.addEventListener('popstate',handleBack)
+return ()=>{ window.removeEventListener('popstate',handleBack)}
+},[])
   
   return (
        <div className='h-screen bg-white '>
