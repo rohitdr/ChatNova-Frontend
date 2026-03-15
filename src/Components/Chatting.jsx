@@ -34,7 +34,7 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-  console.log(newMessage.senderId+" "+newMessage.receiverId)
+  console.log(newMessage.senderId+" "+newMessage.receiverId +""+currentChatUserId )
   if(newMessage.senderId !== currentChatUserId && 
      newMessage.receiverId !== currentChatUserId){
       console.log("return")
