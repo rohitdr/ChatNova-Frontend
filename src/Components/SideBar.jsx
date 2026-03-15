@@ -14,7 +14,7 @@ export default function SideBar() {
    <div className=' 2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_30%_35%] lg:static bg-white fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center  ' >
      <div className='flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start'>
 
-   <img src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png" alt="" className=' lg:h-10 lg:w-14 xs:w-10 xs:pb-1 h-8  w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full' />
+   <img src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png" alt="" className=' lg:h-10 lg:w-14 xs:w-10 xs:pb-1 h-8 xs:pb-1 xs:h-8 w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full' />
    </div>
    <div className='flex lg:h-[20rem] h-full flex-row lg:flex-col items-center justify-between'>
     <div className='hover:bg-red-600'>    <UserCircleIcon className="md:w-9 w-7 h-7 sm:ml-12 lg:w-9 lg:h-9 lg:mb-4 mx-4 lg:mx-2 md:h-9 text-black" /></div>

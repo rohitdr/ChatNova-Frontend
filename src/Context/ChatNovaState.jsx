@@ -86,10 +86,16 @@ export default function ChatNovaState(props) {
  console.log(error.message)
   }}
 
-
+const  capitalizeFirstLetter=(string)=> {
+  // Check if the input is a non-empty string to avoid errors
+  if (typeof string !== 'string' || string.length === 0) {
+    return string;
+  }
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
   return (
     <ChatNovaContext.Provider
-      value={{ activeChat,setActiveChat, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
+      value={{ activeChat,setActiveChat,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
     >
       {props.children}
     </ChatNovaContext.Provider>
