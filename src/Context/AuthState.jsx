@@ -31,8 +31,7 @@ try{
             }
           })
           api.defaults.headers.common["Authorization"] = `Bearer ${refressRes.data.access_token}`
-          originalRequest.headers["Authorization"] = `Bearer ${refressRes.data.access_token}`
- 
+  console.log("refress is successfull")
 }
 catch(error){
   console.log("refress is not successfull")
