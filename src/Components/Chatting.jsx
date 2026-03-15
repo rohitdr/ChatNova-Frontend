@@ -114,8 +114,7 @@ setUploadedVideo(e.target.files[0])
       <div className='px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-auto  '> 
         {currentUsersMessages && currentUsersMessages.map((element)=>{
           console.log(element)
-          return <Message send={currentChatUserId === element.receiverId} time={new Date(element.createdAt).toLocaleTimeString([],{ hour: "2-digit",
-  minute: "2-digit"})} Message={element.text} url={element.media.url} type={element.type}></Message>
+          return <Message send={currentChatUserId === element.receiverId} message={element}></Message>
         })}
        <div ref={messageEndRef}></div>
         
