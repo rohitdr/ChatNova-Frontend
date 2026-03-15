@@ -41,11 +41,11 @@ export default function SideBar() {
     <div className=' cursor-pointer'>
    <div className='border   border-gray-50 hover:bg-slate-100'>
 
-    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium'><div>Profile</div> <div><UserCircleIcon  className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
+    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium' onClick={()=>{setActivePage(1);setProfileOptionsActive(false)}}><div>Profile</div> <div><UserCircleIcon    className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
     </div>
-     <div className='border   cursor-pointer border-gray-50  hover:bg-slate-100'>
+     <div className='border   cursor-pointer border-gray-50  hover:bg-slate-100' onClick={()=>{setActivePage(3);setProfileOptionsActive(false)}}>
 
-    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium'><div>Settings</div> <div><Cog6ToothIcon  className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
+    <div className='flex m-4  mb-4 text-gray-700 justify-between font-medium' ><div>Settings</div> <div><Cog6ToothIcon   className="w-4 h-4 mt-1.5 text-black cursor-pointer" /></div></div>
     </div>
     
     </div>

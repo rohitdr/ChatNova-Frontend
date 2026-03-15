@@ -21,6 +21,7 @@ if(user){
     })
     newSocket.on("getOnlineUsers",(users)=>{
         setOnlineUser(users)
+        console.log("online user " +onlineUsers)
     })
     setSocket(newSocket)
     return ()=>newSocket.close();
