@@ -10,17 +10,33 @@ const [user,setUser]=useState(null)
  const [progress, setProgress] = useState(0);
  const refress_token=localStorage.getItem("refress_token")
 
-const refreshSession=async()=>{
+const refreshUser=async()=>{
 
 try{
     const res =await api.get('/auth/getUser')
- 
     setUser(res.data.user)
  
 }
 catch(error){
   console.log("user is null")
  setUser(null)
+}
+}
+const refreshSession=async()=>{
+
+try{
+   const refressRes=await api.post("/auth/refresh",{},{
+            headers:{
+                Authorization:`Bearer ${refress_token}`
+            }
+          })
+          api.defaults.headers.common["Authorization"] = `Bearer ${refressRes.data.access_token}`
+          originalRequest.headers["Authorization"] = `Bearer ${refressRes.data.access_token}`
+ 
+}
+catch(error){
+  console.log("refress is not successfull")
+    Navigate('/login')
 }
 }
 
@@ -78,6 +94,7 @@ Navigate('/login')
 }
 else{
   refreshSession()
+  refreshUser()
 }
 },[refress_token])
   return (

@@ -35,7 +35,7 @@ serchUser(value)
       <div className="m-2 p-2 text-3xl font-medium">
        Chats
       </div>
-      <div className="flex p-2 rounded-lg border-none mx-4 my-2 bg-[#E6EBF5]">
+      <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 bg-[#E6EBF5]">
            <MagnifyingGlassIcon  className="w-5 h-5 pt-1  text-gray-700 cursor-pointer"/>
 <input type="search" className="w-full  bg-[#E6EBF5] outline-none pl-2" onChange={onChangeHandler} placeholder="Search messages or users" name="usersearch" id="usersearch" />
 
@@ -57,7 +57,7 @@ serchUser(value)
        {/* {searchClick && <div className="px-5 py-2 text-xl font-medium">
      Recent
       </div>} */}
-      <div className="flex flex-col p-2 px-4 overflow-y-auto scrollbar-hide">
+      <div className="flex pt-2 flex-col sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
       {/* first row */}
       {!searchClick && dataBaseUsers && dataBaseUsers.length!==0 && dataBaseUsers.map((element)=>{
        return  <div onClick={()=>{setCurrentChatUserId(element._id);getCureentChattingUser(element._id);getmessages(element._id);setActiveChat(true)}} className='flex  hover:bg-[#E6EBF5] p-0 lg:p-2'>

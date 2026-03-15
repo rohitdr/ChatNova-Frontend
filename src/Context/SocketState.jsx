@@ -14,7 +14,9 @@ if(user){
     const newSocket =io(import.meta.env.VITE_SOCKET,{
         query:{
             userId:user?._id
-        }
+        },
+        transports: ["websocket", "polling"],
+         withCredentials: true,
     })
     newSocket.on("getOnlineUsers",(users)=>{
         setOnlineUser(users)
