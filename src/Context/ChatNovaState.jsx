@@ -1,9 +1,10 @@
 import { useContext, useState } from "react";
 import ChatNovaContext from "./ChatNovaContext";
 
-
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import api from "../Api/Axios.jsx";
+import AuthContext from "./AuthContext.jsx";
 
 export default function ChatNovaState(props) {
   const [dataBaseUsers,setDataBaseUsers]=useState(null)
@@ -14,6 +15,8 @@ export default function ChatNovaState(props) {
   const [currentUsersMessages,setCurrentUsersMessages]=useState([])
   const [activeChat , setActiveChat]=useState(false)
   let Navigate = useNavigate();
+  const authContext = useContext(AuthContext)
+  const {setProgress} = authContext
 /// function to get User whom with logged in user has chats
 
 
@@ -86,6 +89,47 @@ export default function ChatNovaState(props) {
  console.log(error.message)
   }}
 
+    const sendMedia = async(id,message)=>{
+ try{
+     const res = await api.post(`/messages/sendFile/${id}`,{message})
+    console.log(res.data)
+ }
+ 
+
+ catch(error){
+ console.log(error.message)
+  }}
+
+
+  //function to upload a image or video or file
+  const uploadCloudinary =async (id,file)=>{
+    try{
+      setProgress(10)
+ const formdata = new FormData();
+    formdata.append("file",file)
+    formdata.append("upload_preset",import.meta.env.VITE_UPLOAD_PRESET)
+    const res = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,formdata)
+    setProgress(30)
+    const message= {
+ 
+    "publicId": res.data.public_id,
+
+   
+    "bytes": res.data.bytes,
+    "type": res.data.resource_type,
+    "url": res.data.secure_url
+    }
+    setProgress(60)
+    sendMedia(id,message)
+    setProgress(100)
+    }catch(error){
+      console.log(error)
+      setProgress(100)
+    }
+   
+  }
+ 
+
 const  capitalizeFirstLetter=(string)=> {
   // Check if the input is a non-empty string to avoid errors
   if (typeof string !== 'string' || string.length === 0) {
@@ -95,7 +139,7 @@ const  capitalizeFirstLetter=(string)=> {
 }
   return (
     <ChatNovaContext.Provider
-      value={{ activeChat,setActiveChat,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
+      value={{ activeChat,setActiveChat,uploadCloudinary,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
     >
       {props.children}
     </ChatNovaContext.Provider>

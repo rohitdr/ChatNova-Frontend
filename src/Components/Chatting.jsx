@@ -16,7 +16,7 @@ const [uploadVideo,setUploadedVideo]=useState(null)
   const authContext=useContext(AuthContext)
   const {user}=authContext
   const [mediaSendModal,setMediaSendModal]=useState(false)
-  const {getCureentChattingUser,currentChatUser,setActiveChat,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter}=Context
+  const {getCureentChattingUser,currentChatUser,setActiveChat,uploadCloudinary,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter}=Context
  const socketcontext = useContext(SocketContext)
  const {socket}=socketcontext
  useEffect(()=>{
@@ -53,7 +53,6 @@ useEffect(() => {
     console.log([...prev,newMessage])
     return [...prev,newMessage]
   })
-
 } 
   socket.on("newMessage", handleNewMessage)
 
@@ -114,8 +113,9 @@ setUploadedVideo(e.target.files[0])
       </div>
       <div className='px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-auto  '> 
         {currentUsersMessages && currentUsersMessages.map((element)=>{
+          console.log(element)
           return <Message send={currentChatUserId === element.receiverId} time={new Date(element.createdAt).toLocaleTimeString([],{ hour: "2-digit",
-  minute: "2-digit"})} Message={element.message}></Message>
+  minute: "2-digit"})} Message={element.text} url={element.media.url} type={element.type}></Message>
         })}
        <div ref={messageEndRef}></div>
         
@@ -200,10 +200,10 @@ setUploadedVideo(e.target.files[0])
     <div className='fixed shadow-xl ' onClick={(e)=>{e.stopPropagation()}}>
       {uploadedImage && <div><img className='max-h-[80vh] max-w-[90vw] object-contain rounded-xl' src={URL.createObjectURL(uploadedImage)}/>
     <XMarkIcon className="h-8 w-8 absolute cursor-pointer top-6 right-6 text-white" onClick={()=>{setMediaSendModal(false);setUploadedImage(null)}}/>
- <PaperAirplaneIcon className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"  />
+ <PaperAirplaneIcon className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer" onClick={()=>{uploadCloudinary(currentChatUserId,uploadedImage); setMediaSendModal(false)}} />
 </div>}
       {uploadVideo && <div> <video  autoPlay controls className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl" src={URL.createObjectURL(uploadVideo)}></video> <XMarkIcon className="h-8 w-8 absolute cursor-pointer top-6 right-6 text-white" onClick={()=>{setMediaSendModal(false);setUploadedVideo(null)}}/>
- <PaperAirplaneIcon className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"  /></div>}
+ <PaperAirplaneIcon className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer" onClick={()=>{uploadCloudinary(currentChatUserId,uploadVideo); setMediaSendModal(false)}} /></div>}
    
    </div></div>
    }
