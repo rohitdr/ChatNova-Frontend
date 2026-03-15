@@ -34,9 +34,10 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-
+  console.log(newMessage.senderId+" "+newMessage.receiverId)
   if(newMessage.senderId !== currentChatUserId && 
      newMessage.receiverId !== currentChatUserId){
+      console.log("return")
     return
   }
 
@@ -47,6 +48,7 @@ useEffect(() => {
     if(exists) return prev
  const audio = new Audio('/universfield-happy-message-ping-351298.mp3');
     audio.play().catch(err => console.log('Audio play error:', err));
+    console.log([...prev,newMessage])
     return [...prev,newMessage]
   })
 
@@ -180,7 +182,7 @@ setUploadedVideo(e.target.files[0])
   className='hidden'
   onChange={imagechangehandler}
 /></div>
-  <div className='p-2.5  bg-[#6159CB] rounded-lg' onClick={async()=>{ await sendMessages(currentChatUserId,sendingMessage);setSendingMessage("")} }>
+  <div className='p-2.5  bg-[#6159CB] rounded-lg' onClick={()=>{ sendMessages(currentChatUserId,sendingMessage);setSendingMessage("")} }>
   <PaperAirplaneIcon className=" w-6 h-6 text-white cursor-pointer"  />
 
   </div>

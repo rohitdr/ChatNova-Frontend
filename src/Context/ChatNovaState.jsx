@@ -78,12 +78,7 @@ export default function ChatNovaState(props) {
     const sendMessages = async(id,message)=>{
  try{
      const res = await api.post(`/messages/sendMessage/${id}`,{message})
-     if(res.status===200){
-     
-  
-     
-   
-     }
+    console.log(res.data)
  }
  
 
