@@ -1,6 +1,10 @@
 
 import { EllipsisVerticalIcon,UserCircleIcon  } from "@heroicons/react/24/solid";
+import { useContext } from "react";
+import AuthContext from "../Context/AuthContext";
 export default function Profile() {
+  const authContext = useContext(AuthContext)
+  const {user} = authContext
   return (
     <div className='flex h-full flex-col bg-[#F5F7FB]'>
       <div className='flex justify-between m-2 p-2 mt-4'>
@@ -9,9 +13,9 @@ export default function Profile() {
       </div>
       <div className="flex flex-col items-center justify-center my-2">
            <div className="my-2 py-2">
-        <img className='w-28  h-28 rounded-full  border-white border-4' src="https://res.cloudinary.com/do2twyxai/image/upload/v1772522690/users/u7rrlkdxjfr7y7f64oss.jpg" alt="" />
+        <img className='w-28  h-28 rounded-full  border-white border-4' src={user?.image.url} alt="" />
       </div>
-      <p className="my-2 mb-1 font-medium">ROHIT KUMAR</p>
+      <p className="my-2 mb-1 font-medium">{user?.name}</p>
       <p>Active</p>
       </div>
       <div className="my-3 py-3 mx-3 px-2 text-sm text-[#8E949D]">

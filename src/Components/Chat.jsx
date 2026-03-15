@@ -1,6 +1,7 @@
 import  {  useContext } from 'react'
 import SideBar from './SideBar'
 import Users from './Users'
+import Profile from './Profile'
 import Chatting from './Chatting'
 
 import ChatNovaContext from '../Context/ChatNovaContext'

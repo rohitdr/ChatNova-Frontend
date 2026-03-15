@@ -86,7 +86,7 @@ setUploadedVideo(e.target.files[0])
      
         <div className='flex items-center justify-between'>
            <ArrowLeftIcon className="w-6 h-6 text-gray-700 lg:hidden" onClick={()=>{setActiveChat(false)}} />
-        <img className='h-10 w-10 rounded-full border-white border-4' src="https://res.cloudinary.com/do2twyxai/image/upload/v1772522690/users/u7rrlkdxjfr7y7f64oss.jpg" alt="" />
+        <img className='h-10 w-10 rounded-full border-white border-4' src={currentChatUser?.image.url} alt="" />
         <h2 className='mx-2 lg:mx-4 pb-1 font-medium text-xs lg:text-xl'>{capitalizeFirstLetter(currentChatUser?.name)}</h2>
 
         </div>

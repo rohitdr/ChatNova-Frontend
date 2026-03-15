@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import AuthContext from './AuthContext'
 import api from "../Api/Axios.jsx";
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function AuthState(props) {
@@ -9,6 +10,7 @@ export default function AuthState(props) {
 const [user,setUser]=useState(null)
  const [progress, setProgress] = useState(0);
  const refress_token=localStorage.getItem("refress_token")
+ const [activePage,setActivePage]=useState(0)
 
 const refreshUser=async()=>{
 
@@ -85,7 +87,26 @@ catch(error){
   };
 
 
+const updateUserImage = async(file)=>{
+  try{
+  
 
+      const formdata = new FormData();
+    formdata.append("file",file)
+    formdata.append("upload_preset",import.meta.env.VITE_UPLOAD_PRESET)
+    const res = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,formdata)
+    let image = {
+      publicId:res.data.public_id,
+      url:res.data.secure_url
+    }
+   console.log(res.data)
+  const responseUpdate =await api.post('/auth/update',{image})
+  console.log(responseUpdate)
+    refreshUser()
+  }catch(error){
+    console.log(error)
+  }
+}
 
 useEffect(()=>{
 if(!refress_token){
@@ -97,7 +118,7 @@ else{
 }
 },[refress_token])
   return (
-    <AuthContext.Provider value={{user,logout,setUser,progress,setProgress,login,refress_token}}>
+    <AuthContext.Provider value={{user,updateUserImage,activePage,setActivePage,logout,setUser,progress,setProgress,login,refress_token}}>
   {props.children}
     </AuthContext.Provider>
       
