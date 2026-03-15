@@ -110,6 +110,7 @@ export default function ChatNovaState(props) {
     formdata.append("upload_preset",import.meta.env.VITE_UPLOAD_PRESET)
     const res = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,formdata)
     setProgress(30)
+    console.log(res.data)
     const message= {
  
     "publicId": res.data.public_id,
@@ -119,6 +120,7 @@ export default function ChatNovaState(props) {
     "type": res.data.resource_type,
     "url": res.data.secure_url
     }
+console.log(message)
     setProgress(60)
     sendMedia(id,message)
     setProgress(100)
