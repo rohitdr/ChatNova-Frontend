@@ -91,7 +91,7 @@ export default function ChatNovaState(props) {
 
     const sendMedia = async(id,message)=>{
  try{
-     const res = await api.post(`/messages/sendFile/${id}`,{message})
+     const res = await api.post(`/messages/sendFile/${id}`,message)
     console.log(res.data)
  }
  
