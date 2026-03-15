@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { PhoneIcon,EllipsisVerticalIcon,MagnifyingGlassIcon, PaperClipIcon,ArrowLeftIcon  } from "@heroicons/react/24/outline";
-import {  PaperAirplaneIcon,VideoCameraIcon ,PhotoIcon } from "@heroicons/react/24/solid";
+import {  PaperAirplaneIcon,VideoCameraIcon ,PhotoIcon,XMarkIcon } from "@heroicons/react/24/solid";
 import Message from './Message';
 
 import ChatNovaContext from '../Context/ChatNovaContext';
@@ -13,6 +13,8 @@ const messageEndRef = useRef(null)
 const [uploadedImage,setUploadedImage]=useState(null)
 const [uploadVideo,setUploadedVideo]=useState(null)
   const Context = useContext(ChatNovaContext)
+  const authContext=useContext(AuthContext)
+  const {user}=authContext
   const [mediaSendModal,setMediaSendModal]=useState(false)
   const {getCureentChattingUser,currentChatUser,setActiveChat,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages}=Context
  const socketcontext = useContext(SocketContext)
@@ -34,9 +36,9 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-  console.log(newMessage.senderId+" "+newMessage.receiverId +""+currentChatUserId )
-  if(newMessage.senderId !== currentChatUserId && 
-     newMessage.receiverId !== currentChatUserId){
+      console.log(user._id)
+  if(newMessage.senderId !== user._id && 
+     newMessage.receiverId !== user._id){
       console.log("return")
     return
   }
@@ -195,8 +197,11 @@ setUploadedVideo(e.target.files[0])
 
   {mediaSendModal &&  <div className='fixed inset-0 bg-black/20 flex items-center justify-center ' onClick={()=>{setMediaSendModal(false)}}> 
  
-    <div className='fixed shadow-xl   bg-white ' onClick={(e)=>{e.stopPropagation()}}>
-      {uploadedImage && <img className='' src={URL.createObjectURL(uploadedImage)}></img>}
+    <div className='fixed shadow-xl ' onClick={(e)=>{e.stopPropagation()}}>
+      {uploadedImage && <div><img className='max-h-[80vh] max-w-[90vw] object-contain rounded-xl' src={URL.createObjectURL(uploadedImage)}/>
+    <XMarkIcon className="h-8 w-8 absolute top-6 right-6 text-white" onClick={()=>{setMediaSendModal(false);setUploadedImage(null)}}/>
+ <PaperAirplaneIcon className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"  />
+</div>}
       {uploadVideo && <video src={URL.createObjectURL(uploadVideo)}></video>}
    
    </div></div>
