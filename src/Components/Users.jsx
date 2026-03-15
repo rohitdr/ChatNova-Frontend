@@ -21,7 +21,7 @@ export default function Users() {
 
 useEffect(()=>{
 chattedUsers()
-console.log(onlineUsers)
+console.log("online Users " + onlineUsers)
 },[])
 useEffect(()=>{},[activePage])
 
@@ -51,7 +51,7 @@ serchUser(value)
       </div>
       {/* online users  */}
       {searchClick && <div className='flex h-20 justify-evenly overflow-x-auto overflow-y-hidden scrollbar-hide'>
-        {searchClick && chattedOnlineUsers && chattedOnlineUsers.length!==0 && chattedOnlineUsers.map((element)=>{ return <div onClick={()=>{setCurrentChatUserId(element._id);getCureentChattingUser(element._id);setActiveChat(true)}} className={`p-2 pb-0 shadow cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] ${onlineUsers.includes(element._id)?"bg-red-700":"bg-green-600"}  mx-3`}>
+        {searchClick && chattedOnlineUsers && chattedOnlineUsers.length!==0 && chattedOnlineUsers.map((element)=>{ return <div onClick={()=>{setCurrentChatUserId(element._id);getCureentChattingUser(element._id);setActiveChat(true)}} className={`p-2 pb-0 shadow cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] ${onlineUsers?.includes(element._id)?"bg-red-700":"bg-green-600"}  mx-3`}>
 
       <div>
         <img className='w-12  h-10 rounded-full border-white border-2' src={element.image.url} alt="" />
