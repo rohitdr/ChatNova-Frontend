@@ -99,9 +99,8 @@ const updateUserImage = async(file)=>{
       publicId:res.data.public_id,
       url:res.data.secure_url
     }
-   console.log(res.data)
   const responseUpdate =await api.post('/auth/update',{image})
-  console.log(responseUpdate)
+  
     refreshUser()
   }catch(error){
     console.log(error)
