@@ -21,7 +21,6 @@ export default function Users() {
 
 useEffect(()=>{
 chattedUsers()
-console.log("online Users " + onlineUsers)
 },[])
 useEffect(()=>{},[activePage])
 

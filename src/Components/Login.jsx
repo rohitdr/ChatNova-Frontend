@@ -24,8 +24,6 @@ export default function Login() {
   const submitHandler=async (e)=>{
   e.preventDefault()
          login(data.loginEmail,data.loginPassword)
-       
- 
   }
   return (
     <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">

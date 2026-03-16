@@ -4,6 +4,8 @@ import AuthContext from './AuthContext'
 import api from "../Api/Axios.jsx";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getToken } from 'firebase/messaging';
+import { messaging } from '../Firebase/firebase.cjs';
 
 export default function AuthState(props) {
   const Navigate =useNavigate();
@@ -12,6 +14,49 @@ const [user,setUser]=useState(null)
  const refress_token=localStorage.getItem("refress_token")
  const [activePage,setActivePage]=useState(0)
 
+
+// Register service worker and get FCM token
+async function initFCM() {
+  try {
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.jsx');
+    console.log('Service Worker registered', registration);
+
+    const currentToken = await getToken(messaging, {
+      vapidKey: "BKk-CcREDcvLRTVZccMxTrzSaTpBvekfXjVI5mFjLUIVPC7Vrjeh5hwqUdC5sfPse9bZ4M5oVIF8xn7CBVZu3rA", // from Firebase console
+      serviceWorkerRegistration: registration,
+    });
+
+    if (currentToken) {
+      console.log('FCM Token:', currentToken);
+      try{
+  const res = await api.post('/auth/deviceToken',{deviceToken:currentToken})
+      }catch(error){
+        console.log(error)
+      }
+    
+
+    } else {
+      console.log('No registration token available. Request permission to generate one.');
+    }
+  } catch (err) {
+    console.error('FCM registration error:', err);
+  }
+}
+
+
+
+
+//  const getNoficationPermisson = async()=>{
+//      const permisson = await Notification.requestPermission();
+//      if(permisson==="granted"){
+//       console.log("granted")
+//     const token=  getToken(messaging,{
+//         vapidKey:"c6ISY7gYj8TQSxxz_sENivgc8OIN6zJOwwh2mIzY-uM"
+//       })
+//           console.log(token)
+//      }
+ 
+//  }
 const refreshUser=async()=>{
 
 try{
@@ -114,6 +159,14 @@ Navigate('/login')
 else{
   refreshSession()
   refreshUser()
+// Request permission and initialize FCM
+Notification.requestPermission().then((permission) => {
+  if (permission === 'granted') {
+    initFCM();
+  } else {
+    console.log('Notification permission denied');
+  }
+});
 }
 },[refress_token])
   return (
