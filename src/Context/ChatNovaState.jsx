@@ -23,7 +23,7 @@ export default function ChatNovaState(props) {
 /// function to get the coversation id between the current chatter and logged in user
 const getConversationId=async(id)=>{
           try{
-     const res = await api.get(`/messages/conversation/${id}`)
+     const res = await api.get(`/messages/conversationId/${id}`)
      if(res.status===200){
     setConversationId(res.data.conversation._id)
     console.log(res.data)
