@@ -18,11 +18,11 @@ const [user,setUser]=useState(null)
 // Register service worker and get FCM token
 async function initFCM() {
   try {
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.jsx');
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
     console.log('Service Worker registered', registration);
 
     const currentToken = await getToken(messaging, {
-      vapidKey: "BKk-CcREDcvLRTVZccMxTrzSaTpBvekfXjVI5mFjLUIVPC7Vrjeh5hwqUdC5sfPse9bZ4M5oVIF8xn7CBVZu3rA", // from Firebase console
+      vapidKey:import.meta.env.VITE_VAPIEDKEY, // from Firebase console
       serviceWorkerRegistration: registration,
     });
 
@@ -160,11 +160,15 @@ else{
   refreshSession()
   refreshUser()
 // Request permission and initialize FCM
-Notification.requestPermission().then((permission) => {
+Notification.requestPermission().then(async(permission) => {
   if (permission === 'granted') {
     initFCM();
+  }
+  else if(Notification.permission === "default"){
+    await Notification.requestPermission();
   } else {
-    console.log('Notification permission denied');
+
+    console.log('Notification permission denied plese enable it ');
   }
 });
 }
