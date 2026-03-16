@@ -16,7 +16,7 @@ const [uploadVideo,setUploadedVideo]=useState(null)
   const authContext=useContext(AuthContext)
   const {user}=authContext
   const [mediaSendModal,setMediaSendModal]=useState(false)
-  const {getCureentChattingUser,currentChatUser,setActiveChat,uploadCloudinary,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter}=Context
+  const {getCureentChattingUser,currentChatUser,setActiveChat,uploadCloudinary,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter,conversaionId}=Context
  const socketcontext = useContext(SocketContext)
  const {socket}=socketcontext
  useEffect(()=>{
@@ -36,7 +36,7 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-    
+    console.log(conversaionId)
   if(newMessage.senderId !== user._id && 
      newMessage.receiverId !== user._id){
  

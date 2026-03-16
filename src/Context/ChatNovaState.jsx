@@ -14,13 +14,27 @@ export default function ChatNovaState(props) {
   const [currentChatUser,setCurrentChatUser]=useState(null)
   const [currentUsersMessages,setCurrentUsersMessages]=useState([])
   const [activeChat , setActiveChat]=useState(false)
+  const [conversaionId,setConversationId]=useState("")
   let Navigate = useNavigate();
   const authContext = useContext(AuthContext)
   const {setProgress} = authContext
 /// function to get User whom with logged in user has chats
 
-
+/// function to get the coversation id between the current chatter and logged in user
+const getConversationId=async(id)=>{
+          try{
+     const res = await api.get(`/messages/conversation/${id}`)
+     if(res.status===200){
+    setConversationId(res.data.conversation._id)
+   
+     }
+ }
+ catch(error){
  
+  console.log(error.message)
+
+}
+}
   // function to search users from database to chat with search query
   const serchUser = async(searchValue)=>{
  try{
@@ -142,7 +156,7 @@ const  capitalizeFirstLetter=(string)=> {
 }
   return (
     <ChatNovaContext.Provider
-      value={{ activeChat,setActiveChat,uploadCloudinary,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
+      value={{ getConversationId,conversaionId,activeChat,setActiveChat,uploadCloudinary,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
     >
       {props.children}
     </ChatNovaContext.Provider>
