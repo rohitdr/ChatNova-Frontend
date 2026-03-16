@@ -26,6 +26,7 @@ const getConversationId=async(id)=>{
      const res = await api.get(`/messages/conversation/${id}`)
      if(res.status===200){
     setConversationId(res.data.conversation._id)
+    console.log(res.data)
    
      }
  }
