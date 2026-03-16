@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
 import {  MagnifyingGlassIcon  } from "@heroicons/react/24/solid";
-
 import ChatNovaContext from '../Context/ChatNovaContext';
 import Profile from './Profile';
 import AuthContext from '../Context/AuthContext';
@@ -9,7 +8,7 @@ import Group from './Group';
 import SocketContext from '../Context/SocketContext';
 export default function Users() {
   const context=useContext(ChatNovaContext)
-  const {serchUser,dataBaseUsers, getConversationId,setChattedUsersList,setActiveChat,getCureentChattingUser,chattedOnlineUsers,getmessages,chattedUsersList,chattedUsers,currentChatUserId,setCurrentChatUserId,capitalizeFirstLetter}=context
+  const {serchUser,dataBaseUsers, getConversationId,currentUsersMessages,setChattedUsersList,setActiveChat,getCureentChattingUser,chattedOnlineUsers,getmessages,chattedUsersList,chattedUsers,currentChatUserId,setCurrentChatUserId,capitalizeFirstLetter}=context
   const [searchClick,setSearchClick]=useState(true)
   const authContext=useContext(AuthContext)
   const {activePage}=authContext
@@ -21,7 +20,8 @@ export default function Users() {
 
 useEffect(()=>{
 chattedUsers()
-},[])
+},[currentUsersMessages])
+
 useEffect(()=>{},[activePage])
 
 
@@ -49,14 +49,15 @@ serchUser(value)
 
       </div>
       {/* online users  */}
-      {searchClick && <div className='flex h-20 justify-evenly overflow-x-auto overflow-y-hidden scrollbar-hide'>
-        {searchClick && chattedOnlineUsers && chattedOnlineUsers.length!==0 && chattedOnlineUsers.map((element)=>{ return <div onClick={()=>{setCurrentChatUserId(element._id);getCureentChattingUser(element._id);setActiveChat(true); getConversationId(element._id)}} className={`p-2 pb-0 shadow cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] ${onlineUsers?.includes(element._id)?"bg-red-700":"bg-green-600"}  mx-3`}>
+      {searchClick && <div className='flex  justify-evenly overflow-x-auto overflow-y-hidden scrollbar-hide'>
+        {searchClick && chattedOnlineUsers && chattedOnlineUsers.length!==0 && chattedOnlineUsers.map((element)=>{ return <div onClick={()=>{setCurrentChatUserId(element._id);getCureentChattingUser(element._id);setActiveChat(true); getConversationId(element._id)}} className={`p-2 pb-0  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5]  mx-1`}>
 
-      <div>
+      <div className='relative'>  
+       {onlineUsers?.includes(element._id) &&<div className='absolute h-2 w-2 bottom-0 right-0 rounded-full  bg-green-400'></div>}
         <img className='w-12  h-10 rounded-full border-white border-2' src={element.image.url} alt="" />
       </div>
-      <div>
-        <p className=' '> {capitalizeFirstLetter(element.name)}</p>
+      <div className='flex justify-center'>
+        <p className='text-xs   '> {capitalizeFirstLetter(element.name)}</p>
       </div> 
         </div>})}
 
@@ -97,11 +98,12 @@ This is theme ok
   {capitalizeFirstLetter(element.name)}
       </p>
       <p className=' pt-1 text-[10px] xs:text-xs text-gray-400'>
-      02:50PM
+      {element.lastMessageTime===null?"":new Date(element.lastMessageTime).toLocaleTimeString([],{ hour: "2-digit",
+      minute: "2-digit"})}
       </p>
     </div>
     <div className='pl-2  text-[10px] xs:text-sm text-gray-400'>
-This is theme ok
+{element.lastMessage===null ? "":element.lastMessage}
     </div>
      </div>
       </div>

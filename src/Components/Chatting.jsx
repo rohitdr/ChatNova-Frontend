@@ -8,6 +8,7 @@ import { useRef } from 'react';
 import SocketContext from '../Context/SocketContext';
 import AuthContext from '../Context/AuthContext';
 export default function Chatting() {
+
 const [sendingMessage,setSendingMessage]=useState(null)
 const messageEndRef = useRef(null)
 const [uploadedImage,setUploadedImage]=useState(null)
@@ -18,7 +19,9 @@ const [uploadVideo,setUploadedVideo]=useState(null)
   const [mediaSendModal,setMediaSendModal]=useState(false)
   const {getCureentChattingUser,currentChatUser,setActiveChat,uploadCloudinary,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter,conversationId}=Context
  const socketcontext = useContext(SocketContext)
- const {socket}=socketcontext
+ const {socket,onlineUsers}=socketcontext
+
+
  useEffect(()=>{
   if(currentChatUserId){
 
@@ -85,8 +88,10 @@ setUploadedVideo(e.target.files[0])
         <div className='flex items-center justify-between'>
            <ArrowLeftIcon className="w-6 h-6 text-gray-700 lg:hidden" onClick={()=>{setActiveChat(false)}} />
         <img className='h-10 w-10 rounded-full border-white border-4' src={currentChatUser?.image.url} alt="" />
-        <h2 className='mx-2 lg:mx-4 pb-1 font-medium text-xs lg:text-xl'>{capitalizeFirstLetter(currentChatUser?.name)}</h2>
-
+        <div className='flex flex-col items-center'>
+        <h2 className='mx-2 lg:mx-4 pt-2 font-medium text-xs lg:text-xl'>{capitalizeFirstLetter(currentChatUser?.name)}</h2>
+      {onlineUsers?.includes(currentChatUser._id)? <p className='text-xs h-4 text-green-400'>online</p>: <p className='text-xs h-4 text-green-400'></p> }
+       </div>
         </div>
         <div className='flex  items-center justify-between'>
            <div className='mx-2 sm:mx-4'>
