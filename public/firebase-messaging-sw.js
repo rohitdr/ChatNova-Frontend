@@ -1,13 +1,5 @@
-self.addEventListener("install", () => {
-  self.skipWaiting();
-});
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
-self.addEventListener("push", (event) => {
-  console.log("Push received:", event);
-});
+
 
 // Import Firebase scripts (compat version works in SW)
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
@@ -28,12 +20,23 @@ firebase.initializeApp({
 // Retrieve Firebase Messaging instance
 const messaging = firebase.messaging();
 
+
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+self.addEventListener("push", (event) => {
+  console.log("Push received:", event);
+});
 // Optional: Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('[SW] Received background message', payload);
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload?.notification?.title || "New message";
   const notificationOptions = {
-    body: payload.notification.body,
+    body: payload?.notification?.body || " " ,
     icon: '/favicon.ico'
   };
   self.registration.showNotification(notificationTitle, notificationOptions);
