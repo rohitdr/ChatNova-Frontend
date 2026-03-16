@@ -8,9 +8,9 @@ export default function SocketState(props) {
     const context = useContext(AuthContext)
     const {refress_token,user}=context
 useEffect(()=>{
-    console.log(user)
+  
 if(user){
- console.log("Connecting socket for user:", user._id);
+
     const newSocket =io(import.meta.env.VITE_SOCKET,{
           transports: ["polling","websocket"],
         query:{
@@ -29,7 +29,7 @@ if(user){
 else{
     if(socket){
         socket.close();
-        console.log("socket is null")
+   
         setSocket(null)
     }
 }

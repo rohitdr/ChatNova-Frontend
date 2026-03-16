@@ -36,10 +36,10 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-      console.log(user._id)
+    
   if(newMessage.senderId !== user._id && 
      newMessage.receiverId !== user._id){
-      console.log("return")
+ 
     return
   }
 
@@ -50,7 +50,7 @@ useEffect(() => {
     if(exists) return prev
  const audio = new Audio('/universfield-happy-message-ping-351298.mp3');
     audio.play().catch(err => console.log('Audio play error:', err));
-    console.log([...prev,newMessage])
+  
     return [...prev,newMessage]
   })
 } 
@@ -72,7 +72,7 @@ return ()=>{ window.removeEventListener('popstate',handleBack)}
 const imagechangehandler=(e)=>{
   setMediaSendModal(true)
 setUploadedImage(e.target.files[0])
-console.log(e.target.files[0])
+
 }
 const videochangehandler=(e)=>{
   setMediaSendModal(true)
@@ -113,7 +113,7 @@ setUploadedVideo(e.target.files[0])
       </div>
       <div className='px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-auto  '> 
         {currentUsersMessages && currentUsersMessages.map((element)=>{
-          console.log(element)
+      
           return <Message send={currentChatUserId === element.receiverId} message={element}></Message>
         })}
        <div ref={messageEndRef}></div>

@@ -14,12 +14,26 @@ const [user,setUser]=useState(null)
  const refress_token=localStorage.getItem("refress_token")
  const [activePage,setActivePage]=useState(0)
 
-
+// route to signup
+const signUp=async(email,password,username)=>{
+  setProgress(30)
+        try{
+      const res = await api.post('/auth/createUser',{email:email,password:password,username:username})
+        setProgress(60)
+      Navigate('/login')
+        setProgress(100)
+       }
+       catch(error){
+        console.log(error)
+          setProgress(100)
+       }
+   
+}
 // Register service worker and get FCM token
 async function initFCM() {
   try {
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    console.log('Service Worker registered', registration);
+ 
 
     const currentToken = await getToken(messaging, {
       vapidKey:import.meta.env.VITE_VAPIEDKEY, // from Firebase console
@@ -27,7 +41,7 @@ async function initFCM() {
     });
 
     if (currentToken) {
-      console.log('FCM Token:', currentToken);
+
       try{
   const res = await api.post('/auth/deviceToken',{deviceToken:currentToken})
       }catch(error){
@@ -174,7 +188,7 @@ Notification.requestPermission().then(async(permission) => {
 }
 },[refress_token])
   return (
-    <AuthContext.Provider value={{user,updateUserImage,activePage,setActivePage,logout,setUser,progress,setProgress,login,refress_token}}>
+    <AuthContext.Provider value={{user,signUp,updateUserImage,activePage,setActivePage,logout,setUser,progress,setProgress,login,refress_token}}>
   {props.children}
     </AuthContext.Provider>
       

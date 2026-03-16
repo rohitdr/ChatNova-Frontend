@@ -31,7 +31,8 @@ export default function ChatNovaState(props) {
      }
  }
  catch(error){
- console.log(error.message)
+ 
+  console.log(error.message)
   }}
   //function to serach the users with whom logged in user have chatted
    const chattedUsers = async(searchValue)=>{
@@ -81,7 +82,7 @@ export default function ChatNovaState(props) {
     const sendMessages = async(id,message)=>{
  try{
      const res = await api.post(`/messages/sendMessage/${id}`,{message})
-    console.log(res.data)
+
  }
  
 
@@ -92,7 +93,7 @@ export default function ChatNovaState(props) {
     const sendMedia = async(id,message)=>{
  try{
      const res = await api.post(`/messages/sendFile/${id}`,message)
-    console.log(res.data)
+  
  }
  
 
@@ -110,7 +111,7 @@ export default function ChatNovaState(props) {
     formdata.append("upload_preset",import.meta.env.VITE_UPLOAD_PRESET)
     const res = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,formdata)
     setProgress(30)
-    console.log(res.data)
+ 
     const message= {
  
     "publicId": res.data.public_id,
