@@ -36,7 +36,7 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-console.log(currentChatUser?.id)
+    console.log(conversationId)
   if(newMessage.senderId !== user._id && 
      newMessage.receiverId !== user._id){
  
@@ -183,7 +183,7 @@ setUploadedVideo(e.target.files[0])
   className='hidden'
   onChange={imagechangehandler}
 /></div>
-  <div className='p-2.5  bg-[#6159CB] rounded-lg' onClick={()=>{ if(sendingMessage!==null) {sendMessages(currentChatUserId,sendingMessage);setSendingMessage(null)}} }>
+  <div className='p-2.5  bg-[#6159CB] rounded-lg' onClick={()=>{ if(sendingMessage!=="") {sendMessages(currentChatUserId,sendingMessage);setSendingMessage("")}} }>
   <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 sm:h-6 text-white cursor-pointer"  />
 
   </div>

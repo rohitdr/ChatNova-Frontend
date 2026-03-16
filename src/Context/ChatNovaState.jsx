@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import ChatNovaContext from "./ChatNovaContext";
 
 import axios from "axios";
@@ -14,7 +14,7 @@ export default function ChatNovaState(props) {
   const [currentChatUser,setCurrentChatUser]=useState(null)
   const [currentUsersMessages,setCurrentUsersMessages]=useState([])
   const [activeChat , setActiveChat]=useState(false)
-  const [conversationId,setConversationId]=useState("as")
+  const conversationId=useRef(null)
 
   let Navigate = useNavigate();
   const authContext = useContext(AuthContext)
@@ -26,8 +26,8 @@ const getConversationId=async(id)=>{
           try{
      const res = await api.get(`/messages/conversationId/${id}`)
      if(res.status===200){
-    setConversationId(res.data.conversation._id)
-    console.log(res.data)
+   conversationId.current=res.data.conversation
+    console.log(conversationId)
    
      }
  }
