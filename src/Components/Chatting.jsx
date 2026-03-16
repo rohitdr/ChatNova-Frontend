@@ -36,10 +36,8 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-    console.log(conversationId)
-  if(newMessage.senderId !== user._id && 
-     newMessage.receiverId !== user._id){
  
+  if(newMessage.conversationId !== conversationId.current._id){
     return
   }
 
@@ -80,7 +78,7 @@ setUploadedVideo(e.target.files[0])
 }
   
   return (<>
-       <div className='h-screen bg-white '>
+       <div className='h-[100dvh] bg-white '>
     <div className='flex h-full flex-col justify-between'>
       <div className='flex flex-row p-4 lg:p-7 border justify-between'>
      
