@@ -8,7 +8,7 @@ import { useRef } from 'react';
 import SocketContext from '../Context/SocketContext';
 import AuthContext from '../Context/AuthContext';
 export default function Chatting() {
-const [sendingMessage,setSendingMessage]=useState("")
+const [sendingMessage,setSendingMessage]=useState(null)
 const messageEndRef = useRef(null)
 const [uploadedImage,setUploadedImage]=useState(null)
 const [uploadVideo,setUploadedVideo]=useState(null)
@@ -16,7 +16,7 @@ const [uploadVideo,setUploadedVideo]=useState(null)
   const authContext=useContext(AuthContext)
   const {user}=authContext
   const [mediaSendModal,setMediaSendModal]=useState(false)
-  const {getCureentChattingUser,currentChatUser,setActiveChat,uploadCloudinary,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter,conversaionId}=Context
+  const {getCureentChattingUser,currentChatUser,conversationid,setActiveChat,uploadCloudinary,currentChatUserId,getmessages,currentUsersMessages ,setCurrentUsersMessages,sendMessages,capitalizeFirstLetter,conversationId}=Context
  const socketcontext = useContext(SocketContext)
  const {socket}=socketcontext
  useEffect(()=>{
@@ -36,7 +36,7 @@ useEffect(() => {
 
 
   const handleNewMessage = (newMessage) => {
-    console.log(conversaionId)
+ console.log(conversationid)
   if(newMessage.senderId !== user._id && 
      newMessage.receiverId !== user._id){
  
@@ -183,7 +183,7 @@ setUploadedVideo(e.target.files[0])
   className='hidden'
   onChange={imagechangehandler}
 /></div>
-  <div className='p-2.5  bg-[#6159CB] rounded-lg' onClick={()=>{ sendMessages(currentChatUserId,sendingMessage);setSendingMessage("")} }>
+  <div className='p-2.5  bg-[#6159CB] rounded-lg' onClick={()=>{ if(sendingMessage!==null) {sendMessages(currentChatUserId,sendingMessage);setSendingMessage(null)}} }>
   <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 sm:h-6 text-white cursor-pointer"  />
 
   </div>

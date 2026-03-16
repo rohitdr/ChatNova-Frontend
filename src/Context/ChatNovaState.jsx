@@ -14,7 +14,8 @@ export default function ChatNovaState(props) {
   const [currentChatUser,setCurrentChatUser]=useState(null)
   const [currentUsersMessages,setCurrentUsersMessages]=useState([])
   const [activeChat , setActiveChat]=useState(false)
-  const [conversaionId,setConversationId]=useState("")
+  const [conversationId,setConversationId]=useState("")
+  let conversationid;
   let Navigate = useNavigate();
   const authContext = useContext(AuthContext)
   const {setProgress} = authContext
@@ -26,6 +27,7 @@ const getConversationId=async(id)=>{
      const res = await api.get(`/messages/conversationId/${id}`)
      if(res.status===200){
     setConversationId(res.data.conversation._id)
+    conversationid=res.data.conversation._id
     console.log(res.data)
    
      }
@@ -157,7 +159,7 @@ const  capitalizeFirstLetter=(string)=> {
 }
   return (
     <ChatNovaContext.Provider
-      value={{ getConversationId,conversaionId,activeChat,setActiveChat,uploadCloudinary,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
+      value={{ getConversationId,conversationid,conversationId,activeChat,setActiveChat,uploadCloudinary,capitalizeFirstLetter, serchUser,sendMessages,dataBaseUsers,currentUsersMessages,setCurrentUsersMessages,getmessages,getCureentChattingUser,setDataBaseUsers,setCurrentChatUserId,currentChatUserId,setChattedUsersList,chattedUsersList,chattedUsers,chattedOnlineUsers,currentChatUser,setCurrentChatUser }}
     >
       {props.children}
     </ChatNovaContext.Provider>
