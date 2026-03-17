@@ -172,6 +172,13 @@ export default function ChatNovaState(props) {
     }
   };
 
+  //fucntion to keep the last chat person on the top of the list 
+    const updatedUserList =(user)=>{
+       setChattedUsersList((prev)=>{
+         const filterUsers = prev.filter(u=>{u._id !==user._id})
+         return [user , ...filterUsers]
+       })
+    } 
   const capitalizeFirstLetter = (string) => {
     // Check if the input is a non-empty string to avoid errors
     if (typeof string !== "string" || string.length === 0) {
@@ -182,6 +189,7 @@ export default function ChatNovaState(props) {
   return (
     <ChatNovaContext.Provider
       value={{
+        updatedUserList,
         getConversationId,
         conversationId,
         activeChat,

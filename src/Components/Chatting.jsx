@@ -39,6 +39,7 @@ export default function Chatting() {
     sendMessages,
     capitalizeFirstLetter,
     conversationId,
+    updatedUserList
   } = Context;
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
@@ -57,6 +58,7 @@ export default function Chatting() {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
+     
       if (newMessage.conversationId !== conversationId.current._id) {
         return;
       }
@@ -71,6 +73,7 @@ export default function Chatting() {
 
         return [...prev, newMessage];
       });
+      updatedUserList(currentChatUser)
     };
     socket.on("newMessage", handleNewMessage);
 
