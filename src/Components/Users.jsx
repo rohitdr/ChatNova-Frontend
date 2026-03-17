@@ -52,7 +52,7 @@ export default function Users() {
   ) : (
     <>
       {activePage === 0 && (
-        <div className="h-screen 2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col">
+        <div className="h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col">
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Chats</div>
           <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 bg-[#E6EBF5]">
             <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
@@ -66,7 +66,7 @@ export default function Users() {
             />
           </div>
           {/* online users  */}
-          {searchClick && (
+          {/* {searchClick && (
             <div className="flex  justify-evenly overflow-x-auto overflow-y-hidden scrollbar-hide">
               {searchClick &&
                 chattedOnlineUsers &&
@@ -103,9 +103,9 @@ export default function Users() {
                   );
                 })}
             </div>
-          )}
+          )} */}
 
-          <div className="flex pt-2 flex-col sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
+          <div className="flex pt-2 flex-col  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
             {!searchClick &&
               dataBaseUsers &&
               dataBaseUsers.length !== 0 &&
@@ -133,11 +133,9 @@ export default function Users() {
                         <p className="font-small text-black">
                           {capitalizeFirstLetter(element.name)}
                         </p>
-                        <p className=" pt-1 text-xs text-gray-400">02:50PM</p>
+                     
                       </div>
-                      <div className="pl-2  text-sm text-gray-400">
-                        This is theme ok
-                      </div>
+                   
                     </div>
                   </div>
                 );
@@ -155,7 +153,7 @@ export default function Users() {
                       setActiveChat(true);
                       getConversationId(element._id);
                     }}
-                    className="flex shadow cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                    className="flex shadow-md border-gray-200 border-1 cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
                     <div className="pt-2">
                       <img

@@ -192,6 +192,7 @@ export default function AuthState(props) {
 
   const updateUserImage = async (file) => {
     try {
+        setProgress(30);
       const formdata = new FormData();
       formdata.append("file", file);
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
@@ -199,6 +200,7 @@ export default function AuthState(props) {
         `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
         formdata,
       );
+        setProgress(60);
       let image = {
         publicId: res.data.public_id,
         url: res.data.secure_url,
@@ -206,16 +208,18 @@ export default function AuthState(props) {
       const responseUpdate = await api.post("/auth/update", { image });
     
       refreshUser();
+        setProgress(100);
     } catch (error) {
       const status = error.response?.status;
       if (status === 404) {
         showAlert("Error", error.response.data.message);
-      
+        setProgress(100);
       }
      
       else{
           console.log(error)
         setIsServer(500)
+          setProgress(100);
       
       }
     }

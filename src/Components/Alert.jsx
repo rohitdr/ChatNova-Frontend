@@ -35,7 +35,7 @@ export default function Alert(props) {
     !leaving && (
       <div className="fixed inset-0 bg-black/10">
         <div
-          className={` p-2 absolute top-10 right-10 shadow-2xl rounded-md bg-[#101627] ${type === "Warning" ? "border-yellow-200" : ""} ${type === "Error" ? "border-red-600" : ""} ${type === "Success" ? "border-green-500" : ""} border-2 h-20 w-80 md:w-96 
+          className={` p-2 absolute right-5 top-10 md:right-10 shadow-2xl rounded-md bg-[#101627] ${type === "Warning" ? "border-yellow-200" : ""} ${type === "Error" ? "border-red-600" : ""} ${type === "Success" ? "border-green-500" : ""} border-2 h-20 w-80 md:w-96 
      ${leaving ? "animate-slide-out" : "animate-slide-in"}
      `}
         >

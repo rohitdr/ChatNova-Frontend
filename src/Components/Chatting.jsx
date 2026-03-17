@@ -103,7 +103,7 @@ export default function Chatting() {
     <>
       <div className="h-[100dvh] bg-white ">
         <div className="flex h-full flex-col justify-between">
-          <div className="flex flex-row p-4 lg:p-7 border justify-between">
+          <div className="shrink-0 flex flex-row p-4 lg:p-7 border justify-between">
             <div className="flex items-center justify-between">
               <ArrowLeftIcon
                 className="w-6 h-6 text-gray-700 lg:hidden"
@@ -143,7 +143,7 @@ export default function Chatting() {
               </div>
             </div>
           </div>
-          <div className="px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-auto  ">
+          <div className=" px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-auto  ">
             {currentUsersMessages &&
               currentUsersMessages.map((element) => {
                 return (
@@ -156,7 +156,7 @@ export default function Chatting() {
             <div ref={messageEndRef}></div>
           </div>
 
-          <div className="flex xs:p-2 md:p-7 justify-between bg-white border">
+          <div className="shrink-0 flex xs:p-2 md:p-7 justify-between bg-white border">
             <div className="w-full">
               <input
                 type="text"

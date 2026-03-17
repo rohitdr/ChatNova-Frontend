@@ -18,7 +18,7 @@ export default function ChatNovaState(props) {
 
   let Navigate = useNavigate();
   const authContext = useContext(AuthContext);
-  const { setProgress,setIsServer } = authContext;
+  const { setProgress,setIsServer,showAlert } = authContext;
   /// function to get User whom with logged in user has chats
 
   /// function to get the coversation id between the current chatter and logged in user
@@ -43,11 +43,13 @@ export default function ChatNovaState(props) {
       const res = await api.get(`/users/search?search=${searchValue}`);
       if (res.status === 200) {
         setDataBaseUsers(res.data.users);
+        console.log("1")
       }
     } catch (error) {
      const status = error.response?.status;
 
       if (status === 404) {
+        console.log("not found")
         showAlert("Error", error.response.data.message);
    
       }
