@@ -1,34 +1,40 @@
-import { EnvelopeIcon, LockClosedIcon,ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import {
+  EnvelopeIcon,
+  LockClosedIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/24/outline";
 
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-
+import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
 
 export default function Login() {
+  const context = useContext(AuthContext);
 
-  const context = useContext(AuthContext)
-
-  const {login}=context
-  const [Emailerror, setEmailerror]=useState(false)
-  const [passworderror,setPasswordError]=useState(false)
-  const [data,setData]=useState({loginEmail:"",loginPassword:""})
-  const onChangeHandler=(e)=>{
-    const array = Array.from(data)
-   setData({...data,[e.target.name]:e.target.value})
-   data.loginEmail.length<5?setEmailerror(true):setEmailerror(false)
-   data.loginPassword.length <7?setPasswordError(true):setPasswordError(false)
- 
-  
-  }
-  const submitHandler=async (e)=>{
-  e.preventDefault()
-  if(!Emailerror && !passworderror){
-   login(data.loginEmail,data.loginPassword)
-  }
-      
-  }
-  return (
+  const { login, isServer } = context;
+  const [Emailerror, setEmailerror] = useState(false);
+  const [passworderror, setPasswordError] = useState(false);
+  const [data, setData] = useState({ loginEmail: "", loginPassword: "" });
+  const onChangeHandler = (e) => {
+    const array = Array.from(data);
+    setData({ ...data, [e.target.name]: e.target.value });
+    data.loginEmail.length < 5 ? setEmailerror(true) : setEmailerror(false);
+    data.loginPassword.length < 7
+      ? setPasswordError(true)
+      : setPasswordError(false);
+  };
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (!Emailerror && !passworderror) {
+      console.log(isServer)
+      login(data.loginEmail, data.loginPassword);
+      console.log(isServer)
+    }
+  };
+  return isServer === 500 ? (
+    <NoServer></NoServer>
+  ) : (
     <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
       <div className="">
         <div className=" my-5 flex text-3xl font-medium justify-center">
@@ -50,14 +56,16 @@ export default function Login() {
                   <EnvelopeIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
                 </div>
                 <input
-                  className={`pl-2  h-[45px]  w-full border border-r-[0px]  outline-none ${Emailerror ?"border-red-600 ":"border-gray-300" }"`}
+                  className={`pl-2  h-[45px]  w-full border border-r-[0px]  outline-none ${Emailerror ? "border-red-600 " : "border-gray-300"}"`}
                   placeholder="   Enter your Email"
                   type="email"
                   name="loginEmail"
                   id="loginEmail"
-                   onChange={onChangeHandler}
+                  onChange={onChangeHandler}
                 />
-                   <div className={`w-10  justify-center  ${Emailerror?"block border border-red-500 border-l-[0px]":"hidden"}`}>
+                <div
+                  className={`w-10  justify-center  ${Emailerror ? "block border border-red-500 border-l-[0px]" : "hidden"}`}
+                >
                   <ExclamationCircleIcon className="w-7 px-1 h-[43px] text-red-600  " />
                 </div>
               </div>
@@ -76,23 +84,24 @@ export default function Login() {
                 <input
                   type="password"
                   placeholder="    Enter your Password"
-                  className={`${passworderror ?"border-red-600 ":"border-gray-300"} pl-2 border-r-[0px] outline-none border  h-[45px]  w-full`}
+                  className={`${passworderror ? "border-red-600 " : "border-gray-300"} pl-2 border-r-[0px] outline-none border  h-[45px]  w-full`}
                   name="loginPassword"
                   id="loginPassword"
                   onChange={onChangeHandler}
                 />
-                  <div className={`w-10  justify-center  ${passworderror?"block border border-red-500 border-l-[0px]":"hidden"}`}>
+                <div
+                  className={`w-10  justify-center  ${passworderror ? "block border border-red-500 border-l-[0px]" : "hidden"}`}
+                >
                   <ExclamationCircleIcon className="w-7 px-1 h-[43px] text-red-600  " />
                 </div>
               </div>{" "}
             </div>
 
-          
             <div className="m-1 mt-5  p-1">
               <input
-              disabled={Emailerror || passworderror}
+                disabled={Emailerror || passworderror}
                 type="submit"
-                className={`bg-[#7269EF] cursor-pointer ${(Emailerror || passworderror)?"text-gray-600":"text-white"} w-full rounded-lg h-[42px] text-lg`}
+                className={`bg-[#7269EF] cursor-pointer ${Emailerror || passworderror ? "text-gray-600" : "text-white"} w-full rounded-lg h-[42px] text-lg`}
                 value="Sign in"
               />
             </div>
@@ -102,7 +111,10 @@ export default function Login() {
           <div>
             <p>
               Don't have an account?{" "}
-              <Link className="text-blue-500" to="/SignUp"> Signup now</Link>
+              <Link className="text-blue-500" to="/SignUp">
+                {" "}
+                Signup now
+              </Link>
             </p>
           </div>
         </div>

@@ -1,34 +1,46 @@
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 
 const api = axios.create({
-    baseURL:import.meta.env.VITE_API,
-    withCredentials:true
-})
+  baseURL: import.meta.env.VITE_API,
+  withCredentials: true,
+});
 
 api.interceptors.response.use(
-    (response)=>response,
-    async(error)=>{
-        const originalRequest = error.config;
-        if(error.response?.status===403 && !originalRequest._retry && originalRequest.url !== "/auth/refresh" )
-        {
-            originalRequest._retry=true;
-            try{
-                
-          const refressRes=await api.post("/auth/refresh",{},{
-            headers:{
-                Authorization:`Bearer ${localStorage.getItem("refress_token")}`
-            }
-          })
-          api.defaults.headers.common["Authorization"] = `Bearer ${refressRes.data.access_token}`
-          originalRequest.headers["Authorization"] = `Bearer ${refressRes.data.access_token}`
-          return api(originalRequest)
-            }catch{
-              console.log("Login again")
-            }
-        }
-        return Promise.reject(error)
-    } 
-)
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (
+      error.response?.status === 403 &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/auth/refresh"
+    ) {
+      originalRequest._retry = true;
+      try {
+        const refressRes = await api.post(
+          "/auth/refresh",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("refress_token")}`,
+            },
+          },
+        );
+        api.defaults.headers.common["Authorization"] =
+          `Bearer ${refressRes.data.access_token}`;
+        originalRequest.headers["Authorization"] =
+          `Bearer ${refressRes.data.access_token}`;
+        return api(originalRequest);
+      } catch {
+        
+      let Navigate=useNavigate()
+      localStorage.removeItem('refress_token')
+      Navigate('/login')
+      }
+    }
+  
+    return Promise.reject(error);
+  },
+);
 
 export default api;
