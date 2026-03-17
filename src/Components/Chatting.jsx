@@ -90,7 +90,7 @@ setUploadedVideo(e.target.files[0])
         <img className='h-10 w-10 rounded-full border-white border-4' src={currentChatUser?.image.url} alt="" />
         <div className='flex flex-col items-center'>
         <h2 className='mx-2 lg:mx-4 pt-2 font-medium text-xs lg:text-xl'>{capitalizeFirstLetter(currentChatUser?.name)}</h2>
-      {onlineUsers?.includes(currentChatUser._id)? <p className='text-xs h-4 text-green-400'>online</p>: <p className='text-xs h-4 text-green-400'></p> }
+      {onlineUsers?.includes(currentChatUser?._id)? <p className='text-xs h-4 text-green-400'>online</p>: <p className='text-xs h-4 text-green-400'></p> }
        </div>
         </div>
         <div className='flex  items-center justify-between'>
