@@ -31,7 +31,7 @@ api.interceptors.response.use(
         originalRequest.headers["Authorization"] =
           `Bearer ${refressRes.data.access_token}`;
         return api(originalRequest);
-      } catch {
+      } catch(error) {
         
       let Navigate=useNavigate()
       localStorage.removeItem('refress_token')

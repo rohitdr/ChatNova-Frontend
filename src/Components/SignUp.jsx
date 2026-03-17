@@ -7,7 +7,7 @@ import {
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../Context/AuthContext";
-
+import NoServer from "./NoServer";
 export default function SignUp() {
   const [data, setData] = useState({
     signUpEmail: "",
@@ -18,7 +18,7 @@ export default function SignUp() {
   const [passworderror, setPasswordError] = useState(false);
   const [usernameerror, setUsernameError] = useState(false);
   const authcontext = useContext(AuthContext);
-  const { signUp, isServer } = authcontext;
+  const { signUp, isServer,showAlert } = authcontext;
   const onChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
     data.signUpEmail.length < 8 ? setemailError(true) : setemailError(false);
@@ -33,6 +33,9 @@ export default function SignUp() {
     e.preventDefault();
     if (!emailerror && !passworderror && !usernameerror) {
       signUp(data.signUpEmail, data.signUpPassword, data.signUpUsername);
+    }
+    else{
+       showAlert("Error","Enter the full details and then submit")
     }
   };
   return isServer === 500 ? (

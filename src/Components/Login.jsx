@@ -12,7 +12,7 @@ import AuthContext from "../Context/AuthContext";
 export default function Login() {
   const context = useContext(AuthContext);
 
-  const { login, isServer } = context;
+  const { login, isServer ,showAlert} = context;
   const [Emailerror, setEmailerror] = useState(false);
   const [passworderror, setPasswordError] = useState(false);
   const [data, setData] = useState({ loginEmail: "", loginPassword: "" });
@@ -27,9 +27,12 @@ export default function Login() {
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!Emailerror && !passworderror) {
-      console.log(isServer)
+  
       login(data.loginEmail, data.loginPassword);
-      console.log(isServer)
+  
+    }
+    else{
+      showAlert("Error","Enter the full Deatils and then submit")
     }
   };
   return isServer === 500 ? (
@@ -99,7 +102,7 @@ export default function Login() {
 
             <div className="m-1 mt-5  p-1">
               <input
-                disabled={Emailerror || passworderror}
+                // disabled={Emailerror || passworderror}
                 type="submit"
                 className={`bg-[#7269EF] cursor-pointer ${Emailerror || passworderror ? "text-gray-600" : "text-white"} w-full rounded-lg h-[42px] text-lg`}
                 value="Sign in"

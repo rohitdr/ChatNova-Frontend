@@ -6,6 +6,7 @@ import AuthContext from "../Context/AuthContext";
 import Settings from "./Settings";
 import Group from "./Group";
 import SocketContext from "../Context/SocketContext";
+import NoServer from "./NoServer";
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
@@ -82,7 +83,7 @@ export default function Users() {
                       className={`p-2 pb-0  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5]  mx-1`}
                     >
                       <div className="relative">
-                        {!onlineUsers?.includes(element?._id) && (
+                        {onlineUsers?.includes(element?._id) && (
                           <div className="absolute h-2 w-2 bottom-0 right-0 rounded-full  bg-green-400"></div>
                         )}
                         <img

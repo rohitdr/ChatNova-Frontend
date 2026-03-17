@@ -7,6 +7,7 @@ import {
 import { useContext, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import NoServer from "./NoServer";
 export default function Settings() {
   const authContext = useContext(AuthContext);
   const { user, updateUserImage, isServer } = authContext;

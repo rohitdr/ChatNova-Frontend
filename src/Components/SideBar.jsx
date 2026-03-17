@@ -9,7 +9,7 @@ import {
   Cog8ToothIcon,
 } from "@heroicons/react/24/solid";
 import AuthContext from "../Context/AuthContext";
-
+import NoServer from "./NoServer";
 export default function SideBar() {
   const context = useContext(AuthContext);
   const { logout, user, setActivePage, activePage, isServer } = context;
@@ -26,7 +26,7 @@ export default function SideBar() {
           <img
             src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"
             alt=""
-            className=" lg:h-10 lg:w-14 xs:w-10 xs:pb-1 h-8 xs:pb-1 xs:h-8 w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full"
+            className=" lg:h-10 lg:w-14 xs:w-10 xs:pb-1 h-8  xs:h-8 w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full"
           />
         </div>
         <div className="flex lg:h-[20rem] h-full flex-row lg:flex-col items-center justify-between">
