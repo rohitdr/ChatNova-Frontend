@@ -66,7 +66,7 @@ export default function ChatNovaState(props) {
       const res = await api.get(`/users/chattedUsers`);
       if (res.status === 200) {
         setChattedUsersList(res.data.users);
-        getCureentChattingUser(res.data.users[0]._id);
+    console.log(res.data.users)
 
         setChattedOnlineUsers(res.data.onlineUsers);
       }
@@ -85,9 +85,9 @@ export default function ChatNovaState(props) {
   const getCureentChattingUser = async (id) => {
     try {
       const res = await api.get(`/users/getUser/${id}`);
-      if (res.status === 200) {
+  
         setCurrentChatUser(res.data.user);
-      }
+       
     } catch (error) {
     const status = error.response?.status;
 

@@ -46,6 +46,7 @@ export default function Chatting() {
   useEffect(() => {
     if (currentChatUserId) {
       getmessages(currentChatUserId);
+   
     }
   }, [currentChatUserId]);
   useEffect(() => {

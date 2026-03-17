@@ -7,6 +7,13 @@ import Settings from "./Settings";
 import Group from "./Group";
 import SocketContext from "../Context/SocketContext";
 import NoServer from "./NoServer";
+import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
+import {
+
+  VideoCameraIcon,
+  PhotoIcon,
+
+} from "@heroicons/react/24/solid";
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
@@ -142,18 +149,19 @@ export default function Users() {
               })}
             {searchClick &&
               chattedUsersList &&
-              chattedUsersList.length !== 0 &&
+              chattedUsersList.length !== 0 ?
               chattedUsersList.map((element) => {
                 return (
                   <div
                     onClick={() => {
                       setCurrentChatUserId(element._id);
+                      console.log(currentChatUserId)
                       getCureentChattingUser(element._id);
                       getmessages(element._id);
                       setActiveChat(true);
                       getConversationId(element._id);
                     }}
-                    className="flex shadow-md border-gray-200 border-1 cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
                     <div className="pt-2">
                       <img
@@ -179,14 +187,21 @@ export default function Users() {
                         </p>
                       </div>
                       <div className="pl-2  text-[10px] xs:text-sm text-gray-400">
-                        {element.lastMessage === null
+                        {element.lastMessageType =="image"&&  <div className="flex"> <PhotoIcon className="w-3 h-3 text-red-400 mt-1 mr-2 "></PhotoIcon> Photo</div>}
+                        {element.lastMessageType =="video"&& <div className="flex"> <VideoCameraIcon className="text-[#6159CB] w-3 h-3 mt-1 mr-2"></VideoCameraIcon>Video</div>}
+                        { element.lastMessageType=="text" && element.lastMessage === null
                           ? ""
                           : element.lastMessage}
                       </div>
                     </div>
                   </div>
                 );
-              })}
+              }):
+              <div className="flex h-screen justify-center items-center">
+                <div className="text-center flex flex-col"> <div className="flex justify-center"> <MagnifyingGlassCircleIcon className="h-12 w-12 text-gray-600"></MagnifyingGlassCircleIcon></div><div>Search User to chat With...</div> </div>
+              </div>
+              
+              }
           </div>
         </div>
       )}
