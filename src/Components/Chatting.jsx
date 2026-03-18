@@ -105,7 +105,7 @@ export default function Chatting() {
     <NoServer></NoServer>
   ) : (
     <>
-      <div className="h-[100dvh] bg-white ">
+      <div className="h-screen bg-white ">
         <div className="flex h-full flex-col justify-between">
           <div className="shrink-0 flex flex-row p-4 lg:p-7 border justify-between">
             <div className="flex items-center justify-between">
@@ -147,7 +147,7 @@ export default function Chatting() {
               </div>
             </div>
           </div>
-          <div className=" px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-auto  ">
+          <div className=" px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-1 min-h-0 ">
             {currentUsersMessages &&
               currentUsersMessages.map((element) => {
                 return (
