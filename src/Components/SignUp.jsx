@@ -14,28 +14,29 @@ export default function SignUp() {
     signUpPassword: "",
     signUpUsername: "",
   });
-  const [emailerror, setemailError] = useState(false);
-  const [passworderror, setPasswordError] = useState(false);
-  const [usernameerror, setUsernameError] = useState(false);
+
   const authcontext = useContext(AuthContext);
   const { signUp, isServer,showAlert } = authcontext;
   const onChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
-    data.signUpEmail.length < 8 ? setemailError(true) : setemailError(false);
-    data.signUpPassword.length < 8
-      ? setPasswordError(true)
-      : setPasswordError(false);
-    data.signUpUsername.length < 8
-      ? setUsernameError(true)
-      : setUsernameError(false);
+  
   };
   const handlerSubmit = (e) => {
     e.preventDefault();
-    if (!emailerror && !passworderror && !usernameerror) {
-      signUp(data.signUpEmail, data.signUpPassword, data.signUpUsername);
+
+    if ( data.signUpEmail.length < 8 ) {
+        showAlert("Warning","Email length should be more than 8")
+    
+
+    }
+    else if(data.signUpPassword.length < 8){
+  showAlert("Warning","Password length should be more than 8")
+    }
+    else if(data.signUpUsername.length < 8){
+  showAlert("Warning","Username length should be more than 8")
     }
     else{
-       showAlert("Error","Enter the full details and then submit")
+   signUp(data.signUpEmail, data.signUpPassword, data.signUpUsername);
     }
   };
   return isServer === 500 ? (
@@ -62,7 +63,7 @@ export default function SignUp() {
                   <EnvelopeIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
                 </div>
                 <input
-                  className={`pl-2  border outline-none  h-[45px] ${emailerror ? "border-red-700 border-2" : "border-gray-300"}  w-full`}
+                  className={`pl-2  border outline-none  h-[45px] border-gray-300  w-full`}
                   placeholder="   Enter your Email"
                   type="email"
                   name="signUpEmail"
@@ -80,7 +81,7 @@ export default function SignUp() {
                   <UserIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
                 </div>
                 <input
-                  className={`pl-2 outline-none  border  h-[45px] ${usernameerror ? "border-red-700 border-2" : "border-gray-300"}  w-full`}
+                  className={`pl-2 outline-none  border  h-[45px]  border-gray-300  w-full`}
                   placeholder="   Enter your Username"
                   type="text"
                   name="signUpUsername"
@@ -103,7 +104,7 @@ export default function SignUp() {
                 <input
                   type="password"
                   placeholder="    Enter your Password"
-                  className={`pl-2  outline-none border  h-[45px] ${passworderror ? "border-red-700 border-2" : "border-gray-300"}  w-full`}
+                  className={`pl-2  outline-none border  h-[45px]  border-gray-300  w-full`}
                   name="signUpPassword"
                   id="signUpPassword"
                   onChange={onChange}
@@ -113,9 +114,9 @@ export default function SignUp() {
 
             <div className="m-1 p-1">
               <input
-                disabled={emailerror || passworderror || usernameerror}
+           
                 type="submit"
-                className={`bg-[#7269EF] cursor-pointer  w-full rounded-lg h-[42px] text-lg ${emailerror || passworderror || usernameerror ? "text-gray-700" : "text-white"}`}
+                className={`bg-[#7269EF] cursor-pointer  w-full rounded-lg h-[42px] text-lg  text-white`}
                 value="Sign in"
               />
             </div>

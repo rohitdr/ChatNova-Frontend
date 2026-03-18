@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import ChatNovaContext from "./ChatNovaContext";
 
 import axios from "axios";
@@ -66,7 +66,7 @@ export default function ChatNovaState(props) {
       const res = await api.get(`/users/chattedUsers`);
       if (res.status === 200) {
         setChattedUsersList(res.data.users);
-    console.log(res.data.users)
+
 
         setChattedOnlineUsers(res.data.onlineUsers);
       }
@@ -186,6 +186,8 @@ export default function ChatNovaState(props) {
     }
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
+
+
   return (
     <ChatNovaContext.Provider
       value={{

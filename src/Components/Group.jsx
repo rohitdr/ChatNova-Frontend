@@ -98,7 +98,7 @@ const {chattedUsersList,capitalizeFirstLetter}=context
               }
           </div>
         </div>
-      )
+      
  
     </>
   );

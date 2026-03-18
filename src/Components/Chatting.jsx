@@ -18,6 +18,7 @@ import { useRef } from "react";
 import SocketContext from "../Context/SocketContext";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
+import EmptyChat from "./EmptyChat";
 export default function Chatting() {
   const [sendingMessage, setSendingMessage] = useState(null);
   const messageEndRef = useRef(null);
@@ -39,7 +40,8 @@ export default function Chatting() {
     sendMessages,
     capitalizeFirstLetter,
     conversationId,
-    updatedUserList
+    updatedUserList,
+    activeChat
   } = Context;
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
@@ -101,11 +103,21 @@ export default function Chatting() {
     setUploadedVideo(e.target.files[0]);
   };
 
+  const formatLastSeen =(time)=>{
+   const now = new Date();
+   const last = new Date(time)
+   let diff = Math.floor((now-last)/1000)
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+
+  return last.toLocaleDateString();
+  }
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
     <>
-      <div className="h-screen bg-white ">
+     {currentChatUserId ? <div className={`h-screen bg-white`}>
         <div className="flex h-full flex-col justify-between">
           <div className="shrink-0 flex flex-row p-4 lg:p-7 border justify-between">
             <div className="flex items-center justify-between">
@@ -125,9 +137,9 @@ export default function Chatting() {
                   {capitalizeFirstLetter(currentChatUser?.name)}
                 </h2>
                 {onlineUsers?.includes(currentChatUser?._id) ? (
-                  <p className="text-xs h-4 text-green-400">online</p>
+                  <p className="text-xs h-4 ">online</p>
                 ) : (
-                  <p className="text-xs h-4 text-green-400"></p>
+                  <p className="text-xs h-4 ">{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
                 )}
               </div>
             </div>
@@ -234,7 +246,7 @@ export default function Chatting() {
             </div>
           </div>
         </div>
-      </div>
+      </div> : <EmptyChat></EmptyChat>}
 
       {mediaSendModal && (
         <div

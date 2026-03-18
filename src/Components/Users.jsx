@@ -23,6 +23,7 @@ export default function Users() {
     currentUsersMessages,
     setChattedUsersList,
     setActiveChat,
+    activeChat,
     getCureentChattingUser,
     chattedOnlineUsers,
     getmessages,
@@ -60,7 +61,7 @@ export default function Users() {
   ) : (
     <>
       {activePage === 0 && (
-        <div className="h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col">
+        <div className={`h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col `}>
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Chats</div>
           <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 bg-[#E6EBF5]">
             <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
@@ -164,13 +165,23 @@ export default function Users() {
                     }}
                     className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
-                    <div className="pt-2">
+                    {/* <div className="pt-2">
                       <img
                         className="w-12 h-10 rounded-full border-white border-2"
                         src={element.image.url}
                         alt=""
                       />
-                    </div>
+                    </div> */}
+                    <div className="relative">
+                        {onlineUsers?.includes(element?._id) && (
+                          <div className="absolute h-2 w-2 bottom-2 right-0 rounded-full  bg-green-400"></div>
+                        )}
+                        <img
+                          className="w-12  h-10 rounded-full border-white border-2"
+                          src={element.image.url}
+                          alt=""
+                        />
+                      </div>
                     <div className="flex flex-col w-full justify-between py-1">
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
                         <p className="font-small text-xs  xs:text-sm text-black">

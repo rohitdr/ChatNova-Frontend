@@ -24,14 +24,18 @@ export default function AuthState(props) {
   const signUp = async (email, password, username) => {
     setProgress(30);
     try {
-      const res = await api.post("/auth/createUser", {
+      const response = await api.post("/auth/createUser", {
         email: email,
         password: password,
         username: username,
       });
-      setProgress(60);
-      showAlert("Success","Signed up successfully ! You can login now")
-      Navigate("/login");
+      api.defaults.headers.common["Authorization"] =
+        `Bearer ${response.data.access_token}`;
+      localStorage.setItem("refress_token", response.data.refress_token);
+
+      showAlert("Success", "You have been logged in successfully !");
+     
+      Navigate("/additionaldetails");
       setProgress(100);
     } catch (error) {
       const status = error.response?.status;
@@ -74,7 +78,6 @@ export default function AuthState(props) {
       }
      
       else{
-   console.log(error)
         setIsServer(500)
       
       }

@@ -11,6 +11,7 @@ import LoadingBar from "react-top-loading-bar";
 import Alert from "./Components/Alert";
 import AuthContext from "./Context/AuthContext";
 import ForgetPassword from "./Components/ForgetPassword";
+import AdditonalDeatils from "./Components/AdditonalDeatils";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
       <Routes>
         <Route exact path="/login" element={<Login></Login>}></Route>
         <Route exact path="/" element={<Chat></Chat>}></Route>
+        <Route exact path="/additionaldetails" element={<AdditonalDeatils></AdditonalDeatils>}></Route>
         <Route exact path="/forgetpassword" element={<ForgetPassword></ForgetPassword>}></Route>
       
         <Route exact path="/SignUp" element={<SignUp></SignUp>}></Route>
