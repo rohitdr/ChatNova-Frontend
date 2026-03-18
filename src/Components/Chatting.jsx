@@ -139,7 +139,7 @@ export default function Chatting() {
                 {onlineUsers?.includes(currentChatUser?._id) ? (
                   <p className="text-xs h-4 ">online</p>
                 ) : (
-                  <p className="text-xs h-4 ">{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
+                  <p className="text-xs h-4 "></p>
                 )}
               </div>
             </div>
