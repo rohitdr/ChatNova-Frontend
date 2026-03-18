@@ -33,9 +33,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch(error) {
         
-      let Navigate=useNavigate()
-      localStorage.removeItem('refress_token')
-      Navigate('/login')
+     console.log(error)
       }
     }
   
