@@ -21,7 +21,7 @@ export default function SideBar() {
     <NoServer></NoServer>
   ) : (
     <>
-      <div className=" 2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_30%_35%] lg:static bg-white fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center  ">
+      <div className=" 2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center  ">
         <div className="flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start">
           <img
             src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"
@@ -61,9 +61,11 @@ export default function SideBar() {
             {" "}
             <Cog8ToothIcon
               onClick={() => {
+            
                 setActivePage(3);
+
               }}
-              className={` cursor-pointerlg:w-9 md:w-9 w-7 sm:ml-12 lg:my-6 h-7 md:h-9 2xs:mx-2 2xs:mt-0 cursor-pointer xs:mx-4 lg:mx-2 lg:h-9  ${activePage === 3 ? "text-blue-700" : "text-black"}`}
+              className={`lg:w-9 md:w-9 w-7 sm:ml-12 lg:my-6 h-7 md:h-9 2xs:mx-2 2xs:mt-0 cursor-pointer xs:mx-4 lg:mx-2 lg:h-9  ${activePage === 3 ? "text-blue-700" : "text-black"}`}
             />
           </div>
         </div>

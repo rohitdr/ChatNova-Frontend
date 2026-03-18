@@ -78,7 +78,7 @@ export default function Login() {
                 <label htmlFor="loginPassword" className="pb-2">
                   Passoword
                 </label>
-                <p className="pb-2 text-gray-500"> Forget password? </p>
+                <Link className="pb-2 text-gray-500" to="/forgetpassword"> Forget password? </Link>
               </div>
               <div className="flex items-center border border-gray-300">
                 <div className="w-10 bg-[#F8F9FA] flex justify-center">

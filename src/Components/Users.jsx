@@ -54,6 +54,7 @@ export default function Users() {
       serchUser(value);
     }
   };
+  
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (

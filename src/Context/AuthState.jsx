@@ -164,6 +164,85 @@ export default function AuthState(props) {
 
     }
   };
+/// update password when user is login
+  const updatePassword = async (oldPassword,newPassword) => {
+    try {
+  
+      setProgress(30);
+      const response = await api.put("/auth/updatePassword",{oldPassword,newPassword});
+      setProgress(50);
+      if (response.status === 200) {
+        refreshUser()
+        showAlert("Success", "You Password has been updated");
+        setProgress(100);
+      }
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 404) {
+        showAlert("Error", error.response.data.message);
+        setProgress(100);
+      }
+     
+      else{
+          console.log(error)
+        setIsServer(500)
+          setProgress(100);
+      }
+    }
+  };
+/// update password when user is not login
+  const forgetPassword = async (email,password,username) => {
+    try {
+
+      setProgress(30);
+      const response = await api.put("/auth/forgetPassword",{email:email,password:password,username:username});
+      setProgress(50);
+      if (response.status === 200) {
+        refreshUser()
+        showAlert("Success", "You Password has been changed successfully");
+        setProgress(100);
+        Navigate('/login')
+      }
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 404) {
+        showAlert("Error", error.response.data.message);
+        setProgress(100);
+      }
+     
+      else{
+          console.log(error)
+        setIsServer(500)
+          setProgress(100);
+      }
+    }
+  };
+  /// update user information
+  const updateUser = async (data) => {
+    try {
+      console.log(data)
+      setProgress(30);
+      const response = await api.post("/auth/update",data);
+      setProgress(50);
+      if (response.status === 200) {
+        refreshUser()
+        showAlert("Success", "You information has been updated");
+        setProgress(100);
+      }
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 404) {
+        showAlert("Error", error.response.data.message);
+        setProgress(100);
+      }
+     
+      else{
+          console.log(error)
+        setIsServer(500)
+          setProgress(100);
+      }
+    }
+  };
   const logout = async () => {
     try {
       setProgress(30);
@@ -206,7 +285,7 @@ export default function AuthState(props) {
         url: res.data.secure_url,
       };
       const responseUpdate = await api.post("/auth/update", { image });
-    
+  
       refreshUser();
         setProgress(100);
     } catch (error) {
@@ -247,6 +326,8 @@ export default function AuthState(props) {
     <AuthContext.Provider
       value={{
         user,
+        updatePassword,
+        updateUser,
         isServer,
         setIsServer,
         alert,
@@ -256,6 +337,7 @@ export default function AuthState(props) {
         activePage,
         setActivePage,
         logout,
+        forgetPassword,
         setUser,
         progress,
         setProgress,
