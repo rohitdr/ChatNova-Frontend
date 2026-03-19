@@ -34,11 +34,19 @@ export default function Message(props) {
           className={`mx-2 2xs:text-sm xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-4 ${send ? "bg-[#6159CB] text-white" : "bg-[#d0d3da] text-black"} rounded-lg lg:rounded-2xl ${send ? "rounded-br-none" : "rounded-bl-none"} `}
         >
           {message.type === "text" && message.text}
-          {message.type === "image" && <img src={message.media.url} onClick={()=>{setMediaView(true)}} alt="" />}
+          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img src={message.media.url} onClick={()=>{setMediaView(true)}} alt="" />}
           {message.type === "video" && (
             <video width="300"  autoplay muted loop controls>
               <source src={message.media.url} type="video/mp4" />
             </video>
+          )}
+          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() ==="pdf" && (
+       <iframe
+  src={`https://docs.google.com/gview?url=${message.media.url}&embedded=true`}
+  
+  width="100%"
+  height="500px"
+> {console.log(message.media.url)}</iframe>
           )}
         </div>{" "}
         <div

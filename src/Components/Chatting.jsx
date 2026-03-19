@@ -24,9 +24,11 @@ export default function Chatting() {
   const messageEndRef = useRef(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadVideo, setUploadedVideo] = useState(null);
+  const [uploadFile,setUplaodFile]=useState(null)
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer } = authContext;
+  const { user, isServer,showAlert } = authContext;
+  const [fileType,setFileType]=useState(null)
   const [mediaSendModal, setMediaSendModal] = useState(false);
   const {
 
@@ -98,14 +100,33 @@ export default function Chatting() {
   }, []);
 
   const imagechangehandler = (e) => {
+    if(e.target.files[0].size> 10000000){
+      showAlert("Error","Image size should be less than 10 mb")
+    }
+    else{
     setMediaSendModal(true);
-    setUploadedImage(e.target.files[0]);
+   setUploadedImage(e.target.files[0]);
+    }
+ 
   };
   const videochangehandler = (e) => {
+     if(e.target.files[0].size> 10000000){
+      showAlert("Error","Video size should be less than 10 mb")
+    }
+    else{
     setMediaSendModal(true);
     setUploadedVideo(e.target.files[0]);
+    }
   };
-
+    const fileChangeHandler=(e)=>{
+       if(e.target.files[0].size> 10000000){
+      showAlert("Error","File size should be less than 10 mb")
+    }
+    else{
+   
+    uploadCloudinary(currentChatUserId, e.target.files[0]);
+    }
+    }
   const formatLastSeen =(time)=>{
    const now = new Date();
    const last = new Date(time)
@@ -197,12 +218,15 @@ export default function Chatting() {
                   document.getElementById("fileMessageInput").click();
                 }}
               >
-                <PaperClipIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#6159CB]  cursor-pointer" />
+                <PaperClipIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#6159CB] hidden  cursor-pointer" />
                 <input
+                disabled={true}
+
                   type="file"
                   id="fileMessageInput"
-                  accept=".pdf,.doc,.docx,.txt,.zip"
+                  accept=".pdf,.doc,.docx,.txt"
                   className="hidden"
+                  onChange={fileChangeHandler}
                 />
               </div>
               <div
@@ -312,6 +336,33 @@ export default function Chatting() {
                 />
               </div>
             )}
+            {/* {uploadFile && (
+              <div className="">
+                {" "}
+               {fileType==="pdf" &&  <iframe className="h-screen w-screen" src={URL.createObjectURL(uploadFile)}></iframe>
+               }
+                {fileType==="docx" &&  <iframe
+  src={`https://view.officeapps.live.com/op/embed.aspx?src=${URL.createObjectURL(uploadFile)}`}
+  width="100%"
+  height="500px">
+</iframe>
+               }
+                <XMarkIcon
+                  className="h-8 w-8 absolute cursor-pointer top-6 right-6 text-white"
+                  onClick={() => {
+                    setMediaSendModal(false);
+                    setUploadedVideo(null);
+                  }}
+                />
+                <PaperAirplaneIcon
+                  className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"
+                  onClick={() => {
+                    uploadCloudinary(currentChatUserId, uploadVideo);
+                    setMediaSendModal(false);
+                  }}
+                />
+              </div>
+            )} */}
           </div>
         </div>
       )}

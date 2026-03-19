@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import  { useContext, useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import Profile from "./Profile";
@@ -38,10 +38,14 @@ export default function Users() {
   const { activePage, isServer } = authContext;
   const socketcontext = useContext(SocketContext);
   const { onlineUsers } = socketcontext;
+  const [unseenMessages,setUnseenMessages]=useState(0)
 
   useEffect(() => {
     chattedUsers();
+
   }, [currentUsersMessages]);
+
+
 
   useEffect(() => {}, [activePage]);
 
@@ -154,6 +158,7 @@ export default function Users() {
               chattedUsersList &&
               chattedUsersList.length !== 0 ?
               chattedUsersList.map((element) => {
+             
                 return (
                   <div
                   key={element._id}
@@ -179,7 +184,7 @@ export default function Users() {
                           <div className="absolute h-2 w-2 bottom-2 right-0 rounded-full  bg-green-400"></div>
                         )}
                         <img
-                          className="w-12  h-10 rounded-full border-white border-2"
+                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
                           src={element.image.url}
                           alt=""
                         />
@@ -189,6 +194,7 @@ export default function Users() {
                         <p className="font-small text-xs  xs:text-sm text-black">
                           {capitalizeFirstLetter(element.name)}
                         </p>
+                    
                         <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
                           {element.lastMessageTime === null
                             ? ""
@@ -199,13 +205,18 @@ export default function Users() {
                                 minute: "2-digit",
                               })}
                         </p>
+                       
                       </div>
-                      <div className="pl-2  text-[10px] xs:text-sm text-gray-400">
+                      <div className="pl-2  text-[10px] xs:text-sm text-gray-400 flex justify-between">
                         {element.lastMessageType =="image"&&  <div className="flex"> <PhotoIcon className="w-3 h-3 text-red-400 mt-1 mr-2 "></PhotoIcon> Photo</div>}
                         {element.lastMessageType =="video"&& <div className="flex"> <VideoCameraIcon className="text-[#6159CB] w-3 h-3 mt-1 mr-2"></VideoCameraIcon>Video</div>}
                         { element.lastMessageType=="text" && element.lastMessage === null
                           ? ""
                           : element.lastMessage}
+                          {/* {unseenMessages===0?"":
+                             <p className=" rounded-full bg-green-400 py-[1px] mx-2  px-[8px] text-black  text-[8px] ">
+                       { unseenMessages}
+                        </p>} */}
                       </div>
                     </div>
                   </div>

@@ -154,7 +154,7 @@ export default function ChatNovaState(props) {
         formdata,
       );
       setProgress(30);
-
+       console.log(res.data)
       const message = {
         publicId: res.data.public_id,
 
@@ -162,6 +162,7 @@ export default function ChatNovaState(props) {
         type: res.data.resource_type,
         url: res.data.secure_url,
       };
+      console.log(message)
     
       setProgress(60);
       sendMedia(id, message);
