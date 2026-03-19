@@ -29,7 +29,7 @@ export default function Chatting() {
   const { user, isServer } = authContext;
   const [mediaSendModal, setMediaSendModal] = useState(false);
   const {
-    getCureentChattingUser,
+
     currentChatUser,
     setActiveChat,
     uploadCloudinary,
@@ -40,7 +40,7 @@ export default function Chatting() {
     sendMessages,
     capitalizeFirstLetter,
     conversationId,
-    updatedUserList,
+ 
     activeChat
   } = Context;
   const socketcontext = useContext(SocketContext);
@@ -51,6 +51,7 @@ export default function Chatting() {
       getmessages(currentChatUserId);
    
     }
+  
   }, [currentChatUserId]);
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,15 +68,17 @@ export default function Chatting() {
 
       setCurrentUsersMessages((prev) => {
         if (!prev) return [newMessage];
-
+ 
         const exists = prev.some((msg) => msg._id === newMessage._id);
         if (exists) return prev;
         const audio = new Audio("/universfield-happy-message-ping-351298.mp3");
         audio.play().catch((err) => console.log("Audio play error:", err));
 
+    
         return [...prev, newMessage];
       });
-      updatedUserList(currentChatUser)
+      
+      // updatedUserList(currentChatUser)
     };
     socket.on("newMessage", handleNewMessage);
 
@@ -108,8 +111,8 @@ export default function Chatting() {
    const last = new Date(time)
    let diff = Math.floor((now-last)/1000)
   if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  if (diff < 3600) return `Active ${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return ` Active ${Math.floor(diff / 3600)} hr ago`;
 
   return last.toLocaleDateString();
   }
@@ -139,7 +142,7 @@ export default function Chatting() {
                 {onlineUsers?.includes(currentChatUser?._id) ? (
                   <p className="text-xs h-4 ">online</p>
                 ) : (
-                  <p className="text-xs h-4 "></p>
+                  <p className="text-xs h-4 ">{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
                 )}
               </div>
             </div>
@@ -164,6 +167,7 @@ export default function Chatting() {
               currentUsersMessages.map((element) => {
                 return (
                   <Message
+                  key={element._id}
                     send={currentChatUserId === element.receiverId}
                     message={element}
                   ></Message>

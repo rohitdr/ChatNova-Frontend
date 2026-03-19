@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API,
@@ -32,8 +32,9 @@ api.interceptors.response.use(
           `Bearer ${refressRes.data.access_token}`;
         return api(originalRequest);
       } catch(error) {
-        
-     console.log(error)
+        console.log(error)
+        localStorage.clear()
+    
       }
     }
   

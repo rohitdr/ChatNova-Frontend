@@ -54,7 +54,7 @@ const {chattedUsersList,capitalizeFirstLetter}=context
               chattedUsersList.map((element) => {
                 return (
                   <div
-                  
+                   key={element._id}
                     className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
                     <div className="pt-2">

@@ -45,7 +45,7 @@ export default function AuthState(props) {
       }
     
       else{
-        console.log(error)
+     
         setIsServer(500)
           setProgress(100);
       }
@@ -104,7 +104,7 @@ export default function AuthState(props) {
       }
      
       else{
-         console.log(error)
+      
         setIsServer(500)
       
       }
@@ -124,11 +124,11 @@ export default function AuthState(props) {
       );
       api.defaults.headers.common["Authorization"] =
         `Bearer ${refressRes.data.access_token}`;
-      console.log("refress is successfull");
+    
     } catch (error) {
      const status = error.response?.status;
     if(status ===500){
-      console.log(error)
+    
    setIsServer(500)
 
     }
@@ -160,7 +160,7 @@ export default function AuthState(props) {
         setProgress(100);
       }
       else{
-          console.log(error)
+       
         setIsServer(500)
         setProgress(100);
       }
@@ -187,7 +187,7 @@ export default function AuthState(props) {
       }
      
       else{
-          console.log(error)
+     
         setIsServer(500)
           setProgress(100);
       }
@@ -214,7 +214,7 @@ export default function AuthState(props) {
       }
      
       else{
-          console.log(error)
+        
         setIsServer(500)
           setProgress(100);
       }
@@ -223,7 +223,7 @@ export default function AuthState(props) {
   /// update user information
   const updateUser = async (data) => {
     try {
-      console.log(data)
+  
       setProgress(30);
       const response = await api.post("/auth/update",data);
       setProgress(50);
@@ -240,7 +240,7 @@ export default function AuthState(props) {
       }
      
       else{
-          console.log(error)
+       
         setIsServer(500)
           setProgress(100);
       }
@@ -265,7 +265,7 @@ export default function AuthState(props) {
       }
      
       else{
-          console.log(error)
+    
         setIsServer(500)
           setProgress(100);
       }
@@ -299,7 +299,7 @@ export default function AuthState(props) {
       }
      
       else{
-          console.log(error)
+      
         setIsServer(500)
           setProgress(100);
       

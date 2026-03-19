@@ -121,6 +121,7 @@ export default function Users() {
               dataBaseUsers.map((element) => {
                 return (
                   <div
+                  key={element._id}
                     onClick={() => {
                       setCurrentChatUserId(element._id);
                       getCureentChattingUser(element._id);
@@ -155,9 +156,10 @@ export default function Users() {
               chattedUsersList.map((element) => {
                 return (
                   <div
+                  key={element._id}
                     onClick={() => {
                       setCurrentChatUserId(element._id);
-                      console.log(currentChatUserId)
+                      
                       getCureentChattingUser(element._id);
                       getmessages(element._id);
                       setActiveChat(true);

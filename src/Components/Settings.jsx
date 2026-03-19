@@ -26,7 +26,7 @@ export default function Settings() {
     setData({...data,[e.target.name]:e.target.value})
   }
   const handleUpdate=(e)=>{
-    const updatedfiled={}
+    let updatedfiled={}
     const argu ={}
     Object.keys(data).forEach((key)=>{
       if(data[key] !== originaldata[key]){

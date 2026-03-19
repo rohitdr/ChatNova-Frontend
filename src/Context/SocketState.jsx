@@ -10,7 +10,7 @@ export default function SocketState(props) {
   useEffect(() => {
     if (user) {
       const newSocket = io(import.meta.env.VITE_SOCKET, {
-        transports: ["polling", "websocket"],
+        transports: [ "websocket"],
         query: {
           userId: user?._id,
         },

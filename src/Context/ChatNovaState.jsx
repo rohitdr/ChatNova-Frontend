@@ -31,7 +31,7 @@ export default function ChatNovaState(props) {
     } catch (error) {
       const status = error.response?.status;
     if(status ===500){
-      console.log(error)
+    
       setIsServer(500)
       }
     
@@ -43,18 +43,18 @@ export default function ChatNovaState(props) {
       const res = await api.get(`/users/search?search=${searchValue}`);
       if (res.status === 200) {
         setDataBaseUsers(res.data.users);
-        console.log("1")
+     
       }
     } catch (error) {
      const status = error.response?.status;
 
       if (status === 404) {
-        console.log("not found")
+     
         showAlert("Error", error.response.data.message);
    
       }
       else{
-          console.log(error)
+     
         setIsServer(500)
      
       }
@@ -65,6 +65,7 @@ export default function ChatNovaState(props) {
     try {
       const res = await api.get(`/users/chattedUsers`);
       if (res.status === 200) {
+    
         setChattedUsersList(res.data.users);
 
 
@@ -74,7 +75,7 @@ export default function ChatNovaState(props) {
        const status = error.response?.status;
 
       if(status ===500){
-          console.log(error)
+     
         setIsServer(500)
      
       }
@@ -96,7 +97,7 @@ export default function ChatNovaState(props) {
    
       }
       else{
-          console.log(error)
+       
         setIsServer(500)
      
       }
@@ -112,7 +113,7 @@ export default function ChatNovaState(props) {
     } catch (error) {
       const status = error.response?.status;
     if(status ===500){
-        console.log(error)
+  
       setIsServer(500)
       }
     }
@@ -124,7 +125,7 @@ export default function ChatNovaState(props) {
     } catch (error) {
      const status = error.response?.status;
     if(status ===500){
-        console.log(error)
+    
       setIsServer(500)
       }
     }
@@ -136,8 +137,7 @@ export default function ChatNovaState(props) {
     } catch (error) {
      const status = error.response?.status;
     if(status ===500){
-        console.log(error)
-      setIsServer(500)
+          setIsServer(500)
       }
     }
   };
@@ -162,23 +162,17 @@ export default function ChatNovaState(props) {
         type: res.data.resource_type,
         url: res.data.secure_url,
       };
-      console.log(message);
+    
       setProgress(60);
       sendMedia(id, message);
       setProgress(100);
     } catch (error) {
-      console.log(error);
+   
       setProgress(100);
     }
   };
 
-  //fucntion to keep the last chat person on the top of the list 
-    const updatedUserList =(user)=>{
-       setChattedUsersList((prev)=>{
-         const filterUsers = prev.filter(u=>{u._id !==user._id})
-         return [user , ...filterUsers]
-       })
-    } 
+ 
   const capitalizeFirstLetter = (string) => {
     // Check if the input is a non-empty string to avoid errors
     if (typeof string !== "string" || string.length === 0) {
@@ -191,7 +185,7 @@ export default function ChatNovaState(props) {
   return (
     <ChatNovaContext.Provider
       value={{
-        updatedUserList,
+     
         getConversationId,
         conversationId,
         activeChat,
