@@ -8,6 +8,7 @@ import Group from "./Group";
 import SocketContext from "../Context/SocketContext";
 import NoServer from "./NoServer";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
+import GroupInfo from "./GroupInfo";
 import {
 
   VideoCameraIcon,
@@ -26,12 +27,16 @@ export default function Users() {
     activeChat,
     getCureentChattingUser,
     chattedOnlineUsers,
-    getmessages,
+ setCurrentUsersMessages,
+    isInitailLoadRef,
+      setHasMore,
+      setpage,
     chattedUsersList,
     chattedUsers,
     currentChatUserId,
     setCurrentChatUserId,
     capitalizeFirstLetter,
+    setActiveGroupChat
   } = context;
   const [searchClick, setSearchClick] = useState(true);
   const authContext = useContext(AuthContext);
@@ -43,7 +48,7 @@ export default function Users() {
   useEffect(() => {
     chattedUsers();
 
-  }, [currentUsersMessages]);
+  }, []);
 
 
 
@@ -127,9 +132,12 @@ export default function Users() {
                   <div
                   key={element._id}
                     onClick={() => {
+                      setActiveGroupChat(false)
+                          setCurrentUsersMessages([]),
+                           setHasMore(true),
+                             setpage(2),
                       setCurrentChatUserId(element._id);
                       getCureentChattingUser(element._id);
-                      getmessages(element._id);
                       setActiveChat(true);
                       getConversationId(element._id);
                     }}
@@ -161,45 +169,42 @@ export default function Users() {
              
                 return (
                   <div
-                  key={element._id}
+                  key={element.user._id}
                     onClick={() => {
-                      setCurrentChatUserId(element._id);
+                      isInitailLoadRef.current=true
+                       setActiveGroupChat(false)
+                      setCurrentUsersMessages([]),
+      setHasMore(true),
+      setpage(2),
+                      setCurrentChatUserId(element.user._id);
                       
-                      getCureentChattingUser(element._id);
-                      getmessages(element._id);
+                      getCureentChattingUser(element.user._id);
+                    
                       setActiveChat(true);
-                      getConversationId(element._id);
+                      getConversationId(element.user._id);
                     }}
                     className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
-                    {/* <div className="pt-2">
-                      <img
-                        className="w-12 h-10 rounded-full border-white border-2"
-                        src={element.image.url}
-                        alt=""
-                      />
-                    </div> */}
-                    <div className="relative">
-                        {onlineUsers?.includes(element?._id) && (
-                          <div className="absolute h-2 w-2 bottom-2 right-0 rounded-full  bg-green-400"></div>
-                        )}
+                    
+                    <div className="">
+                       
                         <img
                           className="w-12 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.image.url}
+                          src={element.user.image.url}
                           alt=""
                         />
                       </div>
                     <div className="flex flex-col w-full justify-between py-1">
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
                         <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.name)}
+                          {capitalizeFirstLetter(element.user.name)}
                         </p>
                     
                         <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
-                          {element.lastMessageTime === null
+                          {element.lastMessage.createdAt === null
                             ? ""
                             : new Date(
-                                element.lastMessageTime,
+                                element.lastMessage.createdAt
                               ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -208,11 +213,12 @@ export default function Users() {
                        
                       </div>
                       <div className="pl-2  text-[10px] xs:text-sm text-gray-400 flex justify-between">
-                        {element.lastMessageType =="image"&&  <div className="flex"> <PhotoIcon className="w-3 h-3 text-red-400 mt-1 mr-2 "></PhotoIcon> Photo</div>}
+                        {element.lastMessage.text}
+                        {/* {element.lastMessageType =="image"&&  <div className="flex"> <PhotoIcon className="w-3 h-3 text-red-400 mt-1 mr-2 "></PhotoIcon> Photo</div>}
                         {element.lastMessageType =="video"&& <div className="flex"> <VideoCameraIcon className="text-[#6159CB] w-3 h-3 mt-1 mr-2"></VideoCameraIcon>Video</div>}
                         { element.lastMessageType=="text" && element.lastMessage === null
                           ? ""
-                          : element.lastMessage}
+                          : element.lastMessage} */}
                           {/* {unseenMessages===0?"":
                              <p className=" rounded-full bg-green-400 py-[1px] mx-2  px-[8px] text-black  text-[8px] ">
                        { unseenMessages}
@@ -233,6 +239,7 @@ export default function Users() {
       {activePage === 1 && <Profile></Profile>}
       {activePage === 2 && <Group></Group>}
       {activePage === 3 && <Settings></Settings>}
+      {activePage === 4 && <GroupInfo></GroupInfo>}
     </>
   );
 }

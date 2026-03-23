@@ -19,16 +19,18 @@ import SocketContext from "../Context/SocketContext";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import EmptyChat from "./EmptyChat";
+import { Virtuoso } from "react-virtuoso";
 export default function Chatting() {
   const [sendingMessage, setSendingMessage] = useState(null);
-  const messageEndRef = useRef(null);
+ 
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadVideo, setUploadedVideo] = useState(null);
   const [uploadFile,setUplaodFile]=useState(null)
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer,showAlert } = authContext;
+  const { user, isServer,showAlert,setActivePage } = authContext;
   const [fileType,setFileType]=useState(null)
+ 
   const [mediaSendModal, setMediaSendModal] = useState(false);
   const {
 
@@ -36,50 +38,128 @@ export default function Chatting() {
     setActiveChat,
     uploadCloudinary,
     currentChatUserId,
+    setChattedUsersList,
     getmessages,
     currentUsersMessages,
+    chattedUsers,
     setCurrentUsersMessages,
     sendMessages,
+    isInitailLoadRef,
     capitalizeFirstLetter,
     conversationId,
- 
-    activeChat
+    activeGroupChat,
+   
+        currentGroup,
+    activeChat,
+    page,
+    hasMoreRef,
+    loadingRef,
+    loadMoreMessages
   } = Context;
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
+  const virtuosoRef=useRef(null)
 
-  useEffect(() => {
-    if (currentChatUserId) {
-      getmessages(currentChatUserId);
-   
-    }
-  
-  }, [currentChatUserId]);
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [currentUsersMessages]);
+
+
+//   useEffect(()=>{
+//     return ()=>{
+//       if(conversationId?.current){
+//  hasMoreRef.current = true
+//   loadingRef.current = false
+//  isInitailLoadRef.current = true
+//       }
+//  }
+// },[conversationId])
+ useEffect(()=>{
+
+if(currentUsersMessages.length && isInitailLoadRef.current)
+{
+  virtuosoRef.current.scrollToIndex({
+       index:currentUsersMessages.length-1,
+       behavior:"auto"
+  })
+  isInitailLoadRef.current=false
+ 
+}
+ },[currentUsersMessages])
 
   useEffect(() => {
     if (!socket) return;
-
+ console.log("yues")
     const handleNewMessage = (newMessage) => {
+   console.log(conversationId.current)
+   console.log(newMessage._doc.conversationId)
      
-      if (newMessage.conversationId !== conversationId.current._id) {
-        return;
-      }
-
+      if ( (activeGroupChat && newMessage._doc.conversationId === conversationId.current) ||
+          (!activeGroupChat && newMessage._doc.conversationId === conversationId.current?._id)
+      ) {
+     
+       /// setting current user chat 
       setCurrentUsersMessages((prev) => {
-        if (!prev) return [newMessage];
- 
-        const exists = prev.some((msg) => msg._id === newMessage._id);
-        if (exists) return prev;
+      
+        if (!prev) return [newMessage._doc];
+  
+        const exists = prev.some((msg) => msg._id === newMessage.tempId);
+        if (exists) {
+       
+         return prev.map(m=>
+          m._id === newMessage.tempId ?newMessage._doc:m
+         )
+        };
+    
         const audio = new Audio("/universfield-happy-message-ping-351298.mp3");
         audio.play().catch((err) => console.log("Audio play error:", err));
 
-    
-        return [...prev, newMessage];
+ 
+        return [...prev, newMessage._doc];
       });
+       
+      }
       
+      //setting current user list 
+   setChattedUsersList (  prev=>
+     {
+
+       const index = prev.findIndex(
+         c=>c.ConversationId === newMessage._doc.conversationId
+       )
+       console.log(index)
+       const lastMessage = {
+       text:newMessage._doc.text,
+       createdAt:newMessage._doc.createdAt
+
+       }
+       if (index === -1)
+        { 
+           const newuser = newMessage.conversationToSend.participents.find(
+            p=> p.user._id !== user._id
+            )
+            console.log({
+            ConversationId:newMessage.conversationToSend.ConversationId,
+            lastMessage:newMessage.conversationToSend.lastMessage,
+            user:newuser
+            
+           })
+           return [{
+            ConversationId:newMessage.conversationToSend.ConversationId,
+            lastMessage:newMessage.conversationToSend.lastMessage,
+            user:newuser.user
+            
+           },...prev]
+
+        }
+       const updateduserlist = {
+        ...prev[index],
+        lastMessage,
+      }
+      const filtereduser = prev.filter(c=>
+          c.ConversationId !== newMessage._doc.conversationId
+      )
+     
+      return [updateduserlist , ...filtereduser]
+     }
+     )
       // updatedUserList(currentChatUser)
     };
     socket.on("newMessage", handleNewMessage);
@@ -102,20 +182,24 @@ export default function Chatting() {
   const imagechangehandler = (e) => {
     if(e.target.files[0].size> 10000000){
       showAlert("Error","Image size should be less than 10 mb")
+      e.target.value=null
     }
     else{
     setMediaSendModal(true);
    setUploadedImage(e.target.files[0]);
+     e.target.value=null
     }
  
   };
   const videochangehandler = (e) => {
      if(e.target.files[0].size> 10000000){
       showAlert("Error","Video size should be less than 10 mb")
+        e.target.value=null
     }
     else{
     setMediaSendModal(true);
     setUploadedVideo(e.target.files[0]);
+      e.target.value=null
     }
   };
     const fileChangeHandler=(e)=>{
@@ -137,11 +221,161 @@ export default function Chatting() {
 
   return last.toLocaleDateString();
   }
+  const handleSendMessage =() => {
+                  if (sendingMessage !== "") {
+                    
+                    const tempmessage = {
+                     _id:Date.now(),
+                     type:"text",
+                     text:sendingMessage,
+                     createdAt:Date.now(),
+                     senderId:{
+                      _id:user._id,
+                      image:{
+                        url:user.image?.url
+                      }
+                     }
+                     
+                    }
+                  
+                 activeGroupChat? sendMessages({conversationId:conversationId.current, message:sendingMessage,tempId:tempmessage._id})
+                   : sendMessages({receiverId:currentChatUserId, message:sendingMessage,tempId:tempmessage._id});
+                    setCurrentUsersMessages(prev=>[...prev,tempmessage])
+                  
+                    setSendingMessage("");
+                     setChattedUsersList(prev=>
+     {
+       const index = prev.findIndex(
+         c=>c.user._id === currentChatUserId
+       )
+     
+       const lastMessage = {
+       text:tempmessage.text,
+       createdAt:tempmessage.createdAt
+
+       }
+       if(index === -1) return prev
+       const updateduserlit = {
+        ...prev[index],
+        lastMessage,
+      }
+      const filtereduser = prev.filter(c=>
+        c.user._id !== currentChatUserId
+      )
+      console.log([updateduserlit, ...filtereduser])
+      return [updateduserlit , ...filtereduser]
+     }
+     )
+                  }
+                    setTimeout(() => {
+    virtuosoRef.current.scrollToIndex({
+      index: currentUsersMessages.length - 1,
+      behavior: "auto"
+    });
+  }, 0);
+                }
+                const virtusoStartReached=(atTop)=>{
+                  if (!atTop) return; 
+                  if(conversationId?.current?._id){
+                   
+                    loadMoreMessages(conversationId.current?._id ,page)
+                  }
+                }
+                const handleUploadImage=() => {
+                   const tempmessage = {
+                     _id:Date.now(),
+                     type:"image",
+                     text:"New Photo",
+                     createdAt:Date.now(),
+                     senderId:{
+                      _id:user._id,
+                      image:{
+                        url:user.image?.url
+                      }
+                     },
+                     media:{
+                      url:URL.createObjectURL(uploadedImage)
+                     }
+
+                     
+                    }
+                     setCurrentUsersMessages(prev=>[...prev,tempmessage])
+                              setChattedUsersList(prev=>
+     {
+       const index = prev.findIndex(
+         c=>c.user._id === currentChatUserId
+       )
+     
+       const lastMessage = {
+       text:tempmessage.text,
+       createdAt:tempmessage.createdAt
+
+       }
+       if(index === -1) return prev
+       const updateduserlit = {
+        ...prev[index],
+        lastMessage,
+      }
+      const filtereduser = prev.filter(c=>
+        c.user._id !== currentChatUserId
+      )
+      console.log([updateduserlit, ...filtereduser])
+      return [updateduserlit , ...filtereduser]
+     }
+     )
+                    uploadCloudinary(conversationId.current._id, uploadedImage,tempmessage._id);
+                    setMediaSendModal(false);
+                  }
+                const handleUploadVideo=() => {
+                   const tempmessage = {
+                     _id:Date.now(),
+                     type:"video",
+                     text:"New Video",
+                     createdAt:Date.now(),
+                     senderId:{
+                      _id:user._id,
+                      image:{
+                        url:user.image?.url
+                      }
+                     },
+                     media:{
+                      url:URL.createObjectURL(uploadVideo)
+                     }
+
+                     
+                    }
+                     setCurrentUsersMessages(prev=>[...prev,tempmessage])
+                              setChattedUsersList(prev=>
+     {
+       const index = prev.findIndex(
+         c=>c.user._id === currentChatUserId
+       )
+     
+       const lastMessage = {
+       text:tempmessage.text,
+       createdAt:tempmessage.createdAt
+
+       }
+       if(index === -1) return prev
+       const updateduserlit = {
+        ...prev[index],
+        lastMessage,
+      }
+      const filtereduser = prev.filter(c=>
+        c.user._id !== currentChatUserId
+      )
+      console.log([updateduserlit, ...filtereduser])
+      return [updateduserlit , ...filtereduser]
+     }
+     )
+                    uploadCloudinary(conversationId.current._id, uploadVideo,tempmessage._id);
+                    setMediaSendModal(false);
+                  }
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
     <>
-     {currentChatUserId ? <div className={`h-screen bg-white`}>
+     {(currentChatUserId ||activeGroupChat) ? <div className={`h-screen bg-white`}>
         <div className="flex h-full flex-col justify-between">
           <div className="shrink-0 flex flex-row p-4 lg:p-7 border justify-between">
             <div className="flex items-center justify-between">
@@ -153,18 +387,18 @@ export default function Chatting() {
               />
               <img
                 className="lg:h-14 lg:w-14 h-10 w-10 rounded-full border-white border-4"
-                src={currentChatUser?.image.url}
+                src={activeGroupChat?currentGroup?.avtar?.url:currentChatUser?.image.url}
                 alt=""
               />
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center cursor-pointer" onClick={()=>{ if(activeGroupChat){setActivePage(4)}}}>
                 <h2 className="mx-2 lg:mx-4 pt-2 font-medium text-xs lg:text-xl">
-                  {capitalizeFirstLetter(currentChatUser?.name)}
+                  {capitalizeFirstLetter(activeGroupChat?currentGroup?.name:currentChatUser?.name)}
                 </h2>
-                {onlineUsers?.includes(currentChatUser?._id) ? (
-                  <p className="text-xs h-4 ">online</p>
+                {(onlineUsers?.includes(currentChatUser?._id) ? (
+                  <p className={`text-xs h-4 ${activeGroupChat?"invisible":""} `}>online</p>
                 ) : (
-                  <p className="text-xs h-4 ">{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
-                )}
+                  <p className={`text-xs h-4 ${activeGroupChat?"invisible":""} `}>{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
+                ))}
               </div>
             </div>
             <div className="flex  items-center justify-between">
@@ -183,18 +417,30 @@ export default function Chatting() {
               </div>
             </div>
           </div>
-          <div className=" px-3 sm:px-6 overflow-y-auto scrollbar-hide flex-1 min-h-0 ">
-            {currentUsersMessages &&
+          <div className=" px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ">
+   
+            <Virtuoso className="scrollbar-hide" alignToBottom  atTopStateChange={virtusoStartReached} computeItemKey={(index, message) => message._id} ref={virtuosoRef} style={{height:"100%" }} increaseViewportBy={300}   
+   data={currentUsersMessages}  followOutput="auto"
+            itemContent={(index,message)=>(
+                <Message
+                
+                    send={user._id === message.senderId._id}
+                    message={message}
+                  ></Message>
+  )}
+            />
+            {/* {currentUsersMessages &&
               currentUsersMessages.map((element) => {
                 return (
+                  
                   <Message
                   key={element._id}
-                    send={currentChatUserId === element.receiverId}
+                    send={user._id === element.senderId}
                     message={element}
                   ></Message>
                 );
-              })}
-            <div ref={messageEndRef}></div>
+              })} */}
+           
           </div>
 
           <div className="shrink-0 flex xs:p-2 md:p-7 justify-between bg-white border">
@@ -262,12 +508,7 @@ export default function Chatting() {
               </div>
               <div
                 className="p-2.5  bg-[#6159CB] rounded-lg"
-                onClick={() => {
-                  if (sendingMessage !== "") {
-                    sendMessages(currentChatUserId, sendingMessage);
-                    setSendingMessage("");
-                  }
-                }}
+                onClick={handleSendMessage}
               >
                 <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 sm:h-6 text-white cursor-pointer" />
               </div>
@@ -304,10 +545,7 @@ export default function Chatting() {
                 />
                 <PaperAirplaneIcon
                   className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"
-                  onClick={() => {
-                    uploadCloudinary(currentChatUserId, uploadedImage);
-                    setMediaSendModal(false);
-                  }}
+                  onClick={handleUploadImage}
                 />
               </div>
             )}
@@ -329,10 +567,7 @@ export default function Chatting() {
                 />
                 <PaperAirplaneIcon
                   className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"
-                  onClick={() => {
-                    uploadCloudinary(currentChatUserId, uploadVideo);
-                    setMediaSendModal(false);
-                  }}
+                  onClick={handleUploadVideo}
                 />
               </div>
             )}

@@ -15,6 +15,7 @@ export default function Message(props) {
   const { currentChatUser } = context;
   const [mediaView,setMediaView]=useState(false)
 
+
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -22,10 +23,10 @@ export default function Message(props) {
       className={` my-2 sm:my-6 w-full flex ${send ? "flex-row-reverse" : ""}  `}
     >
       <div className=" flex flex-col justify-end max-w-[15%] ">
-        {" "}
+       
         <img
           className="w-[40px] h-[38px]        lg:w-[40px]  lg:h-[41px] rounded-full  border-white border-4"
-          src={send ? user?.image?.url : currentChatUser?.image?.url}
+          src={send ? user?.image?.url : message?.senderId?.image?.url}
           alt=""
         />
       </div>

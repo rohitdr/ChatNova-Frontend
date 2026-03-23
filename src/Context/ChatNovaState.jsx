@@ -15,6 +15,18 @@ export default function ChatNovaState(props) {
   const [currentUsersMessages, setCurrentUsersMessages] = useState([]);
   const [activeChat, setActiveChat] = useState(false);
   const conversationId = useRef(null);
+  const [allGroups,setAllgroups]=useState(null)
+  const [databaseGruops,setDatabaseGroups]=useState(null)
+  const [page,setpage]=useState(2)
+  const [hasMore,setHasMore]=useState(true)
+  const [activeGroupChat,setActiveGroupChat]=useState(false)
+  const [currentGroup,setCurrentGroup]=useState(null)
+ const hasMoreRef = useRef(true)
+ const loadingRef = useRef(false)
+const isInitailLoadRef = useRef(true)
+
+
+
 
   let Navigate = useNavigate();
   const authContext = useContext(AuthContext);
@@ -24,9 +36,11 @@ export default function ChatNovaState(props) {
   /// function to get the coversation id between the current chatter and logged in user
   const getConversationId = async (id) => {
     try {
+      setCurrentUsersMessages([])
       const res = await api.get(`/messages/conversationId/${id}`);
       if (res.status === 200) {
         conversationId.current = res.data.conversation;
+          getmessages(res.data.conversation._id);
       }
     } catch (error) {
       const status = error.response?.status;
@@ -60,6 +74,29 @@ export default function ChatNovaState(props) {
       }
     }
   };
+  // function to search users from database to chat with search query
+  const serchGroup = async (searchValue) => {
+    try {
+      const res = await api.get(`/groups/search?search=${searchValue}`);
+      if (res.status === 200) {
+        setDatabaseGroups(res.data.groups);
+     
+      }
+    } catch (error) {
+     const status = error.response?.status;
+
+      if (status === 404) {
+     
+        showAlert("Error", error.response.data.message);
+   
+      }
+      else{
+     
+        setIsServer(500)
+     
+      }
+    }
+  };
   //function to serach the users with whom logged in user have chatted
   const chattedUsers = async () => {
     try {
@@ -67,9 +104,7 @@ export default function ChatNovaState(props) {
       if (res.status === 200) {
     
         setChattedUsersList(res.data.users);
-
-
-        setChattedOnlineUsers(res.data.onlineUsers);
+        console.log(res.data.users)
       }
     } catch (error) {
        const status = error.response?.status;
@@ -106,9 +141,14 @@ export default function ChatNovaState(props) {
 
   const getmessages = async (id) => {
     try {
-      const res = await api.get(`/messages/recieveMessage/${id}`);
+      const res = await api.get(`/messages/recieveMessage/${id}?page=1&limit=20`);
       if (res.status === 200) {
-        setCurrentUsersMessages(res.data.message);
+      console.log(res.data.message)
+        setCurrentUsersMessages(res.data.message.reverse());
+      console.log(res.data.hasMore)
+      hasMoreRef.current = res.data.hasMore
+      console.log(hasMoreRef.current)
+        setHasMore(res.data.hasMore)
       }
     } catch (error) {
       const status = error.response?.status;
@@ -118,10 +158,42 @@ export default function ChatNovaState(props) {
       }
     }
   };
-
-  const sendMessages = async (id, message) => {
+  const loadMoreMessages = async (id,page) => {
     try {
-      const res = await api.post(`/messages/sendMessage/${id}`, { message });
+     
+      if(isInitailLoadRef.current){
+       isInitailLoadRef.current =false
+     
+        return
+      }
+      if( !hasMoreRef.current || loadingRef.current){
+        return
+      }
+
+      loadingRef.current = true
+      const res = await api.get(`/messages/recieveMessage/${id}?page=${page}&limit=20`);
+      if (res.status === 200) {
+        setCurrentUsersMessages(prev=>[...res.data.message.reverse(),...prev]);
+        console.log(res.data.message.reverse())
+         setpage(prev=>prev +1)
+               hasMoreRef.current = res.data.hasMore
+                 console.log(hasMoreRef.current)
+        setHasMore(res.data.hasMore)
+           loadingRef.current = false
+           console.log(loadingRef.current)
+      }
+    } catch (error) {
+      const status = error.response?.status;
+    if(status ===500){
+  
+      setIsServer(500)
+      }
+    }
+  };
+//sendmessagee do it 
+  const sendMessages = async (message) => {
+    try {
+      const res = await api.post(`/messages/sendMessage`,message);
     } catch (error) {
      const status = error.response?.status;
     if(status ===500){
@@ -137,13 +209,14 @@ export default function ChatNovaState(props) {
     } catch (error) {
      const status = error.response?.status;
     if(status ===500){
+      console.log(error.message)
           setIsServer(500)
       }
     }
   };
 
   //function to upload a image or video or file
-  const uploadCloudinary = async (id, file) => {
+  const uploadCloudinary = async (id, file,tempId) => {
     try {
       setProgress(10);
       const formdata = new FormData();
@@ -161,6 +234,7 @@ export default function ChatNovaState(props) {
         bytes: res.data.bytes,
         type: res.data.resource_type,
         url: res.data.secure_url,
+        tempId:tempId
       };
       console.log(message)
     
@@ -168,11 +242,44 @@ export default function ChatNovaState(props) {
       sendMedia(id, message);
       setProgress(100);
     } catch (error) {
-   
+    console.log(error.message)
       setProgress(100);
     }
   };
+  /// function to get all groups
+  const getAllGroups =async()=>{
+ try {
+      const res = await api.get(`/groups/allgroups`);
+      setAllgroups(res.data.groups)
+      console.log(res.data.groups)
+    } catch (error) {
+     const status = error.response?.status;
+    if(status ===500){
+          setIsServer(500)
+      }
+    }
+  }
 
+  //function to get group by id
+  const getGroupById=async(id)=>{
+     try {
+      const res = await api.get(`/groups/getGroupById/${id}`);
+      setCurrentGroup(res.data.message)
+     console.log(res.data.message)
+    } catch (error) {
+     const status = error.response?.status;
+   if (status === 404) {
+        showAlert("Error", error.response.data.message);
+   
+      }
+      else{
+       
+        setIsServer(500)
+     
+      }
+    
+    }
+  }
  
   const capitalizeFirstLetter = (string) => {
     // Check if the input is a non-empty string to avoid errors
@@ -186,9 +293,19 @@ export default function ChatNovaState(props) {
   return (
     <ChatNovaContext.Provider
       value={{
-     
+        getGroupById,
+        currentGroup,
+        activeGroupChat,
+        setActiveGroupChat,
+        getAllGroups,
+        databaseGruops,
+        page,
+        loadMoreMessages,
+        serchGroup,
+        allGroups,
         getConversationId,
         conversationId,
+        setActiveGroupChat,
         activeChat,
         setActiveChat,
         uploadCloudinary,
@@ -199,6 +316,9 @@ export default function ChatNovaState(props) {
         currentUsersMessages,
         setCurrentUsersMessages,
         getmessages,
+      isInitailLoadRef,
+      setHasMore,
+      setpage,
         getCureentChattingUser,
         setDataBaseUsers,
         setCurrentChatUserId,
