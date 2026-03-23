@@ -5,6 +5,13 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+body{
+  font-family: inter;
+}
+.text-2xs{
+  font-size: 10px;
+  line-height: 0.75rem;
+}
 
 @keyframes slideIn {
   from{

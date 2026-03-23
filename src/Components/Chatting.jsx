@@ -377,7 +377,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
     <>
      {(currentChatUserId ||activeGroupChat) ? <div className={`h-screen bg-white`}>
         <div className="flex h-full flex-col justify-between">
-          <div className="shrink-0 flex flex-row p-4 lg:p-7 border justify-between">
+          <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:pt-3 border justify-between">
             <div className="flex items-center justify-between">
               <ArrowLeftIcon
                 className="w-6 h-6 text-gray-700 lg:hidden"
@@ -444,13 +444,13 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
           </div>
 
           <div className="shrink-0 flex xs:p-2 md:p-7 justify-between bg-white border">
-            <div className="w-full">
+            <div className="w-full ">
               <input
                 type="text"
                 onChange={(e) => {
                   setSendingMessage(e.target.value);
                 }}
-                className="bg-[#E6EBF5] rounded-md h-full w-full pl-2 "
+                className="bg-[#E6EBF5] rounded-full outline-none  h-full w-full pl-2 "
                 placeholder="Enter Message..."
                 value={sendingMessage}
                 name="sendmessageinput"
@@ -507,10 +507,10 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
                 />
               </div>
               <div
-                className="p-2.5  bg-[#6159CB] rounded-lg"
+                className="p-2.5  bg-[#6159CB] rounded-full"
                 onClick={handleSendMessage}
               >
-                <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 sm:h-6 text-white cursor-pointer" />
+                <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 rotate-90 sm:h-6 text-white cursor-pointer" />
               </div>
             </div>
           </div>

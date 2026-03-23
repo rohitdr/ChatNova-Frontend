@@ -20,7 +20,7 @@ export default function Message(props) {
     <NoServer></NoServer>
   ) : (
    <> <div
-      className={` my-2 sm:my-6 w-full flex ${send ? "flex-row-reverse" : ""}  `}
+      className={` w-full flex ${send ? "flex-row-reverse" : ""}  `}
     >
       <div className=" flex flex-col justify-end max-w-[15%] ">
        
@@ -32,26 +32,18 @@ export default function Message(props) {
       </div>
       <div className="flex max-w-[85%] flex-col mb-2 ">
         <div
-          className={`mx-2 2xs:text-sm xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-4 ${send ? "bg-[#6159CB] text-white" : "bg-[#d0d3da] text-black"} rounded-lg lg:rounded-2xl ${send ? "rounded-br-none" : "rounded-bl-none"} `}
+          className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-3 ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
         >
+          <div className="">
           {message.type === "text" && message.text}
           {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img src={message.media.url} onClick={()=>{setMediaView(true)}} alt="" />}
           {message.type === "video" && (
             <video width="300"  autoplay muted loop controls>
               <source src={message.media.url} type="video/mp4" />
             </video>
-          )}
-          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() ==="pdf" && (
-       <iframe
-  src={`https://docs.google.com/gview?url=${message.media.url}&embedded=true`}
-  
-  width="100%"
-  height="500px"
-> {console.log(message.media.url)}</iframe>
-          )}
-        </div>{" "}
-        <div
-          className={`flex text-xs mx-2 ${send ? "justify-end" : "justify-start"}`}
+          )}</div>
+         <div
+          className={`flex text-2xs  ${send ? "justify-end" : "justify-start"}`}
         >
           <div>
             {new Date(message.createdAt).toLocaleTimeString([], {
@@ -60,6 +52,8 @@ export default function Message(props) {
             })}
           </div>
         </div>
+        </div>{" "}
+       
       </div>
     </div>
    

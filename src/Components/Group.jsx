@@ -65,7 +65,7 @@ const {chattedUsersList,capitalizeFirstLetter,getAllGroups,allGroups,setActiveCh
                       
                       
                     }}
-                    className="flex shadow cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
+                    className="flex shadow cursor-pointer bg-white rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
                   >
                     <div className="pt-2">
                       <img
@@ -102,7 +102,7 @@ const {chattedUsersList,capitalizeFirstLetter,getAllGroups,allGroups,setActiveCh
                      
                       }}
                    key={element._id}
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                    className="flex shadow  border-2  bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
                     <div className="pt-2">
                       <img

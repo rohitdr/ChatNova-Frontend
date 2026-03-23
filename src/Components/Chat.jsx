@@ -23,7 +23,7 @@ export default function Chat() {
         <SideBar></SideBar>
       </div>
       <div
-        className={`w-full ${activeChat ? "hidden" : "block"} order-1 lg:block lg:order-2 lg:w-[320px]`}
+        className={`w-full ${activeChat ? "hidden" : "block"} order-1 lg:block lg:order-2 lg:w-[380px]`}
       >
         <Users></Users>
       </div>

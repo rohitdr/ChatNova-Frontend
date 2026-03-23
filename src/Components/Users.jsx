@@ -67,7 +67,7 @@ export default function Users() {
   
   return isServer === 500 ? (
     <NoServer></NoServer>
-  ) : (
+  ) : 
     <>
       {activePage === 0 && (
         <div className={`h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col `}>
@@ -123,7 +123,7 @@ export default function Users() {
             </div>
           )} */}
 
-          <div className="flex pt-2 flex-col  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
+          <div className="flex pt-2 flex-col pb-10  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
             {!searchClick &&
               dataBaseUsers &&
               dataBaseUsers.length !== 0 &&
@@ -141,7 +141,7 @@ export default function Users() {
                       setActiveChat(true);
                       getConversationId(element._id);
                     }}
-                    className="flex shadow cursor-pointer rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
+                    className="flex shadow cursor-pointer bg-white rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
                   >
                     <div className="pt-2">
                       <img
@@ -183,7 +183,7 @@ export default function Users() {
                       setActiveChat(true);
                       getConversationId(element.user._id);
                     }}
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
                     
                     <div className="">
@@ -241,5 +241,5 @@ export default function Users() {
       {activePage === 3 && <Settings></Settings>}
       {activePage === 4 && <GroupInfo></GroupInfo>}
     </>
-  );
+  
 }
