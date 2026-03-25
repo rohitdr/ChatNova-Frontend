@@ -47,6 +47,7 @@ export default function Chatting() {
     isInitailLoadRef,
     capitalizeFirstLetter,
     conversationId,
+  
     activeGroupChat,
    
         currentGroup,
@@ -60,17 +61,6 @@ export default function Chatting() {
   const { socket, onlineUsers } = socketcontext;
   const virtuosoRef=useRef(null)
 
-
-
-//   useEffect(()=>{
-//     return ()=>{
-//       if(conversationId?.current){
-//  hasMoreRef.current = true
-//   loadingRef.current = false
-//  isInitailLoadRef.current = true
-//       }
-//  }
-// },[conversationId])
  useEffect(()=>{
 
 if(currentUsersMessages.length && isInitailLoadRef.current)
@@ -88,14 +78,14 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
  
   useEffect(() => {
     if (!socket) return;
-
+  
     const handleNewMessage = (newMessage) => {
-   console.log(conversationId.current)
-   console.log(newMessage._doc.conversationId)
+
      
-      if ( (activeGroupChat && newMessage._doc.conversationId === conversationId.current) ||
-          (!activeGroupChat && newMessage._doc.conversationId === conversationId.current?._id)
+      if ( (activeGroupChat && newMessage._doc.conversationId === conversationId) ||
+          (!activeGroupChat && newMessage._doc.conversationId === conversationId)
       ) {
+        console.log("running")
      
        /// setting current user chat 
       setCurrentUsersMessages((prev) => {
@@ -169,7 +159,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
     return () => {
       socket.off("newMessage", handleNewMessage);
     };
-  }, [socket]);
+  }, [conversationId]);
 
   useEffect(() => {
     const handleBack = () => {
@@ -240,7 +230,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
                      
                     }
                   
-                 activeGroupChat? sendMessages({conversationId:conversationId.current, message:sendingMessage,tempId:tempmessage._id})
+                 activeGroupChat? sendMessages({conversationId:conversationId, message:sendingMessage,tempId:tempmessage._id})
                    : sendMessages({receiverId:currentChatUserId, message:sendingMessage,tempId:tempmessage._id});
                     setCurrentUsersMessages(prev=>[...prev,tempmessage])
                   
@@ -278,9 +268,9 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
                 }
                 const virtusoStartReached=(atTop)=>{
                   if (!atTop) return; 
-                  if(conversationId?.current?._id){
-                   
-                    loadMoreMessages(conversationId.current?._id ,page)
+                  if(conversationId){
+                    console.log(conversationId)
+                    loadMoreMessages(conversationId,page)
                   }
                 }
                 const handleUploadImage=() => {
@@ -325,7 +315,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
       return [updateduserlit , ...filtereduser]
      }
      )
-                    uploadCloudinary(conversationId.current._id, uploadedImage,tempmessage._id);
+                    uploadCloudinary(conversationId, uploadedImage,tempmessage._id);
                     setMediaSendModal(false);
                   }
                 const handleUploadVideo=() => {
@@ -370,7 +360,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
       return [updateduserlit , ...filtereduser]
      }
      )
-                    uploadCloudinary(conversationId.current._id, uploadVideo,tempmessage._id);
+                    uploadCloudinary(conversationId, uploadVideo,tempmessage._id);
                     setMediaSendModal(false);
                   }
   return isServer === 500 ? (

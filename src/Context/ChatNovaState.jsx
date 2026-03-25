@@ -14,7 +14,8 @@ export default function ChatNovaState(props) {
   const [currentChatUser, setCurrentChatUser] = useState(null);
   const [currentUsersMessages, setCurrentUsersMessages] = useState([]);
   const [activeChat, setActiveChat] = useState(false);
-  const conversationId = useRef(null);
+const [conversationId,setConversationId]=useState(null)
+
   const [allGroups,setAllgroups]=useState(null)
   const [databaseGruops,setDatabaseGroups]=useState(null)
   const [page,setpage]=useState(2)
@@ -39,7 +40,14 @@ const isInitailLoadRef = useRef(true)
       setCurrentUsersMessages([])
       const res = await api.get(`/messages/conversationId/${id}`);
       if (res.status === 200) {
-        conversationId.current = res.data.conversation;
+          if(!socket) return
+    if(conversationId) {
+      socket.emit("leave_group",res.data.conversation._id)
+    }
+     
+     socket.emit("join_group",res.data.conversation._id)
+ 
+             setConversationId(res.data.conversation._id)
           getmessages(res.data.conversation._id);
       }
     } catch (error) {
@@ -303,21 +311,23 @@ const isInitailLoadRef = useRef(true)
         loadMoreMessages,
         serchGroup,
         allGroups,
-        getConversationId,
+   
         conversationId,
-        setActiveGroupChat,
+    
         activeChat,
         setActiveChat,
         uploadCloudinary,
         capitalizeFirstLetter,
         serchUser,
         sendMessages,
+        setConversationId,
         dataBaseUsers,
         currentUsersMessages,
         setCurrentUsersMessages,
         getmessages,
       isInitailLoadRef,
       setHasMore,
+      getConversationId,
       setpage,
         getCureentChattingUser,
         setDataBaseUsers,

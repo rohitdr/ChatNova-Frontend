@@ -20,7 +20,7 @@ export default function Users() {
   const {
     serchUser,
     dataBaseUsers,
-    getConversationId,
+ getConversationId,
     currentUsersMessages,
     setChattedUsersList,
     setActiveChat,
@@ -36,13 +36,18 @@ export default function Users() {
     currentChatUserId,
     setCurrentChatUserId,
     capitalizeFirstLetter,
-    setActiveGroupChat
+    setActiveGroupChat,
+    conversationId,
+    setConversationId,
+    getmessages
   } = context;
+ 
+
   const [searchClick, setSearchClick] = useState(true);
   const authContext = useContext(AuthContext);
   const { activePage, isServer } = authContext;
   const socketcontext = useContext(SocketContext);
-  const { onlineUsers } = socketcontext;
+  const { onlineUsers,socket } = socketcontext;
   const [unseenMessages,setUnseenMessages]=useState(0)
 
   useEffect(() => {
@@ -64,6 +69,42 @@ export default function Users() {
       serchUser(value);
     }
   };
+  const handleUserClick=(element)=>{
+     if(!socket) return
+    if(conversationId) {
+      socket.emit("leave_group",conversationId)
+    }
+     
+     socket.emit("join_group",element.ConversationId)
+   setConversationId(element.ConversationId)
+   getmessages(element.ConversationId)
+     isInitailLoadRef.current=true
+                       setActiveGroupChat(false)
+                      setCurrentUsersMessages([]),
+                   setHasMore(true),
+                     setpage(2),
+                      setCurrentChatUserId(element.user._id);
+                      
+                      getCureentChattingUser(element.user._id);
+                    
+                      setActiveChat(true);
+                 
+  }
+  const handleDatabaseUserClick=(element)=>{
+   
+  getConversationId(element._id)
+     isInitailLoadRef.current=true
+                       setActiveGroupChat(false)
+                      setCurrentUsersMessages([]),
+                   setHasMore(true),
+                     setpage(2),
+                      setCurrentChatUserId(element._id);
+                      
+                      getCureentChattingUser(element._id);
+                    setSearchClick(true)
+                      setActiveChat(true);
+                 
+  }
   
   return isServer === 500 ? (
     <NoServer></NoServer>
@@ -131,16 +172,7 @@ export default function Users() {
                 return (
                   <div
                   key={element._id}
-                    onClick={() => {
-                      setActiveGroupChat(false)
-                          setCurrentUsersMessages([]),
-                           setHasMore(true),
-                             setpage(2),
-                      setCurrentChatUserId(element._id);
-                      getCureentChattingUser(element._id);
-                      setActiveChat(true);
-                      getConversationId(element._id);
-                    }}
+                    onClick={() => {handleDatabaseUserClick(element)}}
                     className="flex shadow cursor-pointer bg-white rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
                   >
                     <div className="pt-2">
@@ -168,20 +200,13 @@ export default function Users() {
               chattedUsersList.map((element) => {
              
                 return (
+                  
                   <div
                   key={element.user._id}
                     onClick={() => {
-                      isInitailLoadRef.current=true
-                       setActiveGroupChat(false)
-                      setCurrentUsersMessages([]),
-      setHasMore(true),
-      setpage(2),
-                      setCurrentChatUserId(element.user._id);
                       
-                      getCureentChattingUser(element.user._id);
-                    
-                      setActiveChat(true);
-                      getConversationId(element.user._id);
+                      handleUserClick(element)
+                     
                     }}
                     className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                   >
