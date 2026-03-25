@@ -13,16 +13,13 @@ export default function GroupInfo() {
   const authContext = useContext(AuthContext);
   const { user, isServer } = authContext;
   const context = useContext(ChatNovaContext)
-  const {currentGroup} = context
+  const {currentGroup,capitalizeFirstLetter} = context
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
     <div className="flex h-full flex-col bg-[#F5F7FB] overflow-y-auto scrollbar-hide">
-      <div className="flex justify-between m-2 p-2 mt-4">
-        <div>
-          {" "}
-          <h2 className="text-2xl pt-2 font-medium">My Profile</h2>{" "}
-        </div>
+      <div className="flex justify-end m-2 p-2 mt-4">
+      
         <div className="pt-2">
           {" "}
           <EllipsisVerticalIcon className="w-7 h-7 text-gray-700 cursor-pointer" />
@@ -36,7 +33,7 @@ export default function GroupInfo() {
             alt=""
           />
         </div>
-        <p className="my-2 mb-1 font-medium">{currentGroup?.name}</p>
+        <p className="my-2 mb-1 font-medium">{capitalizeFirstLetter(currentGroup?.name)}</p>
         <p>Active</p>
       </div>
       <div className="my-3 py-3 mx-3 px-2 text-sm text-[#8E949D]">

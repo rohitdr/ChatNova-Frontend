@@ -228,7 +228,7 @@ export default function Users() {
                   </div>
                 );
               }):
-              <div className="flex h-screen justify-center items-center">
+              searchClick && <div className="flex h-screen justify-center items-center">
                 <div className="text-center flex flex-col"> <div className="flex justify-center"> <MagnifyingGlassCircleIcon className="h-12 w-12 text-gray-600"></MagnifyingGlassCircleIcon></div><div>Search User to chat With...</div> </div>
               </div>
               

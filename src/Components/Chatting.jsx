@@ -84,9 +84,11 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
 }
  },[currentUsersMessages])
 
+
+ 
   useEffect(() => {
     if (!socket) return;
- console.log("yues")
+
     const handleNewMessage = (newMessage) => {
    console.log(conversationId.current)
    console.log(newMessage._doc.conversationId)
@@ -377,7 +379,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
     <>
      {(currentChatUserId ||activeGroupChat) ? <div className={`h-screen bg-white`}>
         <div className="flex h-full flex-col justify-between">
-          <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:pt-3 border justify-between">
+          <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
             <div className="flex items-center justify-between">
               <ArrowLeftIcon
                 className="w-6 h-6 text-gray-700 lg:hidden"
@@ -391,13 +393,13 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
                 alt=""
               />
               <div className="flex flex-col items-center cursor-pointer" onClick={()=>{ if(activeGroupChat){setActivePage(4)}}}>
-                <h2 className="mx-2 lg:mx-4 pt-2 font-medium text-xs lg:text-xl">
+                <h2 className="mx-2 lg:mx-4 pt-2 font-medium text-md lg:text-xl">
                   {capitalizeFirstLetter(activeGroupChat?currentGroup?.name:currentChatUser?.name)}
                 </h2>
                 {(onlineUsers?.includes(currentChatUser?._id) ? (
                   <p className={`text-xs h-4 ${activeGroupChat?"invisible":""} `}>online</p>
                 ) : (
-                  <p className={`text-xs h-4 ${activeGroupChat?"invisible":""} `}>{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
+                  <p className={`text-2xs lg:text-xs h-4 ${activeGroupChat?"invisible":""} `}>{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
                 ))}
               </div>
             </div>
@@ -443,7 +445,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
            
           </div>
 
-          <div className="shrink-0 flex xs:p-2 md:p-7 justify-between bg-white border">
+          <div className="shrink-0 flex xs:p-2 md:p-4 justify-between bg-white border">
             <div className="w-full ">
               <input
                 type="text"
@@ -510,7 +512,7 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
                 className="p-2.5  bg-[#6159CB] rounded-full"
                 onClick={handleSendMessage}
               >
-                <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 rotate-90 sm:h-6 text-white cursor-pointer" />
+                <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 -rotate-90 sm:h-6 text-white cursor-pointer" />
               </div>
             </div>
           </div>

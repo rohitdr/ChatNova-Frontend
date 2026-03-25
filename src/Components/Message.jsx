@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import NoServer from "./NoServer";
@@ -14,13 +14,42 @@ export default function Message(props) {
   const context = useContext(ChatNovaContext);
   const { currentChatUser } = context;
   const [mediaView,setMediaView]=useState(false)
+  const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
+ const [display,setDisplay]=useState("hidden")
+ const reactionRef = useRef(null)
+ const ignoreClick = useRef(false);
+ const socket = 
+ useEffect(()=>{
+   const handleOutsideClick =(e)=>{
+    if(ignoreClick.current){
+      ignoreClick.current =false
+      return
+    }
+     if(reactionRef.current && !reactionRef.current.contains(e.target)){
+      setDisplay("hidden")
+     }
+   }
+   document.addEventListener("click",handleOutsideClick)
+   return ()=>{
+    document.removeEventListener("click",handleOutsideClick)
+   }
+ },[])
+ const presstimer = useRef(null)
+const handleReactionClick=(e)=>{
+      
+         
+
+}
+  
 
 
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
-   <> <div
-      className={` w-full flex ${send ? "flex-row-reverse" : ""}  `}
+   <> <div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}
+   onPointerLeave={()=>{clearTimeout(presstimer.current)}} 
+   onPointerUp={()=>{clearTimeout(presstimer.current)}} 
+      className={` w-full flex ${send ? "flex-row-reverse" : ""}  relative `}
     >
       <div className=" flex flex-col justify-end max-w-[15%] ">
        
@@ -30,20 +59,20 @@ export default function Message(props) {
           alt=""
         />
       </div>
-      <div className="flex max-w-[85%] flex-col mb-2 ">
+      <div className="flex max-w-[85%] flex-col mb-2 relative ">
         <div
           className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-3 ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
         >
           <div className="">
           {message.type === "text" && message.text}
-          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img src={message.media.url} onClick={()=>{setMediaView(true)}} alt="" />}
+          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img src={message.media.url} className="" onClick={()=>{setMediaView(true)}} alt="" />}
           {message.type === "video" && (
-            <video width="300"  autoplay muted loop controls>
+            <video width="300" className="" autoplay muted loop controls>
               <source src={message.media.url} type="video/mp4" />
             </video>
           )}</div>
          <div
-          className={`flex text-2xs  ${send ? "justify-end" : "justify-start"}`}
+          className={`flex text-2xs pt-0.5  ${send ? "justify-end" : "justify-start"}`}
         >
           <div>
             {new Date(message.createdAt).toLocaleTimeString([], {
@@ -51,16 +80,31 @@ export default function Message(props) {
               minute: "2-digit",
             })}
           </div>
+          
         </div>
+      
+        
+     
+        
+    
+   
         </div>{" "}
-       
+        <div ref={reactionRef} className={`bg-white absolute rounded-3xl shadow-2xl -top-5 ${send?"right-28":""}  p-2 ${display}`}>
+          { reactions.map((r)=>{
+             return <span className=" cursor-pointer text-3xl " onClick={handleReactionClick}>{r}</span>
+          })
+            
+          }</div>
       </div>
+    
+     {message.reaction &&  <div  className={` absolute rounded-3xl shadow-2xl bottom-0  ${send?"right-9":"left-9"}  `}>
+          {message.reaction?.emoji}</div>}
     </div>
    
    
       {mediaView && (
         <div
-          className="fixed inset-0 bg-black/20 flex items-center justify-center "
+          className="fixed inset-0 bg-black/20 flex items-center justify-center"
           onClick={() => {
             setMediaView(false);
           }}

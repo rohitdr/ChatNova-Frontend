@@ -1,7 +1,7 @@
 import React, { useContext,useEffect,useState } from "react";
 import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
-import { MagnifyingGlassIcon,MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon,MagnifyingGlassCircleIcon,EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import ChatNovaContext from "../Context/ChatNovaContext";
 
 
@@ -36,7 +36,14 @@ const {chattedUsersList,capitalizeFirstLetter,getAllGroups,allGroups,setActiveCh
     <> 
      
         <div className="h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col">
-          <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Groups</div>
+          <div className="flex justify-between">
+            <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Groups</div>
+       <div className="pt-2">
+          {" "}
+          <EllipsisVerticalIcon className="w-7 h-7 text-gray-700 cursor-pointer" />
+        </div>
+          </div>
+          
           <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 bg-[#E6EBF5]">
             <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
             <input
