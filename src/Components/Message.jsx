@@ -6,19 +6,21 @@ import {
 
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-
+import SocketContext from "../Context/SocketContext";
+import { CheckIcon } from "@heroicons/react/24/outline";
 export default function Message(props) {
   const { message, send } = props;
   const authContext = useContext(AuthContext);
   const { user, isServer } = authContext;
   const context = useContext(ChatNovaContext);
-  const { currentChatUser } = context;
+  const { currentChatUser,currentChatUserId,conversationId ,setCurrentUsersMessages} = context;
   const [mediaView,setMediaView]=useState(false)
   const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
  const [display,setDisplay]=useState("hidden")
  const reactionRef = useRef(null)
  const ignoreClick = useRef(false);
- const socket = 
+ const socketcontext  =useContext(SocketContext) 
+ const {socket}=socketcontext
  useEffect(()=>{
    const handleOutsideClick =(e)=>{
     if(ignoreClick.current){
@@ -36,10 +38,72 @@ export default function Message(props) {
  },[])
  const presstimer = useRef(null)
 const handleReactionClick=(e)=>{
-      
+      if(!socket) return
+   setCurrentUsersMessages((prev)=>
+         prev.map(msg=>{
+          let updatedReaction;
+          if(msg._id!==message._id) {return msg}
+          const reaction = message.reaction || []
+          const existing = reaction.filter((r)=>{
+           r.user === user._id
+          }
+       )
+        if(existing){
+          if(existing.emoji === e.target.innerHTML){
+           updatedReaction = reaction.filter((r)=>
+            r.user !==user._id
+          )
+          
+          }
+          else{
+             updatedReaction = reaction.map((r)=>
+             r.user ===user._id?{...r,emoji:e.target.value}:r
+            )
+          }
          
+            
+          }else{
+            updatedReaction =[...reaction,{user:user_id , emoji:e.target.innerHTML}]
+          }
+          return {
+            ...msg,
+            reaction:updatedReaction
+          }
+      
+
+ } )
+   )
+    
+      socket.emit("send_reaction",{
+        messageId:message._id,
+        conversationId:conversationId,
+        emoji:e.target.innerHTML,
+        userId:user._id
+
+      })
+     
+         setDisplay("hidden")
 
 }
+
+const messageStatus = (message,id)=>{
+ 
+const delivered = message.deliveredTo?.some((d)=>
+ d.user.toString()=== id
+
+)
+const seen = message.seenBy?.some((d)=>
+ d.user.toString()=== id
+
+)
+if(!delivered) return "sent"
+if(!seen) return "delivered"
+return "seen"
+
+
+}
+let status = messageStatus(message,currentChatUserId)
+
   
 
 
@@ -59,7 +123,7 @@ const handleReactionClick=(e)=>{
           alt=""
         />
       </div>
-      <div className="flex max-w-[85%] flex-col mb-2 relative ">
+      <div className="flex max-w-[85%] flex-col mb-2 relative  ">
         <div
           className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-3 ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
         >
@@ -80,6 +144,15 @@ const handleReactionClick=(e)=>{
               minute: "2-digit",
             })}
           </div>
+         <span>
+         {send && <span className="flex">
+           {status==="sent" && <CheckIcon className="h-3 w-3  text-[rgba(255,255,255,0.6)]"></CheckIcon>}
+           {status ==="delivered" && <> <CheckIcon className="h-3 w-3  text-[#ffffff]"></CheckIcon><CheckIcon className="h-3 w-3 text-[#ffffff]"></CheckIcon></>}
+            {status ==="seen" && <><CheckIcon className="h-3 w-3  text-[#53bdeb]"></CheckIcon><CheckIcon className="h-3 w-3 text-[#53bdeb]"></CheckIcon></>}
+            
+            </span>}
+         
+         </span>
           
         </div>
       
@@ -91,14 +164,16 @@ const handleReactionClick=(e)=>{
         </div>{" "}
         <div ref={reactionRef} className={`bg-white absolute rounded-3xl shadow-2xl -top-5 ${send?"right-28":""}  p-2 ${display}`}>
           { reactions.map((r)=>{
-             return <span className=" cursor-pointer text-3xl " onClick={handleReactionClick}>{r}</span>
+             return <span className=" cursor-pointer text-3xl " key={r} onClick={handleReactionClick}>{r}</span>
           })
             
           }</div>
       </div>
     
      {message.reaction &&  <div  className={` absolute rounded-3xl shadow-2xl bottom-0  ${send?"right-9":"left-9"}  `}>
-          {message.reaction?.emoji}</div>}
+          {message.reaction.map(element => {
+             return <span key={element.user}>{element.emoji}</span> 
+          })}</div>}
     </div>
    
    

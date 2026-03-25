@@ -6,11 +6,14 @@
   scrollbar-width: none;  /* Firefox */
 }
 body{
-  font-family: inter;
+  font-family: 'inter', sans-serif;
 }
 .text-2xs{
   font-size: 10px;
   line-height: 0.75rem;
+}
+h1,h2{
+  font-family: 'Poppins', sans-serif;
 }
 
 @keyframes slideIn {

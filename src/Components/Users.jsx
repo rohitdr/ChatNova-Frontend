@@ -45,7 +45,7 @@ export default function Users() {
 
   const [searchClick, setSearchClick] = useState(true);
   const authContext = useContext(AuthContext);
-  const { activePage, isServer } = authContext;
+  const { activePage, isServer,user } = authContext;
   const socketcontext = useContext(SocketContext);
   const { onlineUsers,socket } = socketcontext;
   const [unseenMessages,setUnseenMessages]=useState(0)
@@ -76,6 +76,7 @@ export default function Users() {
     }
      
      socket.emit("join_group",element.ConversationId)
+     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
    setConversationId(element.ConversationId)
    getmessages(element.ConversationId)
      isInitailLoadRef.current=true

@@ -22,18 +22,17 @@ import EmptyChat from "./EmptyChat";
 import { Virtuoso } from "react-virtuoso";
 export default function Chatting() {
   const [sendingMessage, setSendingMessage] = useState(null);
- 
+
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadVideo, setUploadedVideo] = useState(null);
-  const [uploadFile,setUplaodFile]=useState(null)
+  const [uploadFile, setUplaodFile] = useState(null);
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer,showAlert,setActivePage } = authContext;
-  const [fileType,setFileType]=useState(null)
- 
+  const { user, isServer, showAlert, setActivePage } = authContext;
+  const [fileType, setFileType] = useState(null);
+
   const [mediaSendModal, setMediaSendModal] = useState(false);
   const {
-
     currentChatUser,
     setActiveChat,
     uploadCloudinary,
@@ -47,111 +46,160 @@ export default function Chatting() {
     isInitailLoadRef,
     capitalizeFirstLetter,
     conversationId,
-  
+
     activeGroupChat,
-   
-        currentGroup,
+
+    currentGroup,
     activeChat,
     page,
     hasMoreRef,
     loadingRef,
-    loadMoreMessages
+    loadMoreMessages,
   } = Context;
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
-  const virtuosoRef=useRef(null)
-
- useEffect(()=>{
-
-if(currentUsersMessages.length && isInitailLoadRef.current)
-{
-  virtuosoRef.current.scrollToIndex({
-       index:currentUsersMessages.length-1,
-       behavior:"auto"
-  })
-  isInitailLoadRef.current=false
- 
-}
- },[currentUsersMessages])
-
-
- 
+  const virtuosoRef = useRef(null);
   useEffect(() => {
     if (!socket) return;
-  
-    const handleNewMessage = (newMessage) => {
+    const handler = ({ messageId, reaction }) => {
+      console.log("handler");
+      setCurrentUsersMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId ? { ...msg, reaction: reaction } : msg,
+        ),
+      );
+    };
+    socket.on("reaction_updated", handler);
 
-     
-      if ( (activeGroupChat && newMessage._doc.conversationId === conversationId) ||
-          (!activeGroupChat && newMessage._doc.conversationId === conversationId)
-      ) {
-        console.log("running")
-     
-       /// setting current user chat 
-      setCurrentUsersMessages((prev) => {
-      
-        if (!prev) return [newMessage._doc];
-  
-        const exists = prev.some((msg) => msg._id === newMessage.tempId);
-        if (exists) {
-       
-         return prev.map(m=>
-          m._id === newMessage.tempId ?newMessage._doc:m
-         )
-        };
-    
-        const audio = new Audio("/universfield-happy-message-ping-351298.mp3");
-        audio.play().catch((err) => console.log("Audio play error:", err));
+    return () => {
+      socket.off("reaction_updated", handler);
+    };
+  }, [socket]);
+  useEffect(()=>{
+ if(!socket) return
+const deliverHandler =({messageId,deliveredTo})=>{
+  setCurrentUsersMessages((prev)=>
+  prev.map((msg)=>
+    msg._id === messageId ?{...msg,deliveredTo:deliveredTo}:msg
+  )
+  )
 
- 
-        return [...prev, newMessage._doc];
+}
+
+
+
+
+
+socket.on("message_deliverd",deliverHandler)
+
+
+ return ()=>{
+socket.off("message_deliverd",deliverHandler)
+ }
+  },[socket])
+  useEffect(()=>{
+ if(!socket) return
+const seenHandler =({messageId,seenBy})=>{
+  setCurrentUsersMessages((prev)=>
+  prev.map((msg)=>
+    msg._id === messageId ?{...msg,seenBy:seenBy}:msg
+  )
+  )
+
+}
+
+
+
+
+
+socket.on("message_seen",seenHandler)
+
+
+ return ()=>{
+socket.off("message_seen",seenHandler)
+ }
+  },[socket])
+
+  useEffect(() => {
+    if (currentUsersMessages.length && isInitailLoadRef.current) {
+      virtuosoRef.current.scrollToIndex({
+        index: currentUsersMessages.length - 1,
+        behavior: "auto",
       });
-       
+      isInitailLoadRef.current = false;
+    }
+  }, [currentUsersMessages]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (newMessage) => {
+      if (
+        (activeGroupChat &&
+          newMessage._doc.conversationId === conversationId) ||
+        (!activeGroupChat && newMessage._doc.conversationId === conversationId)
+      ) {
+        console.log("running");
+          socket.emit("mark_seen",{conversationId:conversationId,userId:user._id})
+
+        /// setting current user chat
+        setCurrentUsersMessages((prev) => {
+          if (!prev) return [newMessage._doc];
+
+          const exists = prev.some((msg) => msg._id === newMessage.tempId);
+          if (exists) {
+            return prev.map((m) =>
+              m._id === newMessage.tempId ? newMessage._doc : m,
+            );
+          }
+
+          const audio = new Audio(
+            "/universfield-happy-message-ping-351298.mp3",
+          );
+          audio.play().catch((err) => console.log("Audio play error:", err));
+
+          return [...prev, newMessage._doc];
+        });
       }
-      
-      //setting current user list 
-   setChattedUsersList (  prev=>
-     {
 
-       const index = prev.findIndex(
-         c=>c.ConversationId === newMessage._doc.conversationId
-       )
-       console.log(index)
-       const lastMessage = {
-       text:newMessage._doc.text,
-       createdAt:newMessage._doc.createdAt
-
-       }
-       if (index === -1)
-        { 
-           const newuser = newMessage.conversationToSend.participents.find(
-            p=> p.user._id !== user._id
-            )
-            console.log({
-            ConversationId:newMessage.conversationToSend.ConversationId,
-            lastMessage:newMessage.conversationToSend.lastMessage,
-            user:newuser
-            
-           })
-           return [{
-            ConversationId:newMessage.conversationToSend.ConversationId,
-            lastMessage:newMessage.conversationToSend.lastMessage,
-            user:newuser.user
-            
-           },...prev]
-
+      //setting current user list
+      setChattedUsersList((prev) => {
+        const index = prev.findIndex(
+          (c) => c.ConversationId === newMessage._doc.conversationId,
+        );
+        console.log(index);
+        const lastMessage = {
+          text: newMessage._doc.text,
+          createdAt: newMessage._doc.createdAt,
+        };
+        if (index === -1) {
+          const newuser = newMessage.conversationToSend.participents.find(
+            (p) => p.user._id !== user._id,
+          );
+          console.log({
+            ConversationId: newMessage.conversationToSend.ConversationId,
+            lastMessage: newMessage.conversationToSend.lastMessage,
+            user: newuser,
+          });
+          return [
+            {
+              ConversationId: newMessage.conversationToSend.ConversationId,
+              lastMessage: newMessage.conversationToSend.lastMessage,
+              user: newuser.user,
+            },
+            ...prev,
+          ];
         }
-       const updateduserlist = {
-        ...prev[index],
-        lastMessage,
-      }
-      const filtereduser = prev.filter(c=>
-          c.ConversationId !== newMessage._doc.conversationId
-      )
-     
-      return [updateduserlist , ...filtereduser]
-     }
-     )
+        const updateduserlist = {
+          ...prev[index],
+          lastMessage,
+        };
+        const filtereduser = prev.filter(
+          (c) => c.ConversationId !== newMessage._doc.conversationId,
+        );
+
+        return [updateduserlist, ...filtereduser];
+      });
       // updatedUserList(currentChatUser)
     };
     socket.on("newMessage", handleNewMessage);
@@ -172,256 +220,270 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
   }, []);
 
   const imagechangehandler = (e) => {
-    if(e.target.files[0].size> 10000000){
-      showAlert("Error","Image size should be less than 10 mb")
-      e.target.value=null
+    if (e.target.files[0].size > 10000000) {
+      showAlert("Error", "Image size should be less than 10 mb");
+      e.target.value = null;
+    } else {
+      setMediaSendModal(true);
+      setUploadedImage(e.target.files[0]);
+      e.target.value = null;
     }
-    else{
-    setMediaSendModal(true);
-   setUploadedImage(e.target.files[0]);
-     e.target.value=null
-    }
- 
   };
   const videochangehandler = (e) => {
-     if(e.target.files[0].size> 10000000){
-      showAlert("Error","Video size should be less than 10 mb")
-        e.target.value=null
-    }
-    else{
-    setMediaSendModal(true);
-    setUploadedVideo(e.target.files[0]);
-      e.target.value=null
+    if (e.target.files[0].size > 10000000) {
+      showAlert("Error", "Video size should be less than 10 mb");
+      e.target.value = null;
+    } else {
+      setMediaSendModal(true);
+      setUploadedVideo(e.target.files[0]);
+      e.target.value = null;
     }
   };
-    const fileChangeHandler=(e)=>{
-       if(e.target.files[0].size> 10000000){
-      showAlert("Error","File size should be less than 10 mb")
+  const fileChangeHandler = (e) => {
+    if (e.target.files[0].size > 10000000) {
+      showAlert("Error", "File size should be less than 10 mb");
+    } else {
+      uploadCloudinary(currentChatUserId, e.target.files[0]);
     }
-    else{
-   
-    uploadCloudinary(currentChatUserId, e.target.files[0]);
-    }
-    }
-  const formatLastSeen =(time)=>{
-   const now = new Date();
-   const last = new Date(time)
-   let diff = Math.floor((now-last)/1000)
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `Active ${Math.floor(diff / 60)} min ago`;
-  if (diff < 86400) return ` Active ${Math.floor(diff / 3600)} hr ago`;
+  };
+  const formatLastSeen = (time) => {
+    const now = new Date();
+    const last = new Date(time);
+    let diff = Math.floor((now - last) / 1000);
+    if (diff < 60) return "just now";
+    if (diff < 3600) return `Active ${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return ` Active ${Math.floor(diff / 3600)} hr ago`;
 
-  return last.toLocaleDateString();
-  }
-  const handleSendMessage =() => {
-                  if (sendingMessage !== "") {
-                    
-                    const tempmessage = {
-                     _id:Date.now(),
-                     type:"text",
-                     text:sendingMessage,
-                     createdAt:Date.now(),
-                     senderId:{
-                      _id:user._id,
-                      image:{
-                        url:user.image?.url
-                      }
-                     }
-                     
-                    }
-                  
-                 activeGroupChat? sendMessages({conversationId:conversationId, message:sendingMessage,tempId:tempmessage._id})
-                   : sendMessages({receiverId:currentChatUserId, message:sendingMessage,tempId:tempmessage._id});
-                    setCurrentUsersMessages(prev=>[...prev,tempmessage])
-                  
-                    setSendingMessage("");
-                     setChattedUsersList(prev=>
-     {
-       const index = prev.findIndex(
-         c=>c.user._id === currentChatUserId
-       )
-     
-       const lastMessage = {
-       text:tempmessage.text,
-       createdAt:tempmessage.createdAt
+    return last.toLocaleDateString();
+  };
+  const handleSendMessage = () => {
+    if (sendingMessage !== "") {
+      const tempmessage = {
+        _id: Date.now(),
+        type: "text",
+        text: sendingMessage,
+        createdAt: Date.now(),
+        senderId: {
+          _id: user._id,
+          image: {
+            url: user.image?.url,
+          },
+        },
+      };
 
-       }
-       if(index === -1) return prev
-       const updateduserlit = {
+      activeGroupChat
+        ? sendMessages({
+            conversationId: conversationId,
+            message: sendingMessage,
+            tempId: tempmessage._id,
+          })
+        : sendMessages({
+            receiverId: currentChatUserId,
+            message: sendingMessage,
+            tempId: tempmessage._id,
+          });
+      setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+
+      setSendingMessage("");
+      setChattedUsersList((prev) => {
+        const index = prev.findIndex((c) => c.user._id === currentChatUserId);
+
+        const lastMessage = {
+          text: tempmessage.text,
+          createdAt: tempmessage.createdAt,
+        };
+        if (index === -1) return prev;
+        const updateduserlit = {
+          ...prev[index],
+          lastMessage,
+        };
+        const filtereduser = prev.filter(
+          (c) => c.user._id !== currentChatUserId,
+        );
+        console.log([updateduserlit, ...filtereduser]);
+        return [updateduserlit, ...filtereduser];
+      });
+    }
+    setTimeout(() => {
+      virtuosoRef.current.scrollToIndex({
+        index: currentUsersMessages.length - 1,
+        behavior: "auto",
+      });
+    }, 0);
+  };
+  const virtusoStartReached = (atTop) => {
+    if (!atTop) return;
+    if (conversationId) {
+      console.log(conversationId);
+      loadMoreMessages(conversationId, page);
+    }
+  };
+  const handleUploadImage = () => {
+    const tempmessage = {
+      _id: Date.now(),
+      type: "image",
+      text: "New Photo",
+      createdAt: Date.now(),
+      senderId: {
+        _id: user._id,
+        image: {
+          url: user.image?.url,
+        },
+      },
+      media: {
+        url: URL.createObjectURL(uploadedImage),
+      },
+    };
+    setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+    setChattedUsersList((prev) => {
+      const index = prev.findIndex((c) => c.user._id === currentChatUserId);
+
+      const lastMessage = {
+        text: tempmessage.text,
+        createdAt: tempmessage.createdAt,
+      };
+      if (index === -1) return prev;
+      const updateduserlit = {
         ...prev[index],
         lastMessage,
-      }
-      const filtereduser = prev.filter(c=>
-        c.user._id !== currentChatUserId
-      )
-      console.log([updateduserlit, ...filtereduser])
-      return [updateduserlit , ...filtereduser]
-     }
-     )
-                  }
-                    setTimeout(() => {
-    virtuosoRef.current.scrollToIndex({
-      index: currentUsersMessages.length - 1,
-      behavior: "auto"
+      };
+      const filtereduser = prev.filter((c) => c.user._id !== currentChatUserId);
+      console.log([updateduserlit, ...filtereduser]);
+      return [updateduserlit, ...filtereduser];
     });
-  }, 0);
-                }
-                const virtusoStartReached=(atTop)=>{
-                  if (!atTop) return; 
-                  if(conversationId){
-                    console.log(conversationId)
-                    loadMoreMessages(conversationId,page)
-                  }
-                }
-                const handleUploadImage=() => {
-                   const tempmessage = {
-                     _id:Date.now(),
-                     type:"image",
-                     text:"New Photo",
-                     createdAt:Date.now(),
-                     senderId:{
-                      _id:user._id,
-                      image:{
-                        url:user.image?.url
-                      }
-                     },
-                     media:{
-                      url:URL.createObjectURL(uploadedImage)
-                     }
+    uploadCloudinary(conversationId, uploadedImage, tempmessage._id);
+    setMediaSendModal(false);
+  };
+  const handleUploadVideo = () => {
+    const tempmessage = {
+      _id: Date.now(),
+      type: "video",
+      text: "New Video",
+      createdAt: Date.now(),
+      senderId: {
+        _id: user._id,
+        image: {
+          url: user.image?.url,
+        },
+      },
+      media: {
+        url: URL.createObjectURL(uploadVideo),
+      },
+    };
+    setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+    setChattedUsersList((prev) => {
+      const index = prev.findIndex((c) => c.user._id === currentChatUserId);
 
-                     
-                    }
-                     setCurrentUsersMessages(prev=>[...prev,tempmessage])
-                              setChattedUsersList(prev=>
-     {
-       const index = prev.findIndex(
-         c=>c.user._id === currentChatUserId
-       )
-     
-       const lastMessage = {
-       text:tempmessage.text,
-       createdAt:tempmessage.createdAt
-
-       }
-       if(index === -1) return prev
-       const updateduserlit = {
+      const lastMessage = {
+        text: tempmessage.text,
+        createdAt: tempmessage.createdAt,
+      };
+      if (index === -1) return prev;
+      const updateduserlit = {
         ...prev[index],
         lastMessage,
-      }
-      const filtereduser = prev.filter(c=>
-        c.user._id !== currentChatUserId
-      )
-      console.log([updateduserlit, ...filtereduser])
-      return [updateduserlit , ...filtereduser]
-     }
-     )
-                    uploadCloudinary(conversationId, uploadedImage,tempmessage._id);
-                    setMediaSendModal(false);
-                  }
-                const handleUploadVideo=() => {
-                   const tempmessage = {
-                     _id:Date.now(),
-                     type:"video",
-                     text:"New Video",
-                     createdAt:Date.now(),
-                     senderId:{
-                      _id:user._id,
-                      image:{
-                        url:user.image?.url
-                      }
-                     },
-                     media:{
-                      url:URL.createObjectURL(uploadVideo)
-                     }
-
-                     
-                    }
-                     setCurrentUsersMessages(prev=>[...prev,tempmessage])
-                              setChattedUsersList(prev=>
-     {
-       const index = prev.findIndex(
-         c=>c.user._id === currentChatUserId
-       )
-     
-       const lastMessage = {
-       text:tempmessage.text,
-       createdAt:tempmessage.createdAt
-
-       }
-       if(index === -1) return prev
-       const updateduserlit = {
-        ...prev[index],
-        lastMessage,
-      }
-      const filtereduser = prev.filter(c=>
-        c.user._id !== currentChatUserId
-      )
-      console.log([updateduserlit, ...filtereduser])
-      return [updateduserlit , ...filtereduser]
-     }
-     )
-                    uploadCloudinary(conversationId, uploadVideo,tempmessage._id);
-                    setMediaSendModal(false);
-                  }
+      };
+      const filtereduser = prev.filter((c) => c.user._id !== currentChatUserId);
+      console.log([updateduserlit, ...filtereduser]);
+      return [updateduserlit, ...filtereduser];
+    });
+    uploadCloudinary(conversationId, uploadVideo, tempmessage._id);
+    setMediaSendModal(false);
+  };
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
     <>
-     {(currentChatUserId ||activeGroupChat) ? <div className={`h-screen bg-white`}>
-        <div className="flex h-full flex-col justify-between">
-          <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
-            <div className="flex items-center justify-between">
-              <ArrowLeftIcon
-                className="w-6 h-6 text-gray-700 lg:hidden"
-                onClick={() => {
-                  setActiveChat(false);
-                }}
-              />
-              <img
-                className="lg:h-14 lg:w-14 h-10 w-10 rounded-full border-white border-4"
-                src={activeGroupChat?currentGroup?.avtar?.url:currentChatUser?.image.url}
-                alt=""
-              />
-              <div className="flex flex-col items-center cursor-pointer" onClick={()=>{ if(activeGroupChat){setActivePage(4)}}}>
-                <h2 className="mx-2 lg:mx-4 pt-2 font-medium text-md lg:text-xl">
-                  {capitalizeFirstLetter(activeGroupChat?currentGroup?.name:currentChatUser?.name)}
-                </h2>
-                {(onlineUsers?.includes(currentChatUser?._id) ? (
-                  <p className={`text-xs h-4 ${activeGroupChat?"invisible":""} `}>online</p>
-                ) : (
-                  <p className={`text-2xs lg:text-xs h-4 ${activeGroupChat?"invisible":""} `}>{formatLastSeen(currentChatUser?.lastSeen?currentChatUser.lastSeen:"")}</p>
-                ))}
+      {currentChatUserId || activeGroupChat ? (
+        <div className={`h-screen bg-white`}>
+          <div className="flex h-full flex-col justify-between">
+            <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
+              <div className="flex items-center justify-between">
+                <ArrowLeftIcon
+                  className="w-6 h-6 text-gray-700 lg:hidden"
+                  onClick={() => {
+                    setActiveChat(false);
+                  }}
+                />
+                <img
+                  className="lg:h-14 lg:w-14 h-10 w-10 rounded-full border-white border-4"
+                  src={
+                    activeGroupChat
+                      ? currentGroup?.avtar?.url
+                      : currentChatUser?.image.url
+                  }
+                  alt=""
+                />
+                <div
+                  className="flex flex-col items-center cursor-pointer"
+                  onClick={() => {
+                    if (activeGroupChat) {
+                      setActivePage(4);
+                    }
+                  }}
+                >
+                  <h2 className="mx-2 lg:mx-4 pt-2 font-medium text-md lg:text-xl">
+                    {capitalizeFirstLetter(
+                      activeGroupChat
+                        ? currentGroup?.name
+                        : currentChatUser?.name,
+                    )}
+                  </h2>
+                  {onlineUsers?.includes(currentChatUser?._id) ? (
+                    <p
+                      className={`text-xs h-4 ${activeGroupChat ? "invisible" : ""} `}
+                    >
+                      online
+                    </p>
+                  ) : (
+                    <p
+                      className={`text-2xs lg:text-xs h-4 ${activeGroupChat ? "invisible" : ""} `}
+                    >
+                      {formatLastSeen(
+                        currentChatUser?.lastSeen
+                          ? currentChatUser.lastSeen
+                          : "",
+                      )}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex  items-center justify-between">
-              <div className="mx-2 sm:mx-4">
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-              </div>
-              <div className="mx-2 sm:mx-4">
-                <PhoneIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-              </div>
-              <div className="mx-2 sm:mx-4">
-                <VideoCameraIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-              </div>
+              <div className="flex  items-center justify-between">
+                <div className="mx-2 sm:mx-4">
+                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
+                </div>
+                <div className="mx-2 sm:mx-4">
+                  <PhoneIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
+                </div>
+                <div className="mx-2 sm:mx-4">
+                  <VideoCameraIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
+                </div>
 
-              <div className=" mx-2 sm:mx-4">
-                <EllipsisVerticalIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
+                <div className=" mx-2 sm:mx-4">
+                  <EllipsisVerticalIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
+                </div>
               </div>
             </div>
-          </div>
-          <div className=" px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ">
-   
-            <Virtuoso className="scrollbar-hide" alignToBottom  atTopStateChange={virtusoStartReached} computeItemKey={(index, message) => message._id} ref={virtuosoRef} style={{height:"100%" }} increaseViewportBy={300}   
-   data={currentUsersMessages}  followOutput="auto"
-            itemContent={(index,message)=>(
-                <Message
-                
+            <div className=" px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ">
+              <Virtuoso
+                className="scrollbar-hide"
+                alignToBottom
+                atTopStateChange={virtusoStartReached}
+                computeItemKey={(index, message) => message._id}
+                ref={virtuosoRef}
+                style={{ height: "100%" }}
+                increaseViewportBy={300}
+                data={currentUsersMessages}
+                followOutput="auto"
+                itemContent={(index, message) => (
+                  <Message
+                  
                     send={user._id === message.senderId._id}
                     message={message}
                   ></Message>
-  )}
-            />
-            {/* {currentUsersMessages &&
+                )}
+              />
+              {/* {currentUsersMessages &&
               currentUsersMessages.map((element) => {
                 return (
                   
@@ -432,82 +494,83 @@ if(currentUsersMessages.length && isInitailLoadRef.current)
                   ></Message>
                 );
               })} */}
-           
-          </div>
-
-          <div className="shrink-0 flex xs:p-2 md:p-4 justify-between bg-white border">
-            <div className="w-full ">
-              <input
-                type="text"
-                onChange={(e) => {
-                  setSendingMessage(e.target.value);
-                }}
-                className="bg-[#E6EBF5] rounded-full outline-none  h-full w-full pl-2 "
-                placeholder="Enter Message..."
-                value={sendingMessage}
-                name="sendmessageinput"
-                id="sendmessageinput"
-              />
             </div>
-            <div className=" flex justify-between">
-              <div
-                className="p-2.5 px-1 sm:px-2.5  "
-                onClick={() => {
-                  document.getElementById("fileMessageInput").click();
-                }}
-              >
-                <PaperClipIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#6159CB] hidden  cursor-pointer" />
-                <input
-                disabled={true}
 
-                  type="file"
-                  id="fileMessageInput"
-                  accept=".pdf,.doc,.docx,.txt"
-                  className="hidden"
-                  onChange={fileChangeHandler}
-                />
-              </div>
-              <div
-                className="p-2.5 px-1 sm:px-2.5"
-                onClick={() => {
-                  document.getElementById("videoMessageInput").click();
-                }}
-              >
-                <VideoCameraIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#6159CB]  cursor-pointer" />
+            <div className="shrink-0 flex xs:p-2 md:p-4 justify-between bg-white border">
+              <div className="w-full ">
                 <input
-                  type="file"
-                  id="videoMessageInput"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={videochangehandler}
-                />
-              </div>
-              <div className="p-2.5 px-1 sm:px-2.5 mr-2">
-                {" "}
-                <PhotoIcon
-                  className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 cursor-pointer"
-                  onClick={() => {
-                    document.getElementById("imageMessageInput").click();
+                  type="text"
+                  onChange={(e) => {
+                    setSendingMessage(e.target.value);
                   }}
-                />
-                <input
-                  type="file"
-                  id="imageMessageInput"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={imagechangehandler}
+                  className="bg-[#E6EBF5] rounded-full outline-none  h-full w-full pl-2 "
+                  placeholder="Enter Message..."
+                  value={sendingMessage}
+                  name="sendmessageinput"
+                  id="sendmessageinput"
                 />
               </div>
-              <div
-                className="p-2.5  bg-[#6159CB] rounded-full"
-                onClick={handleSendMessage}
-              >
-                <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 -rotate-90 sm:h-6 text-white cursor-pointer" />
+              <div className=" flex justify-between">
+                <div
+                  className="p-2.5 px-1 sm:px-2.5  "
+                  onClick={() => {
+                    document.getElementById("fileMessageInput").click();
+                  }}
+                >
+                  <PaperClipIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#6159CB] hidden  cursor-pointer" />
+                  <input
+                    disabled={true}
+                    type="file"
+                    id="fileMessageInput"
+                    accept=".pdf,.doc,.docx,.txt"
+                    className="hidden"
+                    onChange={fileChangeHandler}
+                  />
+                </div>
+                <div
+                  className="p-2.5 px-1 sm:px-2.5"
+                  onClick={() => {
+                    document.getElementById("videoMessageInput").click();
+                  }}
+                >
+                  <VideoCameraIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#6159CB]  cursor-pointer" />
+                  <input
+                    type="file"
+                    id="videoMessageInput"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={videochangehandler}
+                  />
+                </div>
+                <div className="p-2.5 px-1 sm:px-2.5 mr-2">
+                  {" "}
+                  <PhotoIcon
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 cursor-pointer"
+                    onClick={() => {
+                      document.getElementById("imageMessageInput").click();
+                    }}
+                  />
+                  <input
+                    type="file"
+                    id="imageMessageInput"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={imagechangehandler}
+                  />
+                </div>
+                <div
+                  className="p-2.5  bg-[#6159CB] rounded-full"
+                  onClick={handleSendMessage}
+                >
+                  <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 -rotate-90 sm:h-6 text-white cursor-pointer" />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div> : <EmptyChat></EmptyChat>}
+      ) : (
+        <EmptyChat></EmptyChat>
+      )}
 
       {mediaSendModal && (
         <div
