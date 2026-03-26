@@ -289,6 +289,99 @@ const isInitailLoadRef = useRef(true)
     }
   }
  
+
+    const updateGroupImage = async (file) => {
+    try {
+        setProgress(30);
+      const formdata = new FormData();
+      formdata.append("file", file);
+      formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
+      const res = await axios.post(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
+        formdata,
+      );
+        setProgress(60);
+      let image = {
+        publicId: res.data.public_id,
+        url: res.data.secure_url,
+       
+      }; console.log(image)
+      const responseUpdate = await api.put("/groups/groupUpdate", {image,groupId:conversationId });
+  
+    
+        setProgress(100);
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 404) {
+        showAlert("Error", error.response.data.message);
+        setProgress(100);
+      }
+     
+      else{
+       console.log(error.message)
+        setIsServer(500)
+          setProgress(100);
+      
+      }
+    }
+  };
+//// function to remove member from group
+const addMember =async(userId)=>{
+    try {
+      const data = {
+       groupId:conversationId,
+       participents:[{
+        user:userId,
+        role:"member"
+       }]
+      }
+     
+      const res = await api.post(`/groups/addMember`,data);
+    
+     console.log(res.data.message)
+    } catch (error) {
+     const status = error.response?.status;
+   if (status === 404) {
+        showAlert("Error", error.response.data.message);
+   
+      }
+      else{
+       
+        setIsServer(500)
+     
+      }
+    
+    }
+}
+//// function to remove member from group
+const removeMember =async(userId)=>{
+    try {
+      const data = {
+       groupId:conversationId,
+       participents:[{
+        user:userId,
+       }]
+      }
+     
+      const res = await api.post(`/groups/removeMember`,data);
+    
+     console.log(res.data.message)
+    } catch (error) {
+     const status = error.response?.status;
+   if (status === 404) {
+        showAlert("Error", error.response.data.message);
+   
+      }
+      else{
+       
+        setIsServer(500)
+     
+      }
+    
+    }
+}
+
+
   const capitalizeFirstLetter = (string) => {
     // Check if the input is a non-empty string to avoid errors
     if (typeof string !== "string" || string.length === 0) {
@@ -302,6 +395,8 @@ const isInitailLoadRef = useRef(true)
     <ChatNovaContext.Provider
       value={{
         getGroupById,
+        removeMember,
+        setCurrentGroup,
         currentGroup,
         activeGroupChat,
         setActiveGroupChat,
@@ -311,9 +406,9 @@ const isInitailLoadRef = useRef(true)
         loadMoreMessages,
         serchGroup,
         allGroups,
-   
+   updateGroupImage,
         conversationId,
-    
+    addMember,
         activeChat,
         setActiveChat,
         uploadCloudinary,

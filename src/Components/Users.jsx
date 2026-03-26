@@ -15,6 +15,7 @@ import {
   PhotoIcon,
 
 } from "@heroicons/react/24/solid";
+import CreateGroup from "./CreateGroup";
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
@@ -125,45 +126,7 @@ export default function Users() {
               id="usersearch"
             />
           </div>
-          {/* online users  */}
-          {/* {searchClick && (
-            <div className="flex  justify-evenly overflow-x-auto overflow-y-hidden scrollbar-hide">
-              {searchClick &&
-                chattedOnlineUsers &&
-                chattedOnlineUsers.length !== 0 &&
-                chattedOnlineUsers.map((element) => {
-                  return (
-                    <div
-                      onClick={() => {
-                        setCurrentChatUserId(element._id);
-                        getCureentChattingUser(element._id);
-                        setActiveChat(true);
-                        getConversationId(element._id);
-                      }}
-                      className={`p-2 pb-0  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5]  mx-1`}
-                    >
-                      <div className="relative">
-                        {onlineUsers?.includes(element?._id) && (
-                          <div className="absolute h-2 w-2 bottom-0 right-0 rounded-full  bg-green-400"></div>
-                        )}
-                        <img
-                          className="w-12  h-12 rounded-full border-white border-2"
-                          src={element.image.url}
-                          alt=""
-                        />
-                      </div>
-                      <div className="flex justify-center">
-                        <p className="text-xs   ">
-                          {" "}
-                          {capitalizeFirstLetter(element.name).substring(0, 5)}
-                          ...
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )} */}
+        
 
           <div className="flex pt-2 flex-col pb-10  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
             {!searchClick &&
@@ -266,6 +229,7 @@ export default function Users() {
       {activePage === 2 && <Group></Group>}
       {activePage === 3 && <Settings></Settings>}
       {activePage === 4 && <GroupInfo></GroupInfo>}
+      {activePage === 5 && <CreateGroup></CreateGroup>}
     </>
   
 }

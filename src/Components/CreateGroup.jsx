@@ -1,9 +1,13 @@
 import {
   ArrowUpCircleIcon,
+  CheckIcon,
   EllipsisVerticalIcon,
   LockClosedIcon,
   MagnifyingGlassIcon,
+  MinusIcon,
   PencilIcon,
+  PlusIcon,
+  TicketIcon,
   TrashIcon,
   UserCircleIcon,
   UserGroupIcon,
@@ -18,7 +22,7 @@ import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 
-export default function GroupInfo() {
+export default function CreateGroup() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
   const{currentGroup,serchUser,addMember,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
@@ -32,6 +36,7 @@ export default function GroupInfo() {
  const [addUser,setAddUser] = useState(false)
  const [searchingAddUser,setSearchingAddUser]=useState(false)
  const [isAdmin,setIsAdmin]=useState(false)
+ const [selectedUsers,setSelectedUsers]=useState([])
 
  
 
@@ -56,13 +61,7 @@ export default function GroupInfo() {
     }
   };
 
-useEffect(()=>{
-currentGroup.participents?.forEach((p)=>{
- if(p.user._id === user._id && p.role ==="admin"){
-  setIsAdmin(true)
- }
-})
-},[conversationId])
+
  
   const handleUpdate=(e)=>{
     let updatedfiled={}
@@ -171,7 +170,7 @@ e.preventDefault()
       <div className="flex justify-between m-2 p-2 mt-0">
         <div>
           {" "}
-          <h2 className="text-2xl pt-2 font-medium">Group Info</h2>{" "}
+          <h2 className="text-2xl pt-2 font-medium">Create Group</h2>{" "}
         </div>
       </div>
       <div className="bg-white mx-3  rounded-2xl shadow">
@@ -186,7 +185,7 @@ e.preventDefault()
           />
           {settingsImage ? (
             <ArrowUpCircleIcon
-              className={`w-9 h-9 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute ${!isAdmin && "hidden"}`}
+              className={`w-9 h-9 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute `}
               onClick={() => {
                 console.log(currentGroup)
                 updateGroupImage(settingsImage);
@@ -195,7 +194,7 @@ e.preventDefault()
             ></ArrowUpCircleIcon>
           ) : (
             <PencilIcon
-              className={`w-9 h-9 right-2 bg-white border border-black  p-1.5 text-blue-900 ${!isAdmin && "hidden"}  cursor-pointer rounded-full bottom-3 absolute `}
+              className={`w-9 h-9 right-2 bg-white border border-black  p-1.5 text-blue-900  cursor-pointer rounded-full bottom-3 absolute `}
               onClick={() => {
                 document.getElementById("settingsImage").click();
               }}
@@ -206,48 +205,79 @@ e.preventDefault()
             src={
               settingsImage
                 ? URL.createObjectURL(settingsImage)
-                : currentGroup?.avtar.url
+                : ".././public/group-of-friends-sketch-vector-43422085.avif"
             }
             alt=""
           />
         </div>
-        <p className=" font-medium">{capitalizeFirstLetter(currentGroup?.name)}</p>
-      
-      </div>
-      <div className=" mt-2 mb-4 mx-6 px-2 text-sm text-[#8E949D]   ">
-        Hey! I love connecting with new people and having meaningful conversations.
+       <form className="w-full px-6 pb-4 flex flex-col gap-4">
 
-      </div></div>
+  {/* Group Name */}
+  <div className="flex flex-col">
+    <label className="text-sm text-gray-500 mb-1">
+      Group Name
+    </label>
+    <input
+      type="text"
+      placeholder="Enter group name..."
+      className="px-4 py-2 rounded-xl border border-gray-300 bg-[#F9FAFA] 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 
+                 focus:border-blue-500 transition-all shadow-sm"
+    />
+  </div>
+
+  {/* Invite Code */}
+  <div className="flex flex-col">
+    <label className="text-sm text-gray-500 mb-1">
+      Invite Code
+    </label>
+    <input
+      type="text"
+      placeholder="Enter invite code..."
+      className="px-4 py-2 rounded-xl border border-gray-300 bg-[#F9FAFA] 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 
+                 focus:border-blue-500 transition-all shadow-sm"
+    />
+  </div>
+
+</form>
+      </div>
+      </div>
     
-          <div className="flex flex-col mx-3 mt-4 mb-20 ">
+          <div className="flex flex-col mx-3 mt-4 mb-20 bg-white rounded-xl shadow">
         <div className="flex justify-between ">
-        <div className="flex font-medium  pt-2 pb-1">
+        <div className="flex font-medium  pt-2 pb-1 mx-2">
           {" "}
           <UserGroupIcon className="w-6 font-medium mt-0.5  mx-2 h-6 text-black" />
-          <div className=" text-xl">{currentGroup.participents.length} Members</div></div>
+          <div className=" text-xl">Add Members</div></div>
         <div className="flex font-medium  pt-2 pb-1">
           {" "}
       
-          <UserPlusIcon onClick={()=>{setAddUser(true)}} className={`w-5 font-medium mt-1.5 ${!isAdmin && "hidden"} mx-2 h-5 text-blue-500 cursor-pointer`} />
+          <MagnifyingGlassIcon onClick={()=>{setAddUser(true)}} className={`w-5 font-medium mt-1.5  mx-2 h-5 text-blue-500 cursor-pointer`} />
          
           </div>
           
           </div>
           <div className="">
-         { currentGroup && currentGroup.participents.map((element) => {
-             
+       {chattedUsersList &&
+              chattedUsersList.length !== 0 && chattedUsersList.map((element) => {
+                const participentExists=selectedUsers.some(p=>
+                p.user === element.user._id
+              )
                 return (
                   
                   <div
                   key={element.user._id}
                    
-                    className="flex   border-2   cursor-pointer rounded-2xl mt-1 bg-white  hover:bg-[#E6EBF5] p-0   xs:p-2"
+                    className={`flex mx-4  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2 ${participentExists
+                      ? "bg-blue-50 border border-blue-400 scale-[1.01]"
+                      : "hover:bg-gray-100 border border-transparent"}`}
                   >
                     
-                    <div className="">
+                    <div className="flex-shrink-0">
                        
                         <img
-                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
+                          className="w-10 mt-1 h-10 rounded-full border-white border-2"
                           src={element.user.image.url}
                           alt=""
                         />
@@ -255,19 +285,26 @@ e.preventDefault()
                     <div className="flex flex-col w-full justify-between py-1">
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
                         <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)} {element.user._id === user._id && "(You)"}
+                          {capitalizeFirstLetter(element.user.name)}
                         </p>
                     
                        
                        
                       </div>
-                     {element.role=="admin" && <div className="text-xs px-2 text-blue-400">
-                        Admin
-                      </div>}
                      
                     </div>
-                    <div className="flex items-center">
-                      <UserMinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer ${!isAdmin&& "hidden"}`} onClick={()=>{removeMember(element.user._id)}}/>
+                     <div className="flex flex-shrink-0 items-center">
+                      {!participentExists ?<PlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
+                        [...prev,{user:element.user._id,role:"member"}]
+                      )}}/>:<><CheckIcon className={`w-5 font-medium mx-2  h-5 text-blue-500 cursor-pointer `}></CheckIcon><MinusIcon className={`w-5 font-medium  mx-2  h-5 text-red-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
+                      {
+                        const filtered = prev.filter(p=>
+                            p.user !==element.user._id
+                        )
+                        return filtered
+                      }
+                       
+                      )}}/></>}
                     </div>
                   </div>
                 );
@@ -322,54 +359,13 @@ e.preventDefault()
           <div className="flex pt-2 flex-col pb-10  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
            
             <div className="">
-                {!searchingAddUser && chattedUsersList &&
-              chattedUsersList.length !== 0 && chattedUsersList.map((element) => {
-                const exist =currentGroup.participents.some(p=>
-                p.user._id === element.user._id
-              
-                )
-               if(exist) return null
-                return (
-                  
-                  <div
-                  key={element.user._id}
-                   
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                  >
-                    
-                    <div className="">
-                       
-                        <img
-                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.user.image.url}
-                          alt=""
-                        />
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)}
-                        </p>
-                    
-                       
-                       
-                      </div>
-                     
-                    </div>
-                     <div className="flex items-center">
-                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer" onClick={()=>{addMember(element.user._id);setAddUser(false);
-      setSearchingAddUser(false)}}/>
-                    </div>
-                  </div>
-                );
-              })}
+             
                 {searchingAddUser && dataBaseUsers &&
               dataBaseUsers.length !== 0 && dataBaseUsers.map((element) => {
-                const exist =currentGroup.participents.some(p=>
-                p.user._id === element._id
-              
-                )
-               if(exist) return null
+                const participentExists=selectedUsers.some(p=>
+                p.user === element._id
+              )
+            
                 return (
                   
                   <div
@@ -398,10 +394,20 @@ e.preventDefault()
                      
                     </div>
                      <div className="flex items-center">
-                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer"onClick={()=>{addMember(element._id);setAddUser(false);
-      setSearchingAddUser(false)}} />
+                      {!participentExists ?<PlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
+                        [...prev,{user:element._id,role:"member"}]
+                      )}}/>:<MinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
+                      {
+                        const filtered = prev.filter(p=>
+                            p.user !==element._id
+                        )
+                        return filtered
+                      }
+                       
+                      )}}/>}
                     </div>
-                  </div>
+                    </div>
+               
                 );
               })}
 

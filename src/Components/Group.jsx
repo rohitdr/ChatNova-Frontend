@@ -5,6 +5,7 @@ import {
   MagnifyingGlassIcon,
   MagnifyingGlassCircleIcon,
   EllipsisVerticalIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import SocketContext from "../Context/SocketContext";
@@ -13,7 +14,7 @@ export default function Group() {
   const socketcontext=useContext(SocketContext)
   const {socket}=socketcontext
   const authcontext = useContext(AuthContext);
-  const { isServer,user } = authcontext;
+  const { isServer,user,setActivePage } = authcontext;
   const context = useContext(ChatNovaContext);
   const {
     chattedUsersList,
@@ -29,7 +30,8 @@ export default function Group() {
     activeGroupChat,
     getGroupById,
     getmessages,
-    setActiveGroupChat,
+    setActiveGroupChat
+    
   } = context;
   const [searchClick, setSearchClick] = useState(true);
   const onChangeHandler = (e) => {
@@ -70,7 +72,7 @@ export default function Group() {
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Groups</div>
           <div className="pt-2">
             {" "}
-            <EllipsisVerticalIcon className="w-7 h-7 text-gray-700 cursor-pointer" />
+            <PlusIcon className="w-6 h-6 sha mx-2 text-blue-700 cursor-pointer"  onClick={()=>{setActivePage(5)}}/>
           </div>
         </div>
 

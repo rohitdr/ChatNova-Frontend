@@ -30,6 +30,7 @@ export default function Profile() {
             className="w-28  h-28 rounded-full  border-white border-4"
             src={user?.image.url}
             alt=""
+            loading="lazy"
           />
         </div>
         <p className="my-2 mb-1 font-medium">{user?.name}</p>

@@ -143,9 +143,10 @@ let status = messageStatus(message,currentChatUserId)
         />
       </div>
       <div className="flex max-w-[85%] flex-col mb-2 relative  ">
+        <span className="text-2xs m-1 mx-2  text-black">{!send && activeGroupChat&& message?.senderId?.name}</span>
         <div
           className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-3 ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
-        >
+        > 
           <div className="">
           {message.type === "text" && message.text}
           {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img src={message.media.url} className="" onClick={()=>{setMediaView(true)}} alt="" />}

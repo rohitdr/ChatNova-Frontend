@@ -479,6 +479,8 @@ socket.off("user_stop_typing")
                   onClick={() => {
                     if (activeGroupChat) {
                       setActivePage(4);
+                      setActiveChat(false)
+                    
                     }
                   }}
                 >
