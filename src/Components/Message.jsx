@@ -13,7 +13,7 @@ export default function Message(props) {
   const authContext = useContext(AuthContext);
   const { user, isServer } = authContext;
   const context = useContext(ChatNovaContext);
-  const { currentChatUser,currentChatUserId,conversationId ,setCurrentUsersMessages} = context;
+  const { currentChatUser,currentChatUserId,conversationId,activeGroupChat ,setCurrentUsersMessages} = context;
   const [mediaView,setMediaView]=useState(false)
   const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
  const [display,setDisplay]=useState("hidden")
@@ -87,7 +87,21 @@ const handleReactionClick=(e)=>{
 }
 
 const messageStatus = (message,id)=>{
- 
+
+  if(activeGroupChat){
+    if(message.deliveredTo?.length===0 && message.seenBy?.length ===0){
+      return "sent"
+    }
+  if(message.deliveredTo?.length>=1 && message.seenBy?.length ===0){
+    return "delivered"
+  }
+  if(message.seenBy?.length>=1){
+    return "seen"
+
+  }
+
+  }
+  else{
 const delivered = message.deliveredTo?.some((d)=>
  d.user.toString()=== id
 
@@ -99,9 +113,14 @@ const seen = message.seenBy?.some((d)=>
 if(!delivered) return "sent"
 if(!seen) return "delivered"
 return "seen"
+  }
+ 
+
 
 
 }
+
+
 let status = messageStatus(message,currentChatUserId)
 
   

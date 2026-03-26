@@ -13,7 +13,7 @@ export default function Group() {
   const socketcontext=useContext(SocketContext)
   const {socket}=socketcontext
   const authcontext = useContext(AuthContext);
-  const { isServer } = authcontext;
+  const { isServer,user } = authcontext;
   const context = useContext(ChatNovaContext);
   const {
     chattedUsersList,
@@ -53,6 +53,7 @@ export default function Group() {
     }
      
      socket.emit("join_group",element._id)
+     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
    setConversationId(element._id)
     setActiveChat(true);
     setActiveGroupChat(true);

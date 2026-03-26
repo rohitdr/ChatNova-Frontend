@@ -20,6 +20,7 @@ import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import EmptyChat from "./EmptyChat";
 import { Virtuoso } from "react-virtuoso";
+import TypingIndicator from "./TypingIndicator";
 export default function Chatting() {
   const [sendingMessage, setSendingMessage] = useState(null);
 
@@ -32,6 +33,8 @@ export default function Chatting() {
   const [fileType, setFileType] = useState(null);
 
   const [mediaSendModal, setMediaSendModal] = useState(false);
+  const [typingUser,setTypingUser]=useState([])
+  const [isTyping,setIsTyping]=useState(false)
   const {
     currentChatUser,
     setActiveChat,
@@ -128,7 +131,18 @@ socket.off("message_seen",seenHandler)
       });
       isInitailLoadRef.current = false;
     }
-  }, [currentUsersMessages]);
+  }, [currentUsersMessages,typingUser]);
+  useEffect(() => {
+
+      virtuosoRef.current?.scrollToIndex({
+        index: currentUsersMessages.length - 1,
+        behavior: "auto",
+      });
+  
+    
+  }, [typingUser]);
+  
+
 
   useEffect(() => {
     if (!socket) return;
@@ -305,8 +319,9 @@ socket.off("message_seen",seenHandler)
       });
     }
     setTimeout(() => {
-      virtuosoRef.current.scrollToIndex({
+      virtuosoRef.current?.scrollToIndex({
         index: currentUsersMessages.length - 1,
+        align:"end",
         behavior: "auto",
       });
     }, 0);
@@ -354,6 +369,34 @@ socket.off("message_seen",seenHandler)
     uploadCloudinary(conversationId, uploadedImage, tempmessage._id);
     setMediaSendModal(false);
   };
+useEffect(()=>{
+  if(!socket) return 
+socket.on("user_stop_typing",({userId})=>{
+
+setTypingUser(prev=>
+  prev.filter(p=>p.user!==userId)
+
+  )
+})
+socket.on("user_typing",({userId,name})=>{
+setTypingUser(prev=>{
+  if(prev.find(p=>p.user===userId)) {
+    return prev
+  }
+  return [...prev, {user:userId,name}]
+}
+ 
+
+  )
+
+})
+return ()=>{
+  socket.off("user_typing")
+socket.off("user_stop_typing")
+}
+},[socket])
+
+
   const handleUploadVideo = () => {
     const tempmessage = {
       _id: Date.now(),
@@ -390,6 +433,23 @@ socket.off("message_seen",seenHandler)
     uploadCloudinary(conversationId, uploadVideo, tempmessage._id);
     setMediaSendModal(false);
   };
+
+  const handleTyping=()=>{
+    if(!isTyping){
+      setIsTyping(true)
+        socket.emit("typing",{conversationId,userId:user._id,name:user.name})
+    }
+
+  }
+  let typingTimout;
+  const handleStopTyping=()=>{
+    clearTimeout(typingTimout)
+    setIsTyping(false)
+     typingTimout=setTimeout(() => {
+       socket.emit("stop_typing",{conversationId,userId:user._id,name:user.name})
+    }, 1500);
+
+  }
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -400,7 +460,7 @@ socket.off("message_seen",seenHandler)
             <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
               <div className="flex items-center justify-between">
                 <ArrowLeftIcon
-                  className="w-6 h-6 text-gray-700 lg:hidden"
+                  className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden"
                   onClick={() => {
                     setActiveChat(false);
                   }}
@@ -482,25 +542,18 @@ socket.off("message_seen",seenHandler)
                     message={message}
                   ></Message>
                 )}
+                components={{Footer:()=>  typingUser.length>0 &&<TypingIndicator typingUser={typingUser}></TypingIndicator>}}
               />
-              {/* {currentUsersMessages &&
-              currentUsersMessages.map((element) => {
-                return (
-                  
-                  <Message
-                  key={element._id}
-                    send={user._id === element.senderId}
-                    message={element}
-                  ></Message>
-                );
-              })} */}
+        
             </div>
-
+  
             <div className="shrink-0 flex xs:p-2 md:p-4 justify-between bg-white border">
               <div className="w-full ">
                 <input
                   type="text"
                   onChange={(e) => {
+                    handleTyping();
+                    handleStopTyping();
                     setSendingMessage(e.target.value);
                   }}
                   className="bg-[#E6EBF5] rounded-full outline-none  h-full w-full pl-2 "
