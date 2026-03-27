@@ -457,7 +457,7 @@ socket.off("user_stop_typing")
   ) : (
     <>
       {currentChatUserId || activeGroupChat ? (
-        <div className={`h-screen bg-white`}>
+        <div className={`h-dvh bg-white`}>
           <div className="flex h-full flex-col justify-between">
             {!loadingMessages?<div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
               <div className="flex items-center justify-between">
@@ -555,7 +555,7 @@ socket.off("user_stop_typing")
         
             </div>
   
-            <div className="shrink-0 flex xs:p-2 md:p-4 justify-between bg-white border">
+            <div className="shrink-0 flex xs:p-2 md:p-4 sticky bottom-0 justify-between bg-white border">
               <div className="w-full ">
                 <input
                   type="text"

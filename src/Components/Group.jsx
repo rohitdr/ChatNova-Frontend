@@ -108,11 +108,11 @@ export default function Group() {
           </div>
         </div>
 
-        <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 bg-[#E6EBF5]">
+        <div className="flex p-2 pr-0 rounded-xl border-none mx-2 sm:mx-4 my-2  bg-white">
           <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
           <input
             type="search"
-            className="w-full  bg-[#E6EBF5] outline-none pl-2"
+            className="w-full  outline-none pl-2"
             onChange={onChangeHandler}
             placeholder="Search messages or users"
             name="usersearch"
@@ -168,12 +168,12 @@ export default function Group() {
                 <div
                   onClick={()=>{handleGroupClick(element)}}
                   key={element._id}
-                  className="flex shadow  border-2  bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                  className="flex shadow-lg  border-2 hover:shadow-xl bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                 >
                   <div className="pt-2">
                     <img
                     loading="lazy"
-                      className="w-12 h-10 rounded-full border-white border-2"
+                      className="w-10 h-10 object-cover shadow rounded-full border-white border-2"
                       src={element.avtar.url}
                       alt=""
                     />
