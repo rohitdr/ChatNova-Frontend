@@ -21,6 +21,8 @@ import NoServer from "./NoServer";
 import EmptyChat from "./EmptyChat";
 import { Virtuoso } from "react-virtuoso";
 import TypingIndicator from "./TypingIndicator";
+import MessageSkeleton from "./MessageSkeleton";
+import ChatHeaderSkeleton from "./ChatHeaderSkeleton";
 export default function Chatting() {
   const [sendingMessage, setSendingMessage] = useState(null);
 
@@ -29,7 +31,7 @@ export default function Chatting() {
   const [uploadFile, setUplaodFile] = useState(null);
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer, showAlert, setActivePage } = authContext;
+  const { user, isServer,loadingMessages, showAlert, setActivePage } = authContext;
   const [fileType, setFileType] = useState(null);
 
   const [mediaSendModal, setMediaSendModal] = useState(false);
@@ -125,7 +127,7 @@ socket.off("message_seen",seenHandler)
 
   useEffect(() => {
     if (currentUsersMessages.length && isInitailLoadRef.current) {
-      virtuosoRef.current.scrollToIndex({
+      virtuosoRef.current?.scrollToIndex({
         index: currentUsersMessages.length - 1,
         behavior: "auto",
       });
@@ -457,7 +459,7 @@ socket.off("user_stop_typing")
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-screen bg-white`}>
           <div className="flex h-full flex-col justify-between">
-            <div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
+            {!loadingMessages?<div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
               <div className="flex items-center justify-between">
                 <ArrowLeftIcon
                   className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden"
@@ -526,9 +528,9 @@ socket.off("user_stop_typing")
                   <EllipsisVerticalIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
                 </div>
               </div>
-            </div>
-            <div className=" px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ">
-              <Virtuoso
+            </div>:<ChatHeaderSkeleton></ChatHeaderSkeleton>}
+            <div className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ${loadingMessages &&" overflow-y-auto "} `}>
+              {!loadingMessages? <Virtuoso
                 className="scrollbar-hide"
                 alignToBottom
                 atTopStateChange={virtusoStartReached}
@@ -547,6 +549,9 @@ socket.off("user_stop_typing")
                 )}
                 components={{Footer:()=>  typingUser.length>0 &&<TypingIndicator typingUser={typingUser}></TypingIndicator>}}
               />
+              :[...Array(10)].map((_,i)=><MessageSkeleton key ={i} send={i%2===0}></MessageSkeleton>) 
+              
+              }
         
             </div>
   

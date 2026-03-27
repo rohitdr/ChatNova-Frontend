@@ -1,4 +1,4 @@
-import  { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import Profile from "./Profile";
@@ -9,29 +9,25 @@ import SocketContext from "../Context/SocketContext";
 import NoServer from "./NoServer";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 import GroupInfo from "./GroupInfo";
-import {
-
-  VideoCameraIcon,
-  PhotoIcon,
-
-} from "@heroicons/react/24/solid";
+import { VideoCameraIcon, PhotoIcon } from "@heroicons/react/24/solid";
 import CreateGroup from "./CreateGroup";
+import UserSkeleton from "./UserSkeleton";
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
     serchUser,
     dataBaseUsers,
- getConversationId,
+    getConversationId,
     currentUsersMessages,
     setChattedUsersList,
     setActiveChat,
     activeChat,
     getCureentChattingUser,
     chattedOnlineUsers,
- setCurrentUsersMessages,
+    setCurrentUsersMessages,
     isInitailLoadRef,
-      setHasMore,
-      setpage,
+    setHasMore,
+    setpage,
     chattedUsersList,
     chattedUsers,
     currentChatUserId,
@@ -40,23 +36,20 @@ export default function Users() {
     setActiveGroupChat,
     conversationId,
     setConversationId,
-    getmessages
+    getmessages,
+
   } = context;
- 
 
   const [searchClick, setSearchClick] = useState(true);
   const authContext = useContext(AuthContext);
-  const { activePage, isServer,user } = authContext;
+  const { activePage, isServer, user, setLoadingMessages,loadingUser } = authContext;
   const socketcontext = useContext(SocketContext);
-  const { onlineUsers,socket } = socketcontext;
-  const [unseenMessages,setUnseenMessages]=useState(0)
+  const { onlineUsers, socket } = socketcontext;
+  const [unseenMessages, setUnseenMessages] = useState(0);
 
   useEffect(() => {
     chattedUsers();
-
   }, []);
-
-
 
   useEffect(() => {}, [activePage]);
 
@@ -70,50 +63,73 @@ export default function Users() {
       serchUser(value);
     }
   };
-  const handleUserClick=(element)=>{
-     if(!socket) return
-    if(conversationId) {
-      socket.emit("leave_group",conversationId)
+  const handleUserClick = async(element) => {
+    if (!socket || !user?._id) return;
+    setLoadingMessages(true)
+    if (conversationId) {
+      socket.emit("leave_group", conversationId);
     }
-     
-     socket.emit("join_group",element.ConversationId)
-     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
-   setConversationId(element.ConversationId)
-   getmessages(element.ConversationId)
-     isInitailLoadRef.current=true
-                       setActiveGroupChat(false)
-                      setCurrentUsersMessages([]),
-                   setHasMore(true),
-                     setpage(2),
-                      setCurrentChatUserId(element.user._id);
-                      
-                      getCureentChattingUser(element.user._id);
-                    
-                      setActiveChat(true);
-                 
-  }
-  const handleDatabaseUserClick=(element)=>{
+
+    socket.emit("join_group", element.ConversationId);
+    socket.emit("mark_seen", {
+      conversationId: element.ConversationId,
+      userId: user._id,
+    });
+ setCurrentUsersMessages([]),
+ 
+      setHasMore(true),
+      setpage(2),
+         setActiveGroupChat(false);
    
-  getConversationId(element._id)
-     isInitailLoadRef.current=true
-                       setActiveGroupChat(false)
-                      setCurrentUsersMessages([]),
-                   setHasMore(true),
-                     setpage(2),
-                      setCurrentChatUserId(element._id);
-                      
-                      getCureentChattingUser(element._id);
-                    setSearchClick(true)
-                      setActiveChat(true);
-                 
-  }
+      setCurrentChatUserId(element.user._id);
+    setActiveChat(true);
+    setConversationId(element.ConversationId)
+    try{
+ await getmessages(element.ConversationId);
+    await getCureentChattingUser(element.user._id);
+    }catch(err){
+      console.log(err)
+    }
+   setTimeout(()=>{
+ setLoadingMessages(false)
+   },500)
+
+      isInitailLoadRef.current = true;
+  };
+  const handleDatabaseUserClick = async(element) => {
+     if (!socket || !user?._id) return;
+    setLoadingMessages(true)
   
+  
+    setActiveGroupChat(false);
+    setCurrentUsersMessages([]),
+      setHasMore(true),
+      setpage(2),
+      setCurrentChatUserId(element._id);
+    setSearchClick(true);
+    setActiveChat(true);
+     try{
+ await getConversationId(element._id);
+    await getCureentChattingUser(element._id);
+    }catch(err){
+      console.log(err)
+    }
+     setTimeout(()=>{
+ setLoadingMessages(false)
+   },500)
+  
+   
+      isInitailLoadRef.current = true;
+  };
+
   return isServer === 500 ? (
     <NoServer></NoServer>
-  ) : 
+  ) : (
     <>
       {activePage === 0 && (
-        <div className={`h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col `}>
+        <div
+          className={`h-screen   xs:p-4  lg:p-0 flex bg-[#F5F7FB] flex-col `}
+        >
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Chats</div>
           <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 bg-[#E6EBF5]">
             <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
@@ -126,22 +142,23 @@ export default function Users() {
               id="usersearch"
             />
           </div>
-        
 
-          <div className="flex pt-2 flex-col pb-10  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
+          <div className="flex pt-2 flex-col pb-10 mb-10 lg:mb-0  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
             {!searchClick &&
               dataBaseUsers &&
               dataBaseUsers.length !== 0 &&
               dataBaseUsers.map((element) => {
                 return (
                   <div
-                  key={element._id}
-                    onClick={() => {handleDatabaseUserClick(element)}}
+                    key={element._id}
+                    onClick={() => {
+                      handleDatabaseUserClick(element);
+                    }}
                     className="flex shadow cursor-pointer bg-white rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
                   >
                     <div className="pt-2">
                       <img
-                      loading="lazy"
+                        loading="lazy"
                         className="w-12 h-10 rounded-full border-white border-2"
                         src={element.image.url}
                         alt=""
@@ -152,79 +169,66 @@ export default function Users() {
                         <p className="font-small text-black">
                           {capitalizeFirstLetter(element.name)}
                         </p>
-                     
                       </div>
-                   
                     </div>
                   </div>
                 );
               })}
-            {searchClick &&
-              chattedUsersList &&
-              chattedUsersList.length !== 0 ?
-              chattedUsersList.map((element) => {
-             
-                return (
-                  
-                  <div
-                  key={element.user._id}
-                    onClick={() => {
-                      
-                      handleUserClick(element)
-                     
-                    }}
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                  >
-                    
-                    <div className="">
-                       
+            {!loadingUser ?searchClick && chattedUsersList && chattedUsersList.length !== 0
+              ? chattedUsersList.map((element) => {
+                  return (
+                    <div
+                      key={element.user._id}
+                      onClick={() => {
+                        handleUserClick(element);
+                      }}
+                      className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                    >
+                      <div className="">
                         <img
-                        
-                        loading="lazy"
+                          loading="lazy"
                           className="w-12 mt-1 h-10 rounded-full border-white border-2"
                           src={element.user.image.url}
                           alt=""
                         />
                       </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)}
-                        </p>
-                    
-                        <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
-                          {element.lastMessage.createdAt === null
-                            ? ""
-                            : new Date(
-                                element.lastMessage.createdAt
-                              ).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                        </p>
-                       
-                      </div>
-                      <div className="pl-2  text-[10px] xs:text-sm text-gray-400 flex justify-between">
-                        {element.lastMessage.text}
-                        {/* {element.lastMessageType =="image"&&  <div className="flex"> <PhotoIcon className="w-3 h-3 text-red-400 mt-1 mr-2 "></PhotoIcon> Photo</div>}
-                        {element.lastMessageType =="video"&& <div className="flex"> <VideoCameraIcon className="text-[#6159CB] w-3 h-3 mt-1 mr-2"></VideoCameraIcon>Video</div>}
-                        { element.lastMessageType=="text" && element.lastMessage === null
-                          ? ""
-                          : element.lastMessage} */}
-                          {/* {unseenMessages===0?"":
-                             <p className=" rounded-full bg-green-400 py-[1px] mx-2  px-[8px] text-black  text-[8px] ">
-                       { unseenMessages}
-                        </p>} */}
+                      <div className="flex flex-col w-full justify-between py-1">
+                        <div className="flex  flex-1 justify-between items-center pl-2 ">
+                          <p className="font-small text-xs  xs:text-sm text-black">
+                            {capitalizeFirstLetter(element.user.name)}
+                          </p>
+
+                          <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
+                            {element.lastMessage.createdAt === null
+                              ? ""
+                              : new Date(
+                                  element.lastMessage.createdAt,
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                          </p>
+                        </div>
+                        <div className="pl-2  text-[10px] xs:text-sm text-gray-400 flex justify-between">
+                          {element.lastMessage.text}
+                        </div>
                       </div>
                     </div>
+                  );
+                })
+              : searchClick && (
+                  <div className="flex h-screen justify-center items-center">
+                    <div className="text-center flex flex-col">
+                      {" "}
+                      <div className="flex justify-center">
+                        {" "}
+                        <MagnifyingGlassCircleIcon className="h-12 w-12 text-gray-600"></MagnifyingGlassCircleIcon>
+                      </div>
+                      <div>Search User to chat With...</div>{" "}
+                    </div>
                   </div>
-                );
-              }):
-              searchClick && <div className="flex h-screen justify-center items-center">
-                <div className="text-center flex flex-col"> <div className="flex justify-center"> <MagnifyingGlassCircleIcon className="h-12 w-12 text-gray-600"></MagnifyingGlassCircleIcon></div><div>Search User to chat With...</div> </div>
-              </div>
-              
-              }
+                ):
+            [...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
           </div>
         </div>
       )}
@@ -234,5 +238,5 @@ export default function Users() {
       {activePage === 4 && <GroupInfo></GroupInfo>}
       {activePage === 5 && <CreateGroup></CreateGroup>}
     </>
-  
+  );
 }

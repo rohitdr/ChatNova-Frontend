@@ -17,7 +17,6 @@ export default function ChatNovaState(props) {
 const [conversationId,setConversationId]=useState(null)
 
   const [allGroups,setAllgroups]=useState(null)
-  const [databaseGruops,setDatabaseGroups]=useState(null)
   const [page,setpage]=useState(2)
   const [hasMore,setHasMore]=useState(true)
   const [activeGroupChat,setActiveGroupChat]=useState(false)
@@ -25,13 +24,13 @@ const [conversationId,setConversationId]=useState(null)
  const hasMoreRef = useRef(true)
  const loadingRef = useRef(false)
 const isInitailLoadRef = useRef(true)
-
+const [loadingGroups,setLoadingGroups]=useState(false)
 
 
 
   let Navigate = useNavigate();
   const authContext = useContext(AuthContext);
-  const { setProgress,setIsServer,showAlert } = authContext;
+  const { setProgress,setIsServer,showAlert,setLoadingUser } = authContext;
   /// function to get User whom with logged in user has chats
 
   /// function to get the coversation id between the current chatter and logged in user
@@ -48,7 +47,7 @@ const isInitailLoadRef = useRef(true)
      socket.emit("join_group",res.data.conversation._id)
  
              setConversationId(res.data.conversation._id)
-          getmessages(res.data.conversation._id);
+       
       }
     } catch (error) {
       const status = error.response?.status;
@@ -82,43 +81,24 @@ const isInitailLoadRef = useRef(true)
       }
     }
   };
-  // function to search users from database to chat with search query
-  const serchGroup = async (searchValue) => {
-    try {
-      const res = await api.get(`/groups/search?search=${searchValue}`);
-      if (res.status === 200) {
-        setDatabaseGroups(res.data.groups);
-     
-      }
-    } catch (error) {
-     const status = error.response?.status;
 
-      if (status === 404) {
-     
-        showAlert("Error", error.response.data.message);
-   
-      }
-      else{
-     
-        setIsServer(500)
-     
-      }
-    }
-  };
   //function to serach the users with whom logged in user have chatted
   const chattedUsers = async () => {
     try {
+      setLoadingUser(true)
       const res = await api.get(`/users/chattedUsers`);
       if (res.status === 200) {
     
         setChattedUsersList(res.data.users);
-        console.log(res.data.users)
+      setTimeout(() => {
+       setLoadingUser(false)
+      }, 500);
       }
     } catch (error) {
        const status = error.response?.status;
-
+     setLoadingUser(false)
       if(status ===500){
-     
+        setLoadingUser(false)
         setIsServer(500)
      
       }
@@ -257,12 +237,17 @@ const isInitailLoadRef = useRef(true)
   /// function to get all groups
   const getAllGroups =async()=>{
  try {
+  setLoadingGroups(true)
       const res = await api.get(`/groups/allgroups`);
       setAllgroups(res.data.groups)
-      console.log(res.data.groups)
+   setTimeout(() => {
+    setLoadingGroups(false)
+   }, 500);
     } catch (error) {
+       setLoadingGroups(false)
      const status = error.response?.status;
     if(status ===500){
+       setLoadingGroups(false)
           setIsServer(500)
       }
     }
@@ -444,10 +429,10 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         activeGroupChat,
         setActiveGroupChat,
         getAllGroups,
-        databaseGruops,
+     
         page,
         loadMoreMessages,
-        serchGroup,
+       
         allGroups,
    updateGroupImage,
         conversationId,
@@ -477,6 +462,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         chattedOnlineUsers,
         currentChatUser,
         setCurrentChatUser,
+        loadingGroups
       }}
     >
       {props.children}

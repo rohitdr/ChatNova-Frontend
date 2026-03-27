@@ -14,6 +14,8 @@ export default function AuthState(props) {
   const refress_token = localStorage.getItem("refress_token");
   const [activePage, setActivePage] = useState(0);
   const [alert, setAlert] = useState(null);
+  const [loadingUser,setLoadingUser]=useState(false)
+  const [loadingMessages,setLoadingMessages] =useState(true)
   const showAlert = (type, message) => {
     setAlert({
       type: type,
@@ -39,15 +41,16 @@ export default function AuthState(props) {
       setProgress(100);
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
-        setProgress(100);
+      if (status === 500) {
+         setIsServer(500)
+          setProgress(100);
+       
       }
     
       else{
-     
-        setIsServer(500)
-          setProgress(100);
+      showAlert("Error", error.response.data.message);
+        setProgress(100);
+       
       }
     
     
@@ -72,13 +75,14 @@ export default function AuthState(props) {
           });
         } catch (error) {
           const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
+      if (status === 500) {
+         setIsServer(500)
+      
      
       }
      
       else{
-        setIsServer(500)
+         showAlert("Error", error.response.data.message);
       
       }
         }
@@ -98,14 +102,15 @@ export default function AuthState(props) {
       setUser(res.data.user);
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
+      if (status === 500) {
+         setIsServer(500)
+      
    
       }
      
       else{
       
-        setIsServer(500)
+         showAlert("Error", error.response.data.message);
       
       }
     }
@@ -155,13 +160,14 @@ export default function AuthState(props) {
       setProgress(100);
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
+      if (status === 500) {
+          setIsServer(500)
         setProgress(100);
+      
       }
       else{
        
-        setIsServer(500)
+        showAlert("Error", error.response.data.message);
         setProgress(100);
       }
 
@@ -181,14 +187,15 @@ export default function AuthState(props) {
       }
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
+      if (status === 500) {
+           setIsServer(500)
         setProgress(100);
       }
      
       else{
+        showAlert("Error", error.response.data.message);
      
-        setIsServer(500)
+     
           setProgress(100);
       }
     }
@@ -208,15 +215,16 @@ export default function AuthState(props) {
       }
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
-        setProgress(100);
+      if (status === 500) {
+          setIsServer(500)
+          setProgress(100);
+      
       }
      
       else{
-        
-        setIsServer(500)
-          setProgress(100);
+          showAlert("Error", error.response.data.message);
+        setProgress(100);
+      
       }
     }
   };
@@ -234,14 +242,14 @@ export default function AuthState(props) {
       }
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
+      if (status === 500) {
         setProgress(100);
+        setIsServer(500)
       }
      
       else{
-       
-        setIsServer(500)
+         showAlert("Error", error.response.data.message);
+      
           setProgress(100);
       }
     }
@@ -259,15 +267,16 @@ export default function AuthState(props) {
       }
     } catch (error) {
       const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
-        setProgress(100);
+      if (status === 500) {
+          setIsServer(500)
+          setProgress(100);
+      
       }
      
       else{
-    
-        setIsServer(500)
-          setProgress(100);
+      showAlert("Error", error.response.data.message);
+        setProgress(100);
+      
       }
     }
   };
@@ -346,6 +355,10 @@ export default function AuthState(props) {
         setProgress,
         login,
         refress_token,
+        loadingUser,
+        setLoadingUser,
+        setLoadingMessages,
+        loadingMessages
       }}
     >
       {props.children}

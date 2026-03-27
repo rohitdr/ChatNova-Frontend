@@ -9,20 +9,22 @@ import {
 } from "@heroicons/react/24/outline";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import SocketContext from "../Context/SocketContext";
+import UserSkeleton from "./UserSkeleton";
 
 export default function Group() {
   const socketcontext=useContext(SocketContext)
   const {socket}=socketcontext
   const authcontext = useContext(AuthContext);
-  const { isServer,user,setActivePage } = authcontext;
+  const { isServer,user,setActivePage,setLoadingMessages } = authcontext;
   const context = useContext(ChatNovaContext);
+ 
   const {
     chattedUsersList,
     capitalizeFirstLetter,
     getAllGroups,
     allGroups,
     setActiveChat,
-    databaseGruops,
+   
     getConversationId,
     serchGroup,
     setConversationId,
@@ -31,9 +33,12 @@ export default function Group() {
     getGroupById,
     getmessages,
     setActiveGroupChat,
-    setAllgroups
+    setAllgroups,
+    loadingGroups,
+    setLoadingGroups
     
   } = context;
+  const [filteredGroups,setFilteredGroups]=useState(allGroups)
   const [searchClick, setSearchClick] = useState(true);
   const onChangeHandler = (e) => {
     let value = e.target.value;
@@ -42,15 +47,17 @@ export default function Group() {
       setSearchClick(true);
     } else {
       setSearchClick(false);
-      serchGroup(value);
+    let groups = allGroups.filter((grp)=>grp.name.toString().includes(value.toString()))
+  setFilteredGroups(groups)
     }
   };
   useEffect(() => {
     getAllGroups();
   }, []);
 
-  const handleGroupClick = (element) => {
+  const handleGroupClick = async(element) => {
     if(!socket) return
+    setLoadingMessages(true)
     if(conversationId) {
       socket.emit("leave_group",conversationId)
     }
@@ -60,8 +67,16 @@ export default function Group() {
    setConversationId(element._id)
     setActiveChat(true);
     setActiveGroupChat(true);
-    getGroupById(element._id);
-    getmessages(element._id);
+    try{
+
+    await  getGroupById(element._id);
+    await  getmessages(element._id);
+    }catch(error){
+      console.log(error)
+    }
+    setTimeout(() => {
+      setLoadingMessages(false)
+    }, 500);
 
   };
   useEffect(()=>{
@@ -107,14 +122,14 @@ export default function Group() {
 
         <div className="flex pt-2 flex-col  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
           {!searchClick &&
-            databaseGruops &&
-            databaseGruops.length !== 0 &&
-            databaseGruops.map((element) => {
+            filteredGroups &&
+            filteredGroups.length !== 0 &&
+            filteredGroups.map((element) => {
               return (
-                <div
+                 <div
+                  onClick={()=>{handleGroupClick(element)}}
                   key={element._id}
-                 onClick={handleGroupClick}
-                  className="flex shadow cursor-pointer bg-white rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
+                  className="flex shadow  border-2  bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                 >
                   <div className="pt-2">
                     <img
@@ -126,15 +141,28 @@ export default function Group() {
                   </div>
                   <div className="flex flex-col w-full justify-between py-1">
                     <div className="flex  flex-1 justify-between items-center pl-2 ">
-                      <p className="font-small text-black">
+                      <p className="font-small text-xs  xs:text-sm text-black">
                         {capitalizeFirstLetter(element.name)}
                       </p>
+                      <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
+                        {element.lastMessageTime === null
+                          ? ""
+                          : new Date(
+                              element.lastMessage.createdAt,
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                      </p>
+                    </div>
+                    <div className="pl-2  text-[10px] xs:text-sm text-gray-400">
+                      {element.lastMessage.text}
                     </div>
                   </div>
                 </div>
               );
             })}
-          {searchClick && allGroups && allGroups.length !== 0 ? (
+          {!loadingGroups ? searchClick && allGroups && allGroups.length !== 0 ? (
             allGroups.map((element) => {
               return (
                 <div
@@ -184,7 +212,7 @@ export default function Group() {
                 <div>Search User to chat With...</div>{" "}
               </div>
             </div>
-          )}
+          ):[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
         </div>
       </div>
     </>

@@ -80,3 +80,18 @@ animation: slideIn 0.5s ease-in-out forwards;
 .animate-slide-out-chat{
    animation: slide-out-chat 0.5s ease-in-out forwards;
 }
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #e5e7eb 25%,
+    #f3f4f6 50%,
+    #e5e7eb 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
