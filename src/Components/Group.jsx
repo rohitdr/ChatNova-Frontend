@@ -108,7 +108,7 @@ export default function Group() {
           </div>
         </div>
 
-        <div className="flex p-2 pr-0 rounded-xl border-none mx-2 sm:mx-4 my-2  bg-white">
+        <div className="flex p-2 pr-0 rounded-xl border-none mx-4 my-2  bg-white">
           <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
           <input
             type="search"
@@ -120,7 +120,7 @@ export default function Group() {
           />
         </div>
 
-        <div className="flex pt-2 flex-col  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
+        <div className="flex pt-2 flex-col mb-14 lg:mb-0 p-2 px-4 overflow-y-auto scrollbar-hide">
           {!searchClick &&
             filteredGroups &&
             filteredGroups.length !== 0 &&

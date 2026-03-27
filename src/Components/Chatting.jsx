@@ -270,7 +270,7 @@ socket.off("message_seen",seenHandler)
     if (diff < 3600) return `Active ${Math.floor(diff / 60)} min ago`;
     if (diff < 86400) return ` Active ${Math.floor(diff / 3600)} hr ago`;
 
-    return last.toLocaleDateString();
+    return last.toLocaleDateString('en-GB');
   };
   const handleSendMessage = () => {
     if (sendingMessage !== "") {
@@ -459,76 +459,84 @@ socket.off("user_stop_typing")
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-dvh bg-white`}>
           <div className="flex h-full flex-col justify-between">
-            {!loadingMessages?<div className="shrink-0 flex flex-row p-4 pt-3  lg:p-7 lg:py-3 border justify-between">
-              <div className="flex items-center justify-between">
-                <ArrowLeftIcon
-                  className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden"
-                  onClick={() => {
-                    setActiveChat(false);
-                  }}
-                />
-                <img
-                loading="lazy"
-                  className="lg:h-14 lg:w-14 h-10 w-10 rounded-full border-white border-4"
-                  src={
-                    activeGroupChat
-                      ? currentGroup?.avtar?.url
-                      : currentChatUser?.image.url
-                  }
-                  alt=""
-                />
-                <div
-                  className="flex flex-col items-center cursor-pointer"
-                  onClick={() => {
-                    if (activeGroupChat) {
-                      setActivePage(4);
-                      setActiveChat(false)
-                    
-                    }
-                  }}
-                >
-                  <h2 className="mx-2 lg:mx-4 pt-2 font-medium text-md lg:text-xl">
-                    {capitalizeFirstLetter(
-                      activeGroupChat
-                        ? currentGroup?.name
-                        : currentChatUser?.name,
-                    )}
-                  </h2>
-                  {onlineUsers?.includes(currentChatUser?._id) ? (
-                    <p
-                      className={`text-xs h-4 ${activeGroupChat ? "invisible" : ""} `}
-                    >
-                      online
-                    </p>
-                  ) : (
-                    <p
-                      className={`text-2xs lg:text-xs h-4 ${activeGroupChat ? "invisible" : ""} `}
-                    >
-                      {formatLastSeen(
-                        currentChatUser?.lastSeen
-                          ? currentChatUser.lastSeen
-                          : "",
-                      )}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex  items-center justify-between">
-                <div className="mx-2 sm:mx-4">
-                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-                </div>
-                <div className="mx-2 sm:mx-4">
-                  <PhoneIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-                </div>
-                <div className="mx-2 sm:mx-4">
-                  <VideoCameraIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-                </div>
+            {!loadingMessages?<div className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
+bg-white/80 backdrop-blur-md border-b shadow-sm">
 
-                <div className=" mx-2 sm:mx-4">
-                  <EllipsisVerticalIcon className="w-5 h-5 text-gray-700 cursor-pointer" />
-                </div>
-              </div>
-            </div>:<ChatHeaderSkeleton></ChatHeaderSkeleton>}
+ 
+  <div className="flex items-center gap-3">
+
+
+    <ArrowLeftIcon
+      className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden hover:scale-110 transition"
+      onClick={() => setActiveChat(false)}
+    />
+
+  
+    <div className="relative">
+      <img
+        loading="lazy"
+        className="lg:h-12 lg:w-12 h-10 w-10 rounded-full object-cover border-2 border-white shadow"
+        src={
+          activeGroupChat
+            ? currentGroup?.avtar?.url
+            : currentChatUser?.image.url
+        }
+        alt=""
+      />
+
+    
+      {!activeGroupChat &&
+        onlineUsers?.includes(currentChatUser?._id) && (
+          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+        )}
+    </div>
+
+  
+    <div
+      className="flex flex-col cursor-pointer"
+      onClick={() => {
+        if (activeGroupChat) {
+          setActivePage(4);
+          setActiveChat(false);
+        }
+      }}
+    >
+      <h2 className="text-sm lg:text-lg font-semibold text-gray-900">
+        {capitalizeFirstLetter(
+          activeGroupChat
+            ? currentGroup?.name
+            : currentChatUser?.name
+        )}
+      </h2>
+
+      {!activeGroupChat && (
+        onlineUsers?.includes(currentChatUser?._id) ? (
+          <span className="text-xs text-green-500 font-medium">
+            online
+          </span>
+        ) : (
+          <span className="text-xs text-gray-400">
+            {formatLastSeen(
+              currentChatUser?.lastSeen || ""
+            )}
+          </span>
+        )
+      )}
+    </div>
+  </div>
+
+  {/* RIGHT SECTION */}
+  <div className="flex items-center gap-4 text-gray-600">
+
+    <MagnifyingGlassIcon className="w-5 h-5 cursor-pointer hover:text-blue-500 hover:scale-110 transition" />
+
+    <PhoneIcon className="w-5 h-5 cursor-pointer hover:text-green-500 hover:scale-110 transition" />
+
+    <VideoCameraIcon className="w-5 h-5 cursor-pointer hover:text-purple-500 hover:scale-110 transition" />
+
+    <EllipsisVerticalIcon className="w-5 h-5 cursor-pointer hover:text-gray-900 hover:scale-110 transition" />
+  </div>
+</div>:<ChatHeaderSkeleton></ChatHeaderSkeleton>}
             <div className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ${loadingMessages &&" overflow-y-auto "} `}>
               {!loadingMessages? <Virtuoso
                 className="scrollbar-hide"

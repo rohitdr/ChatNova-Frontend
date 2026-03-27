@@ -128,10 +128,10 @@ export default function Users() {
     <>
       {activePage === 0 && (
         <div
-          className={`h-screen   xs:p-4  lg:p-0 flex bg-[#F5F7FB] flex-col `}
+          className={`h-screen   xs:p-2  lg:p-0 flex bg-[#F5F7FB] flex-col `}
         >
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Chats</div>
-          <div className="flex p-2 pr-0 rounded-xl border-none mx-2 sm:mx-4 my-2 bg-white shadow">
+          <div className="flex p-2  pr-0 rounded-xl border-none mx-3 sm:mx-4 my-2 bg-white shadow">
             <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
             <input
               type="search"
@@ -143,7 +143,7 @@ export default function Users() {
             />
           </div>
 
-          <div className="flex pt-2 flex-col pb-10 mb-10 lg:mb-0  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
+          <div className="flex pt-2 flex-col pb-10 mb-10 lg:mb-0  sm:p-2 px-3 lg:px-4 overflow-y-auto scrollbar-hide">
             {!searchClick &&
               dataBaseUsers &&
               dataBaseUsers.length !== 0 &&

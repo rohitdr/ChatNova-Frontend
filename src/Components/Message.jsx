@@ -183,7 +183,7 @@ let status = messageStatus(message,currentChatUserId)
     
    
         </div>{" "}
-        <div ref={reactionRef} className={`bg-white absolute rounded-3xl shadow-2xl -top-5 ${send?"right-28":""}  p-2 ${display}`}>
+        <div ref={reactionRef} className={`bg-white absolute rounded-3xl shadow-2xl -top-5 ${send?"right-10 lg:right-28":""}  p-2 ${display}`}>
           { reactions.map((r)=>{
              return <span className=" cursor-pointer text-3xl " key={r} onClick={handleReactionClick}>{r}</span>
           })

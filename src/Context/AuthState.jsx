@@ -110,7 +110,7 @@ export default function AuthState(props) {
      
       else{
       
-         showAlert("Error", error.response.data.message);
+         showAlert("Error", error.response.message);
       
       }
     }
