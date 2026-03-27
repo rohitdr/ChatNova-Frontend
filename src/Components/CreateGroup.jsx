@@ -25,28 +25,31 @@ import ChatNovaContext from "../Context/ChatNovaContext";
 export default function CreateGroup() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,addMember,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,serchUser,setCurrentGroup,dataBaseUsers,createGroup,conversationId,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
-  const { user,updatePassword, isServer,showAlert ,updateUser} = authContext;
-  const [settingsImage, setSettingsImage] = useState(null);
-  const [data,setData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
-  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
- const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
+  const { user, isServer,showAlert,setActivePage } = authContext;
+  const [groupImage, setGroupImage] = useState(null);
+  
  const socketcontext = useContext(SocketContext)
  const [addUser,setAddUser] = useState(false)
  const [searchingAddUser,setSearchingAddUser]=useState(false)
- const [isAdmin,setIsAdmin]=useState(false)
+
  const [selectedUsers,setSelectedUsers]=useState([])
+ const [groupData,setGroupData]=useState({groupName:"",groupCode:""})
 
  
 
  const {socket}=socketcontext
-  const settingImagehandler = (e) => {
-    setSettingsImage(e.target.files[0]);
+  const groupImagehandler = (e) => {
+    if(e.target.files[0].size >10000000){
+      showAlert("Error","Image size should be less than 10mb")
+    }
+    else{
+ setGroupImage(e.target.files[0]);
+    }
+   
   };
-  const onChangeHandler=(e)=>{
-    setData({...data,[e.target.name]:e.target.value})
-  }
+
   const onChangeSearchAddUser = (e) => {
     let value = e.target.value;
 
@@ -61,73 +64,13 @@ export default function CreateGroup() {
     }
   };
 
-
+ const onInputChange=(e)=>{
+ setGroupData({...groupData,[e.target.name]:e.target.value})
+ }
  
-  const handleUpdate=(e)=>{
-    let updatedfiled={}
-    const argu ={}
-    Object.keys(data).forEach((key)=>{
-      if(data[key] !== originaldata[key]){
-        updatedfiled[key]=data[key]
-      }
-    })
-    e.preventDefault()
-
-    if(data.settingsName.length<3 || data.settingsName.length>20 ){
-      showAlert("Warning","Name should be between length 3 to 20")
-    }
-    else if(data.settingsUsername.length<8 ||data.settingsUsername.length>12){
-      showAlert("Warning","Username should be between length 8 to 12")
-    }
-    else if(String(data.settingsPhoneNumber).trim().length !==10){
-     showAlert("Warning","Phone number should be of length 10")
-    }
-    else if(Object.keys(updatedfiled).length===0){
-         showAlert("Warning","Please Update anything to change the data")
-    }
-    else{
-   if(updatedfiled.settingsName){
-     argu.name=updatedfiled.settingsName
-   }
-   if(updatedfiled.settingsEmail){
-     argu.email=updatedfiled.settingsEmail
-   }
-   if(updatedfiled.settingsUsername){
-     argu.username=updatedfiled.settingsUsername
-   }
-   if(updatedfiled.settingsPhoneNumber){
-     argu.phone_number=updatedfiled.settingsPhoneNumber
-   }
-updateUser(argu)
-setEditMenu(false)
-updatedfiled={}
-
-    }
+ 
 
 
-
-  }
-
-  const onPasswordChangeHandler=(e)=>{
-     setPasswordData({...passwordData,[e.target.name]:e.target.value})
-  }
-  const handlePasswordUpdate=(e)=>{
-e.preventDefault()
- if(passwordData.oldPassword.length<8 || passwordData.newPassword.length<8 || passwordData.confirmPassword.length<8  ){
-      showAlert("Warning","Password should be of length 8")
-    }
-    else if(passwordData.confirmPassword !== passwordData.newPassword){
-         showAlert("Warning","New password and confirm password must be same")
-    }
-    else if(passwordData.oldPassword === passwordData.newPassword){
-         showAlert("Warning","New password and old password must not be same")
-    }
-    else{
-      // console.log(passwordData.oldPassword,passwordData.newPassword)
-  updatePassword(passwordData.oldPassword,passwordData.newPassword)
-   setPasswordData({oldPassword:"",newPassword:"",confirmPassword:""})
-    }
-  }
 
   useEffect(()=>{
     if(!socket) return
@@ -162,11 +105,36 @@ e.preventDefault()
       socket.off("remove_member",MemberHandler)
    }
   },[socket])
+
+
+  const CreateGroupHandler=()=>{
+if(!groupImage){
+    showAlert("Error","Select a image for the group ")
+}
+   else if(groupData.groupName.length<5){
+    showAlert("Error","Group name should be more than 5 characters")
+
+   }
+   else if(groupData.groupCode.length<5){
+showAlert("Error","Group code should be more than 5 characters")
+   }
+   else if(selectedUsers.length===0){
+    showAlert("Error","Please select at least one user")
+   }
+   else{
+  
+    createGroup(selectedUsers,groupData.groupName,groupData.groupCode,groupImage)
+    setGroupImage(null);
+    setActivePage(2)
+   }
+                
+
+  }
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
     <div>
-    {!addUser &&  <div className="flex h-screen flex-col bg-[#F5F7FB] overflow-y-auto scrollbar-hide">
+    { <div className="flex h-screen flex-col bg-[#F5F7FB] overflow-y-auto scrollbar-hide">
       <div className="flex justify-between m-2 p-2 mt-0">
         <div>
           {" "}
@@ -178,33 +146,28 @@ e.preventDefault()
         <div className="my-2 py-2 relative">
           <input
             type="file"
-            id="settingsImage"
+            id="GroupImage"
             accept="image/*"
             className="hidden"
-            onChange={settingImagehandler}
+            onChange={groupImagehandler}
           />
-          {settingsImage ? (
-            <ArrowUpCircleIcon
-              className={`w-9 h-9 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute `}
-              onClick={() => {
-                console.log(currentGroup)
-                updateGroupImage(settingsImage);
-                setSettingsImage(null);
-              }}
-            ></ArrowUpCircleIcon>
-          ) : (
+         
             <PencilIcon
               className={`w-9 h-9 right-2 bg-white border border-black  p-1.5 text-blue-900  cursor-pointer rounded-full bottom-3 absolute `}
               onClick={() => {
-                document.getElementById("settingsImage").click();
+                document.getElementById("GroupImage").click();
               }}
             ></PencilIcon>
-          )}
+          
           <img
+          loading="lazy"
+          onClick={() => {
+                document.getElementById("GroupImage").click();
+              }}
             className="w-28  shadow-md h-28 rounded-full border-white   border-4"
             src={
-              settingsImage
-                ? URL.createObjectURL(settingsImage)
+              groupImage
+                ? URL.createObjectURL(groupImage)
                 : ".././public/group-of-friends-sketch-vector-43422085.avif"
             }
             alt=""
@@ -219,6 +182,10 @@ e.preventDefault()
     </label>
     <input
       type="text"
+      onChange={onInputChange}
+      name="groupName"
+      value={groupData.groupName}
+      id="groupName"
       placeholder="Enter group name..."
       className="px-4 py-2 rounded-xl border border-gray-300 bg-[#F9FAFA] 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 
@@ -233,6 +200,10 @@ e.preventDefault()
     </label>
     <input
       type="text"
+      name="groupCode"
+           onChange={onInputChange}
+           value={groupData.groupCode}
+      id="groupCode"
       placeholder="Enter invite code..."
       className="px-4 py-2 rounded-xl border border-gray-300 bg-[#F9FAFA] 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 
@@ -244,7 +215,7 @@ e.preventDefault()
       </div>
       </div>
     
-          <div className="flex flex-col mx-3 mt-4 mb-20 bg-white rounded-xl shadow">
+        { !addUser? <div className="flex flex-col mx-3 py-2 mt-4 mb-4 bg-white rounded-xl shadow">
         <div className="flex justify-between ">
         <div className="flex font-medium  pt-2 pb-1 mx-2">
           {" "}
@@ -277,6 +248,7 @@ e.preventDefault()
                     <div className="flex-shrink-0">
                        
                         <img
+                        loading="lazy"
                           className="w-10 mt-1 h-10 rounded-full border-white border-2"
                           src={element.user.image.url}
                           alt=""
@@ -309,45 +281,18 @@ e.preventDefault()
                   </div>
                 );
               })} </div>
-                 <div
-                
-                   
-                    className="flex    border-2  cursor-pointer rounded-2xl mt-8 bg-white  hover:bg-[#E6EBF5]    xs:p-2"
-                  >
-                    
-                    <div className="">
-                       
-                     
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-2">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-red-500">
-                   Exit Group
-                        </p>
-                    
-                       
-                       
-                      </div>
-                   
-                     
-                    </div>
-                    <div className="flex items-center">
-                      <TrashIcon className="w-5 font-medium   h-5 text-red-500 cursor-pointer" />
-                    </div>
-                  </div>
+            
 
    
           
-          </div>
-    </div>}
-    {addUser && 
-    <div className={`h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col `}>
+          </div>: 
+    <div className={`h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-white rounded-xl  m-3 mb-20 flex-col `}>
         
-          <div className="flex p-2 pr-0 rounded-lg border-none mx-2 sm:mx-4 my-2 mt-6 bg-[#E6EBF5]">
+          <div className="flex p-2 pr-0 rounded-xl    mx-2 sm:mx-4 my-2 mt-6 bg-[#F9FAFA] border border-gray-300 ">
             <MagnifyingGlassIcon className="w-5 h-5 pt-1  text-gray-700 cursor-pointer" />
             <input
               type="search"
-              className="w-full  bg-[#E6EBF5] outline-none pl-2"
+              className="w-full bg-[#F9FAFA]   outline-none pl-2"
               onChange={onChangeSearchAddUser}
               placeholder="Search messages or users"
               name="usersearch"
@@ -367,17 +312,18 @@ e.preventDefault()
               )
             
                 return (
-                  
                   <div
                   key={element._id}
                    
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+                    className={`flex mx-2  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2 ${participentExists
+                      ? "bg-blue-50 border border-blue-400 scale-[1.01]"
+                      : "hover:bg-gray-100 border border-transparent"}`}
                   >
                     
-                    <div className="">
+                    <div className="flex-shrink-0">
                        
                         <img
-                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
+                          className="w-10 mt-1 h-10 rounded-full border-white border-2"
                           src={element.image.url}
                           alt=""
                         />
@@ -393,10 +339,10 @@ e.preventDefault()
                       </div>
                      
                     </div>
-                     <div className="flex items-center">
+                     <div className="flex flex-shrink-0 items-center">
                       {!participentExists ?<PlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
                         [...prev,{user:element._id,role:"member"}]
-                      )}}/>:<MinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
+                      )}}/>:<><CheckIcon className={`w-5 font-medium mx-2  h-5 text-blue-500 cursor-pointer `}></CheckIcon><MinusIcon className={`w-5 font-medium  mx-2  h-5 text-red-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
                       {
                         const filtered = prev.filter(p=>
                             p.user !==element._id
@@ -404,9 +350,9 @@ e.preventDefault()
                         return filtered
                       }
                        
-                      )}}/>}
+                      )}}/></>}
                     </div>
-                    </div>
+                  </div>
                
                 );
               })}
@@ -414,6 +360,17 @@ e.preventDefault()
         </div>
           </div>
         </div>}
+     <button
+     disabled={selectedUsers.length===0}
+     onClick={CreateGroupHandler}
+     className={`mx-3 flex justify-center items-center gap-2 mb-20 py-3 px-4 rounded-2xl font-semibold text-white shadow-md transition-all duration-200${selectedUsers.length ===0 ?"cursor-not-allowed bg-gray-400":" bg-gradient-to-r from-blue-500 to-indigo-600 hover:scale-[1.02] hover:shadow-lg active:scale-95"}`}
+     >
+      <UserGroupIcon className="w-5 h-5"></UserGroupIcon>
+      Create Group
+<span className="">{selectedUsers.length}</span>
+     </button>
+    </div>}
+   
    
         </div>)
 

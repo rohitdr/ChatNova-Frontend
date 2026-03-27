@@ -380,6 +380,48 @@ const removeMember =async(userId)=>{
     
     }
 }
+const createGroup =async(participents,name,inviteCode,file)=>{
+    try {
+   
+         setProgress(10);
+        const formdata = new FormData();
+      formdata.append("file", file);
+      formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
+      const res = await axios.post(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
+        formdata,
+      );
+        setProgress(40);
+      let image = {
+        publicId: res.data.public_id,
+        url: res.data.secure_url,
+       
+      };
+      let data = {
+       participents,
+       name,
+       avtar:image,
+       inviteCode
+
+      }
+       setProgress(70);
+      const response = await api.post(`/groups/createGroup`,data);
+    
+         setProgress(100);
+    } catch (error) {
+     const status = error.response?.status;
+   if (status === 404) {
+        showAlert("Error", error.response.data.message);
+    setProgress(100);
+      }
+      else{
+       
+        setIsServer(500)
+      setProgress(100);
+      }
+    
+    }
+}
 
 
   const capitalizeFirstLetter = (string) => {
@@ -395,6 +437,7 @@ const removeMember =async(userId)=>{
     <ChatNovaContext.Provider
       value={{
         getGroupById,
+        createGroup,
         removeMember,
         setCurrentGroup,
         currentGroup,

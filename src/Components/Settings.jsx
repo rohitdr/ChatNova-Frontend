@@ -126,6 +126,7 @@ e.preventDefault()
             ></PencilIcon>
           )}
           <img
+          loading="lazy"
             className="w-28  shadow h-28 rounded-full   border-2"
             src={
               settingsImage

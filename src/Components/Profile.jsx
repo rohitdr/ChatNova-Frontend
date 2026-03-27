@@ -27,6 +27,7 @@ export default function Profile() {
       <div className="flex flex-col items-center justify-center my-2">
         <div className="my-2 py-2">
           <img
+        
             className="w-28  h-28 rounded-full  border-white border-4"
             src={user?.image.url}
             alt=""

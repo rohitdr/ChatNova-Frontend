@@ -24,6 +24,7 @@ export default function SideBar() {
       <div className={`2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
         <div className="flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start">
           <img
+          loading="lazy"
             src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"
             alt=""
             className=" lg:h-10 lg:w-14 xs:w-10 xs:pb-1 h-8  xs:h-8 w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full"
@@ -71,6 +72,7 @@ export default function SideBar() {
         </div>
         <div className="flex items-end lg:items-end lg:justify-center mb-4  justify-end ">
           <img
+          loading="lazy"
             onClick={() => {
               profileOptionsActive
                 ? setProfileOptionsActive(false)

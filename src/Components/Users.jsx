@@ -141,6 +141,7 @@ export default function Users() {
                   >
                     <div className="pt-2">
                       <img
+                      loading="lazy"
                         className="w-12 h-10 rounded-full border-white border-2"
                         src={element.image.url}
                         alt=""
@@ -178,6 +179,8 @@ export default function Users() {
                     <div className="">
                        
                         <img
+                        
+                        loading="lazy"
                           className="w-12 mt-1 h-10 rounded-full border-white border-2"
                           src={element.user.image.url}
                           alt=""

@@ -466,6 +466,7 @@ socket.off("user_stop_typing")
                   }}
                 />
                 <img
+                loading="lazy"
                   className="lg:h-14 lg:w-14 h-10 w-10 rounded-full border-white border-4"
                   src={
                     activeGroupChat
@@ -643,6 +644,7 @@ socket.off("user_stop_typing")
             {uploadedImage && (
               <div>
                 <img
+                loading="lazy"
                   className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl"
                   src={URL.createObjectURL(uploadedImage)}
                 />

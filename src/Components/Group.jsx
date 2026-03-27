@@ -30,7 +30,8 @@ export default function Group() {
     activeGroupChat,
     getGroupById,
     getmessages,
-    setActiveGroupChat
+    setActiveGroupChat,
+    setAllgroups
     
   } = context;
   const [searchClick, setSearchClick] = useState(true);
@@ -63,6 +64,22 @@ export default function Group() {
     getmessages(element._id);
 
   };
+  useEffect(()=>{
+    if (!socket) return
+    const groupHandler =(newGroup)=>{
+   
+      setAllgroups(prev=>{
+        const filterd =prev.filter((group)=>group._id !== newGroup._id)
+        return [newGroup,...filterd]
+      }
+      )
+     
+    }
+    socket.on("group_created",groupHandler)
+   return ()=>{
+    socket.off("group_created",groupHandler)
+   }
+  },[socket])
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -101,6 +118,7 @@ export default function Group() {
                 >
                   <div className="pt-2">
                     <img
+                    loading="lazy"
                       className="w-12 h-10 rounded-full border-white border-2"
                       src={element.avtar.url}
                       alt=""
@@ -126,6 +144,7 @@ export default function Group() {
                 >
                   <div className="pt-2">
                     <img
+                    loading="lazy"
                       className="w-12 h-10 rounded-full border-white border-2"
                       src={element.avtar.url}
                       alt=""

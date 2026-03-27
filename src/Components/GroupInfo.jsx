@@ -202,6 +202,7 @@ e.preventDefault()
             ></PencilIcon>
           )}
           <img
+          loading="lazy"
             className="w-28  shadow-md h-28 rounded-full border-white   border-4"
             src={
               settingsImage
@@ -247,6 +248,7 @@ e.preventDefault()
                     <div className="">
                        
                         <img
+                        loading="lazy"
                           className="w-12 mt-1 h-10 rounded-full border-white border-2"
                           src={element.user.image.url}
                           alt=""
@@ -274,7 +276,7 @@ e.preventDefault()
               })} </div>
                  <div
                 
-                   
+                
                     className="flex    border-2  cursor-pointer rounded-2xl mt-8 bg-white  hover:bg-[#E6EBF5]    xs:p-2"
                   >
                     
@@ -285,7 +287,7 @@ e.preventDefault()
                     <div className="flex flex-col w-full justify-between py-2">
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
                         <p className="font-small text-xs  xs:text-sm text-red-500">
-                   Exit Group
+                  {isAdmin?"Delete Group":"Exit Group"}
                         </p>
                     
                        
@@ -340,6 +342,7 @@ e.preventDefault()
                     <div className="">
                        
                         <img
+                        loading="lazy"
                           className="w-12 mt-1 h-10 rounded-full border-white border-2"
                           src={element.user.image.url}
                           alt=""
@@ -381,6 +384,7 @@ e.preventDefault()
                     <div className="">
                        
                         <img
+                        loading="lazy"
                           className="w-12 mt-1 h-10 rounded-full border-white border-2"
                           src={element.image.url}
                           alt=""

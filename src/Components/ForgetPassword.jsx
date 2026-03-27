@@ -49,6 +49,7 @@ export default function ForgetPassword() {
       <div className="">
         <div className=" my-5 flex text-3xl font-medium justify-center">
          <img
+         loading="lazy"
             src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"
             alt=""
             className=" lg:h-12 lg:w-14 xs:w-10 xs:pb-1 h-8  xs:h-8 w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full"

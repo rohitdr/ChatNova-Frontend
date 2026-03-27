@@ -137,6 +137,7 @@ let status = messageStatus(message,currentChatUserId)
       <div className=" flex flex-col justify-end max-w-[15%] ">
        
         <img
+        loading="lazy"
           className="w-[40px] h-[38px]        lg:w-[40px]  lg:h-[41px] rounded-full  border-white border-4"
           src={send ? user?.image?.url : message?.senderId?.image?.url}
           alt=""
@@ -149,7 +150,7 @@ let status = messageStatus(message,currentChatUserId)
         > 
           <div className="">
           {message.type === "text" && message.text}
-          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img src={message.media.url} className="" onClick={()=>{setMediaView(true)}} alt="" />}
+          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img loading="lazy" src={message.media.url} className="" onClick={()=>{setMediaView(true)}} alt="" />}
           {message.type === "video" && (
             <video width="300" className="" autoplay muted loop controls>
               <source src={message.media.url} type="video/mp4" />
@@ -213,6 +214,7 @@ let status = messageStatus(message,currentChatUserId)
             {message.type === "image" && (
               <div>
                 <img
+                loading="lazy"
                   className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl"
                src={message.media.url}
                 />
