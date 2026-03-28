@@ -12,10 +12,13 @@ import GroupInfo from "./GroupInfo";
 import { VideoCameraIcon, PhotoIcon } from "@heroicons/react/24/solid";
 import CreateGroup from "./CreateGroup";
 import UserSkeleton from "./UserSkeleton";
+import UserItem from "./UserItem"
+import { Virtuoso } from "react-virtuoso";
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
     serchUser,
+    loadMoreChattedUsers,
     dataBaseUsers,
     getConversationId,
     currentUsersMessages,
@@ -37,6 +40,7 @@ export default function Users() {
     conversationId,
     setConversationId,
     getmessages,
+    hasMoreUsers
 
   } = context;
 
@@ -46,23 +50,36 @@ export default function Users() {
   const socketcontext = useContext(SocketContext);
   const { onlineUsers, socket } = socketcontext;
   const [unseenMessages, setUnseenMessages] = useState(0);
+  const [userListpage,setUserListPage]=useState(1)
+  const [isFetching, setIsFetching] = useState(false);
+  const [searchValue,setSearchValue]=useState("")
 
   useEffect(() => {
-    chattedUsers();
+    chattedUsers(userListpage,15);
   }, []);
 
   useEffect(() => {}, [activePage]);
 
   const onChangeHandler = (e) => {
     let value = e.target.value;
-
+setSearchValue(value)
     if (value.length === 0) {
       setSearchClick(true);
     } else {
       setSearchClick(false);
-      serchUser(value);
+    
     }
   };
+
+useEffect(() => {
+  const delay = setTimeout(() => {
+    if (searchValue.trim().length > 2) {
+      serchUser(searchValue);
+    }
+  }, 400); 
+
+  return () => clearTimeout(delay); 
+}, [searchValue]);
   const handleUserClick = async(element) => {
     if (!socket || !user?._id) return;
     setLoadingMessages(true)
@@ -122,6 +139,18 @@ export default function Users() {
       isInitailLoadRef.current = true;
   };
 
+  const virtusoEndReached = async() => {
+    if (!hasMoreUsers || isFetching) return;
+   setIsFetching(true)
+  await loadMoreChattedUsers(userListpage + 1, 15);
+
+  setUserListPage(prev => prev + 1);
+
+  
+ setIsFetching(false)
+    
+  };
+
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -143,80 +172,43 @@ export default function Users() {
             />
           </div>
 
-          <div className="flex pt-2 flex-col pb-10 mb-10 lg:mb-0  sm:p-2 px-3 lg:px-4 overflow-y-auto scrollbar-hide">
+          <div className={`flex pt-2 flex-col pb-10 mb-10 lg:mb-0 sm:p-2 px-3 ${!searchClick && " overflow-y-auto scrollbar-hide "} lg:px-4 h-full`}>
             {!searchClick &&
               dataBaseUsers &&
               dataBaseUsers.length !== 0 &&
               dataBaseUsers.map((element) => {
                 return (
-                  <div
-                    key={element._id}
-                    onClick={() => {
-                      handleDatabaseUserClick(element);
-                    }}
-                    className="flex shadow cursor-pointer bg-white rounded-2xl mt-2 border-b-2 hover:bg-[#E6EBF5] p-0 lg:p-2"
-                  >
-                    <div className="pt-2">
-                      <img
-                        loading="lazy"
-                        className="w-12 h-10 rounded-full border-white border-2"
-                        src={element.image.url}
-                        alt=""
-                      />
-                    </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-black">
-                          {capitalizeFirstLetter(element.name)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+               
+                      <div key ={element._id }style={{ height: 65 }} className="my-1" >
+               <UserItem element={element} image={element.image.url} name={element.name} lastMessage={null}  handleUserClick={()=>{handleDatabaseUserClick(element)}} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+       </div>
                 );
               })}
-            {!loadingUser ?searchClick && chattedUsersList && chattedUsersList.length !== 0
-              ? chattedUsersList.map((element) => {
-                  return (
-                    <div
-                      key={element.user._id}
-                      onClick={() => {
-                        handleUserClick(element);
-                      }}
-                      className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                    >
-                      <div className="">
-                        <img
-                          loading="lazy"
-                          className="w-9 mt-1 h-10 rounded-full border-white shadow object-cover"
-                          src={element.user.image.url}
-                          alt=""
-                        />
-                      </div>
-                      <div className="flex flex-col w-full justify-between py-1">
-                        <div className="flex  flex-1 justify-between items-center pl-2 ">
-                          <p className="font-small text-xs  xs:text-sm text-black">
-                            {capitalizeFirstLetter(element.user.name)}
-                          </p>
-
-                          <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
-                            {element.lastMessage.createdAt === null
-                              ? ""
-                              : new Date(
-                                  element.lastMessage.createdAt,
-                                ).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                          </p>
-                        </div>
-                        <div className="pl-2  text-[10px] xs:text-sm text-gray-400 flex justify-between">
-                          {element.lastMessage.text}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              : searchClick && (
+            
+            {!loadingUser && searchClick ?
+            <div className="h-full">
+            <Virtuoso
+                className="scrollbar-hide"
+                endReached={virtusoEndReached}
+                computeItemKey={(index, element) => element.ConversationId}
+                // ref={virtuosoRef}
+                overscan={200}
+               
+                defaultItemHeight={65}
+                style={{ height: "100%" }}
+              increaseViewportBy={{ top: 0, bottom: 400 }}
+                data={chattedUsersList}
+               followOutput={false}
+                itemContent={(index, element) => (
+                  <div style={{ height: 65 }}>
+               <UserItem element={element} image={element.user.image.url} name={element.user.name} lastMessage={element.lastMessage} handleUserClick={()=>{handleUserClick(element)}} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+       </div>
+                )}
+              
+              />
+             </div>
+                
+              : searchClick && !loadingUser && (
                   <div className="flex h-screen justify-center items-center">
                     <div className="text-center flex flex-col">
                       {" "}
@@ -227,8 +219,8 @@ export default function Users() {
                       <div>Search User to chat With...</div>{" "}
                     </div>
                   </div>
-                ):
-            [...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
+                )}
+            {loadingUser &&[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
           </div>
         </div>
       )}

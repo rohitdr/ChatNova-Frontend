@@ -8,7 +8,7 @@ import AuthContext from "./AuthContext.jsx";
 
 export default function ChatNovaState(props) {
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
-  const [chattedUsersList, setChattedUsersList] = useState(null);
+  const [chattedUsersList, setChattedUsersList] = useState([]);
   const [chattedOnlineUsers, setChattedOnlineUsers] = useState(null);
   const [currentChatUserId, setCurrentChatUserId] = useState(null);
   const [currentChatUser, setCurrentChatUser] = useState(null);
@@ -25,7 +25,8 @@ const [conversationId,setConversationId]=useState(null)
  const loadingRef = useRef(false)
 const isInitailLoadRef = useRef(true)
 const [loadingGroups,setLoadingGroups]=useState(false)
-
+const [hasMoreUsers , setHasMoreUsers]=useState(true)
+const firstItemIndexRef =useRef(10000000)
 
 
   let Navigate = useNavigate();
@@ -83,10 +84,10 @@ const [loadingGroups,setLoadingGroups]=useState(false)
   };
 
   //function to serach the users with whom logged in user have chatted
-  const chattedUsers = async () => {
+  const chattedUsers = async (page,limit) => {
     try {
       setLoadingUser(true)
-      const res = await api.get(`/users/chattedUsers`);
+      const res = await api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
       if (res.status === 200) {
     
         setChattedUsersList(res.data.users);
@@ -99,6 +100,34 @@ const [loadingGroups,setLoadingGroups]=useState(false)
      setLoadingUser(false)
       if(status ===500){
         setLoadingUser(false)
+        setIsServer(500)
+     
+      }
+    }
+  };
+  //function to serach the users with whom logged in user have chatted
+  const loadMoreChattedUsers = async (page,limit) => {
+    try {
+   if(!hasMoreUsers) return
+      const res = await api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
+      if (res.status === 200) {
+    
+       setChattedUsersList(prev => {
+  const map = new Map();
+
+  [...prev, ...res.data.users].forEach(item => {
+    map.set(item.ConversationId, item); // unique by conversation
+  });
+
+  return Array.from(map.values());
+});
+        setHasMoreUsers(res.data.hasMore)
+      }
+    } catch (error) {
+       const status = error.response?.status;
+     setLoadingUser(false)
+      if(status ===500){
+   
         setIsServer(500)
      
       }
@@ -131,11 +160,11 @@ const [loadingGroups,setLoadingGroups]=useState(false)
     try {
       const res = await api.get(`/messages/recieveMessage/${id}?page=1&limit=20`);
       if (res.status === 200) {
-      console.log(res.data.message)
+    
         setCurrentUsersMessages(res.data.message.reverse());
-      console.log(res.data.hasMore)
+    
       hasMoreRef.current = res.data.hasMore
-      console.log(hasMoreRef.current)
+     
         setHasMore(res.data.hasMore)
       }
     } catch (error) {
@@ -162,7 +191,7 @@ const [loadingGroups,setLoadingGroups]=useState(false)
       const res = await api.get(`/messages/recieveMessage/${id}?page=${page}&limit=20`);
       if (res.status === 200) {
         setCurrentUsersMessages(prev=>[...res.data.message.reverse(),...prev]);
-        console.log(res.data.message.reverse())
+        firstItemIndexRef.current -= res.data.message.length
          setpage(prev=>prev +1)
                hasMoreRef.current = res.data.hasMore
                  console.log(hasMoreRef.current)
@@ -437,8 +466,10 @@ const createGroup =async(participents,name,inviteCode,file)=>{
    updateGroupImage,
         conversationId,
     addMember,
+    firstItemIndexRef,
         activeChat,
         setActiveChat,
+        loadMoreChattedUsers,
         uploadCloudinary,
         capitalizeFirstLetter,
         serchUser,
@@ -458,6 +489,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         currentChatUserId,
         setChattedUsersList,
         chattedUsersList,
+        hasMoreUsers,
         chattedUsers,
         chattedOnlineUsers,
         currentChatUser,

@@ -31,12 +31,14 @@ export default function Chatting() {
   const [uploadFile, setUplaodFile] = useState(null);
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer,loadingMessages, showAlert, setActivePage } = authContext;
+  const { user, isServer, loadingMessages, showAlert, setActivePage } =
+    authContext;
   const [fileType, setFileType] = useState(null);
 
   const [mediaSendModal, setMediaSendModal] = useState(false);
-  const [typingUser,setTypingUser]=useState([])
-  const [isTyping,setIsTyping]=useState(false)
+  const [typingUser, setTypingUser] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+
   const {
     currentChatUser,
     setActiveChat,
@@ -51,7 +53,7 @@ export default function Chatting() {
     isInitailLoadRef,
     capitalizeFirstLetter,
     conversationId,
-
+    firstItemIndexRef,
     activeGroupChat,
 
     currentGroup,
@@ -80,50 +82,39 @@ export default function Chatting() {
       socket.off("reaction_updated", handler);
     };
   }, [socket]);
-  useEffect(()=>{
- if(!socket) return
-const deliverHandler =({messageId,deliveredTo})=>{
-  setCurrentUsersMessages((prev)=>
-  prev.map((msg)=>
-    msg._id === messageId ?{...msg,deliveredTo:deliveredTo}:msg
-  )
-  )
 
-}
+  useEffect(() => {
+    if (!socket) return;
+    const deliverHandler = ({ messageId, deliveredTo }) => {
+      setCurrentUsersMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId ? { ...msg, deliveredTo: deliveredTo } : msg,
+        ),
+      );
+    };
 
+    socket.on("message_deliverd", deliverHandler);
 
+    return () => {
+      socket.off("message_deliverd", deliverHandler);
+    };
+  }, [socket]);
+  useEffect(() => {
+    if (!socket) return;
+    const seenHandler = ({ messageId, seenBy }) => {
+      setCurrentUsersMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId ? { ...msg, seenBy: seenBy } : msg,
+        ),
+      );
+    };
 
+    socket.on("message_seen", seenHandler);
 
-
-socket.on("message_deliverd",deliverHandler)
-
-
- return ()=>{
-socket.off("message_deliverd",deliverHandler)
- }
-  },[socket])
-  useEffect(()=>{
- if(!socket) return
-const seenHandler =({messageId,seenBy})=>{
-  setCurrentUsersMessages((prev)=>
-  prev.map((msg)=>
-    msg._id === messageId ?{...msg,seenBy:seenBy}:msg
-  )
-  )
-
-}
-
-
-
-
-
-socket.on("message_seen",seenHandler)
-
-
- return ()=>{
-socket.off("message_seen",seenHandler)
- }
-  },[socket])
+    return () => {
+      socket.off("message_seen", seenHandler);
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (currentUsersMessages.length && isInitailLoadRef.current) {
@@ -133,18 +124,13 @@ socket.off("message_seen",seenHandler)
       });
       isInitailLoadRef.current = false;
     }
-  }, [currentUsersMessages,typingUser]);
+  }, []);
   useEffect(() => {
-
-      virtuosoRef.current?.scrollToIndex({
-        index: currentUsersMessages.length - 1,
-        behavior: "auto",
-      });
-  
-    
+    virtuosoRef.current?.scrollToIndex({
+      index: currentUsersMessages.length - 1,
+      behavior: "auto",
+    });
   }, [typingUser]);
-  
-
 
   useEffect(() => {
     if (!socket) return;
@@ -156,7 +142,10 @@ socket.off("message_seen",seenHandler)
         (!activeGroupChat && newMessage._doc.conversationId === conversationId)
       ) {
         console.log("running");
-          socket.emit("mark_seen",{conversationId:conversationId,userId:user._id})
+        socket.emit("mark_seen", {
+          conversationId: conversationId,
+          userId: user._id,
+        });
 
         /// setting current user chat
         setCurrentUsersMessages((prev) => {
@@ -270,7 +259,7 @@ socket.off("message_seen",seenHandler)
     if (diff < 3600) return `Active ${Math.floor(diff / 60)} min ago`;
     if (diff < 86400) return ` Active ${Math.floor(diff / 3600)} hr ago`;
 
-    return last.toLocaleDateString('en-GB');
+    return last.toLocaleDateString("en-GB");
   };
   const handleSendMessage = () => {
     if (sendingMessage !== "") {
@@ -323,15 +312,14 @@ socket.off("message_seen",seenHandler)
     setTimeout(() => {
       virtuosoRef.current?.scrollToIndex({
         index: currentUsersMessages.length - 1,
-        align:"end",
+        align: "end",
         behavior: "auto",
       });
     }, 0);
   };
-  const virtusoStartReached = (atTop) => {
-    if (!atTop) return;
+  const virtusoStartReached = () => {
     if (conversationId) {
-      console.log(conversationId);
+      console.log("run");
       loadMoreMessages(conversationId, page);
     }
   };
@@ -371,33 +359,24 @@ socket.off("message_seen",seenHandler)
     uploadCloudinary(conversationId, uploadedImage, tempmessage._id);
     setMediaSendModal(false);
   };
-useEffect(()=>{
-  if(!socket) return 
-socket.on("user_stop_typing",({userId})=>{
-
-setTypingUser(prev=>
-  prev.filter(p=>p.user!==userId)
-
-  )
-})
-socket.on("user_typing",({userId,name})=>{
-setTypingUser(prev=>{
-  if(prev.find(p=>p.user===userId)) {
-    return prev
-  }
-  return [...prev, {user:userId,name}]
-}
- 
-
-  )
-
-})
-return ()=>{
-  socket.off("user_typing")
-socket.off("user_stop_typing")
-}
-},[socket])
-
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("user_stop_typing", ({ userId }) => {
+      setTypingUser((prev) => prev.filter((p) => p.user !== userId));
+    });
+    socket.on("user_typing", ({ userId, name }) => {
+      setTypingUser((prev) => {
+        if (prev.find((p) => p.user === userId)) {
+          return prev;
+        }
+        return [...prev, { user: userId, name }];
+      });
+    });
+    return () => {
+      socket.off("user_typing");
+      socket.off("user_stop_typing");
+    };
+  }, [socket]);
 
   const handleUploadVideo = () => {
     const tempmessage = {
@@ -436,22 +415,28 @@ socket.off("user_stop_typing")
     setMediaSendModal(false);
   };
 
-  const handleTyping=()=>{
-    if(!isTyping){
-      setIsTyping(true)
-        socket.emit("typing",{conversationId,userId:user._id,name:user.name})
+  const handleTyping = () => {
+    if (!isTyping) {
+      setIsTyping(true);
+      socket.emit("typing", {
+        conversationId,
+        userId: user._id,
+        name: user.name,
+      });
     }
-
-  }
+  };
   let typingTimout;
-  const handleStopTyping=()=>{
-    clearTimeout(typingTimout)
-    setIsTyping(false)
-     typingTimout=setTimeout(() => {
-       socket.emit("stop_typing",{conversationId,userId:user._id,name:user.name})
+  const handleStopTyping = () => {
+    clearTimeout(typingTimout);
+    setIsTyping(false);
+    typingTimout = setTimeout(() => {
+      socket.emit("stop_typing", {
+        conversationId,
+        userId: user._id,
+        name: user.name,
+      });
     }, 1500);
-
-  }
+  };
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -459,110 +444,127 @@ socket.off("user_stop_typing")
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-dvh bg-white`}>
           <div className="flex h-full flex-col justify-between">
-            {!loadingMessages?<div className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
-bg-white/80 backdrop-blur-md border-b shadow-sm">
+            {!loadingMessages ? (
+              <div
+                className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
+bg-white/80 backdrop-blur-md border-b shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <ArrowLeftIcon
+                    className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden hover:scale-110 transition"
+                    onClick={() => setActiveChat(false)}
+                  />
 
- 
-  <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <img
+                      loading="lazy"
+                      className="lg:h-12 lg:w-12 h-10 w-10 rounded-full object-cover border-2 border-white shadow"
+                      src={
+                        activeGroupChat
+                          ? currentGroup?.avtar?.url
+                          : currentChatUser?.image.url
+                      }
+                      alt=""
+                    />
 
+                    {!activeGroupChat &&
+                      onlineUsers?.includes(currentChatUser?._id) && (
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                      )}
+                  </div>
 
-    <ArrowLeftIcon
-      className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden hover:scale-110 transition"
-      onClick={() => setActiveChat(false)}
-    />
+                  <div
+                    className="flex flex-col cursor-pointer"
+                    onClick={() => {
+                      if (activeGroupChat) {
+                        setActivePage(4);
+                        setActiveChat(false);
+                      }
+                    }}
+                  >
+                    <h2 className="text-sm lg:text-lg font-semibold text-gray-900">
+                      {capitalizeFirstLetter(
+                        activeGroupChat
+                          ? currentGroup?.name
+                          : currentChatUser?.name,
+                      )}
+                    </h2>
 
-  
-    <div className="relative">
-      <img
-        loading="lazy"
-        className="lg:h-12 lg:w-12 h-10 w-10 rounded-full object-cover border-2 border-white shadow"
-        src={
-          activeGroupChat
-            ? currentGroup?.avtar?.url
-            : currentChatUser?.image.url
-        }
-        alt=""
-      />
+                    {!activeGroupChat &&
+                      (onlineUsers?.includes(currentChatUser?._id) ? (
+                        <span className="text-xs text-green-500 font-medium">
+                          online
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">
+                          {formatLastSeen(currentChatUser?.lastSeen || "")}
+                        </span>
+                      ))}
+                  </div>
+                </div>
 
-    
-      {!activeGroupChat &&
-        onlineUsers?.includes(currentChatUser?._id) && (
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-        )}
-    </div>
+                {/* RIGHT SECTION */}
+                <div className="flex items-center gap-4 text-gray-600">
+                  <MagnifyingGlassIcon className="w-5 h-5 cursor-pointer hover:text-blue-500 hover:scale-110 transition" />
 
-  
-    <div
-      className="flex flex-col cursor-pointer"
-      onClick={() => {
-        if (activeGroupChat) {
-          setActivePage(4);
-          setActiveChat(false);
-        }
-      }}
-    >
-      <h2 className="text-sm lg:text-lg font-semibold text-gray-900">
-        {capitalizeFirstLetter(
-          activeGroupChat
-            ? currentGroup?.name
-            : currentChatUser?.name
-        )}
-      </h2>
+                  <PhoneIcon className="w-5 h-5 cursor-pointer hover:text-green-500 hover:scale-110 transition" />
 
-      {!activeGroupChat && (
-        onlineUsers?.includes(currentChatUser?._id) ? (
-          <span className="text-xs text-green-500 font-medium">
-            online
-          </span>
-        ) : (
-          <span className="text-xs text-gray-400">
-            {formatLastSeen(
-              currentChatUser?.lastSeen || ""
+                  <VideoCameraIcon className="w-5 h-5 cursor-pointer hover:text-purple-500 hover:scale-110 transition" />
+
+                  <EllipsisVerticalIcon className="w-5 h-5 cursor-pointer hover:text-gray-900 hover:scale-110 transition" />
+                </div>
+              </div>
+            ) : (
+              <ChatHeaderSkeleton></ChatHeaderSkeleton>
             )}
-          </span>
-        )
-      )}
-    </div>
-  </div>
+            <div
+              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ${loadingMessages && " overflow-y-auto "} `}
+            >
+              {!loadingMessages ? (
+                <Virtuoso
+                  className="scrollbar-hide"
+                  startReached={virtusoStartReached}
+                  computeItemKey={(index, message) => message._id}
+                  firstItemIndex={firstItemIndexRef.current}
+                  initialTopMostItemIndex={
+                    currentUsersMessages.length > 0
+                      ? currentUsersMessages.length - 1
+                      : undefined
+                  }
+                  style={{ height: "100%" }}
+                  increaseViewportBy={{ top: 500, bottom: 300 }}
+                  data={currentUsersMessages}
+                  followOutput="auto"
+                  rangeChanged={(range) => {
+                    const isAtTop =
+                      range.startIndex <= firstItemIndexRef.current + 2;
 
-  {/* RIGHT SECTION */}
-  <div className="flex items-center gap-4 text-gray-600">
-
-    <MagnifyingGlassIcon className="w-5 h-5 cursor-pointer hover:text-blue-500 hover:scale-110 transition" />
-
-    <PhoneIcon className="w-5 h-5 cursor-pointer hover:text-green-500 hover:scale-110 transition" />
-
-    <VideoCameraIcon className="w-5 h-5 cursor-pointer hover:text-purple-500 hover:scale-110 transition" />
-
-    <EllipsisVerticalIcon className="w-5 h-5 cursor-pointer hover:text-gray-900 hover:scale-110 transition" />
-  </div>
-</div>:<ChatHeaderSkeleton></ChatHeaderSkeleton>}
-            <div className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ${loadingMessages &&" overflow-y-auto "} `}>
-              {!loadingMessages? <Virtuoso
-                className="scrollbar-hide"
-                alignToBottom
-                atTopStateChange={virtusoStartReached}
-                computeItemKey={(index, message) => message._id}
-                ref={virtuosoRef}
-                style={{ height: "100%" }}
-                increaseViewportBy={300}
-                data={currentUsersMessages}
-                followOutput="auto"
-                itemContent={(index, message) => (
-                  <Message
-                  
-                    send={user._id === message.senderId._id}
-                    message={message}
-                  ></Message>
-                )}
-                components={{Footer:()=>  typingUser.length>0 &&<TypingIndicator typingUser={typingUser}></TypingIndicator>}}
-              />
-              :[...Array(10)].map((_,i)=><MessageSkeleton key ={i} send={i%2===0}></MessageSkeleton>) 
-              
-              }
-        
+                    if (isAtTop) {
+                      virtusoStartReached();
+                    }
+                  }}
+                  itemContent={(index, message) => (
+                    <Message
+                      send={user._id === message.senderId._id}
+                      message={message}
+                    ></Message>
+                  )}
+                  components={{
+                    Footer: () =>
+                      typingUser.length > 0 && (
+                        <TypingIndicator
+                          typingUser={typingUser}
+                        ></TypingIndicator>
+                      ),
+                  }}
+                />
+              ) : (
+                [...Array(10)].map((_, i) => (
+                  <MessageSkeleton key={i} send={i % 2 === 0}></MessageSkeleton>
+                ))
+              )}
             </div>
-  
+
             <div className="shrink-0 flex xs:p-2 md:p-4 sticky bottom-0 justify-between bg-white border">
               <div className="w-full ">
                 <input
@@ -657,7 +659,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm">
             {uploadedImage && (
               <div>
                 <img
-                loading="lazy"
+                  loading="lazy"
                   className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl"
                   src={URL.createObjectURL(uploadedImage)}
                 />
