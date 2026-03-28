@@ -267,7 +267,7 @@ const firstItemIndexRef =useRef(10000000)
   const getAllGroups =async()=>{
  try {
   setLoadingGroups(true)
-      const res = await api.get(`/groups/allgroups`);
+      const res = await api.get(`/groups/allgroups?page=1&limit=20`);
       setAllgroups(res.data.groups)
    setTimeout(() => {
     setLoadingGroups(false)
@@ -494,7 +494,8 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         chattedOnlineUsers,
         currentChatUser,
         setCurrentChatUser,
-        loadingGroups
+        loadingGroups,
+        setAllgroups
       }}
     >
       {props.children}

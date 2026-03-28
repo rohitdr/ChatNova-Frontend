@@ -129,13 +129,13 @@ let status = messageStatus(message,currentChatUserId)
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
-   <> <div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}
+   <> 
+  {message.type !=="system" ?<div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}
    onPointerLeave={()=>{clearTimeout(presstimer.current)}} 
    onPointerUp={()=>{clearTimeout(presstimer.current)}} 
       className={` w-full flex ${send ? "flex-row-reverse" : ""}  relative `}
     >
       <div className=" flex flex-col justify-end max-w-[15%] ">
-       
         <img
         loading="lazy"
           className="w-[40px] h-[38px]        lg:w-[40px]  lg:h-[41px] rounded-full  border-white border-4"
@@ -195,7 +195,13 @@ let status = messageStatus(message,currentChatUserId)
           {message.reaction.map(element => {
              return <span key={element.user}>{element.emoji}</span> 
           })}</div>}
-    </div>
+    </div>:
+    <div className="flex justify-center my-3">
+  <div className="px-4 py-1.5 text-xs font-medium text-gray-500 bg-gray-100/80 backdrop-blur-sm rounded-full shadow-sm">
+   {message.text}
+  </div>
+</div>
+    }
    
    
       {mediaView && (

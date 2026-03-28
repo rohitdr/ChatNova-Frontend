@@ -19,10 +19,7 @@ export default function Profile() {
           {" "}
           <h2 className="text-2xl pt-2 font-medium">My Profile</h2>{" "}
         </div>
-        <div className="pt-2">
-          {" "}
-          <EllipsisVerticalIcon className="w-7 h-7 text-gray-700 cursor-pointer" />
-        </div>
+       
       </div>
       <div className="flex flex-col items-center justify-center my-2">
         <div className="my-2 py-2">
