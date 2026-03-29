@@ -16,6 +16,7 @@ export default function AuthState(props) {
   const [alert, setAlert] = useState(null);
   const [loadingUser,setLoadingUser]=useState(false)
   const [loadingMessages,setLoadingMessages] =useState(true)
+  
   const showAlert = (type, message) => {
     setAlert({
       type: type,

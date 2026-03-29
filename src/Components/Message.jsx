@@ -1,4 +1,5 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState }   from "react";
+import React from "react";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import NoServer from "./NoServer";
@@ -8,7 +9,7 @@ import {
 } from "@heroicons/react/24/solid";
 import SocketContext from "../Context/SocketContext";
 import { CheckIcon } from "@heroicons/react/24/outline";
-export default function Message(props) {
+const Message= React.memo((props) =>{
   const { message, send } = props;
   const authContext = useContext(AuthContext);
   const { user, isServer } = authContext;
@@ -239,4 +240,5 @@ let status = messageStatus(message,currentChatUserId)
         </div>
       )} </>
   );
-}
+})
+export default Message

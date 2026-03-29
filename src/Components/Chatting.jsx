@@ -41,6 +41,7 @@ export default function Chatting() {
 
   const {
     currentChatUser,
+    currentUserLoading,
     setActiveChat,
     uploadCloudinary,
     currentChatUserId,
@@ -214,15 +215,15 @@ export default function Chatting() {
     };
   }, [conversationId]);
 
-  useEffect(() => {
-    const handleBack = () => {
-      setActiveChat(false);
-    };
-    window.addEventListener("popstate", handleBack);
-    return () => {
-      window.removeEventListener("popstate", handleBack);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const handleBack = () => {
+  //     setActiveChat(false);
+  //   };
+  //   window.addEventListener("popstate", handleBack);
+  //   return () => {
+  //     window.removeEventListener("popstate", handleBack);
+  //   };
+  // }, []);
 
   const imagechangehandler = (e) => {
     if (e.target.files[0].size > 10000000) {
@@ -444,7 +445,7 @@ export default function Chatting() {
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-dvh bg-white`}>
           <div className="flex h-full flex-col justify-between">
-            {!loadingMessages ? (
+            {!currentUserLoading || currentUsersMessages.length!==0 ? (
               <div
                 className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
 bg-white/80 backdrop-blur-md border-b shadow-sm"
@@ -520,7 +521,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
             <div
               className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ${loadingMessages && " overflow-y-auto "} `}
             >
-              {!loadingMessages ? (
+              { !loadingMessages || currentUsersMessages.length!==0 ? (
                 <Virtuoso
                   className="scrollbar-hide"
                   startReached={virtusoStartReached}

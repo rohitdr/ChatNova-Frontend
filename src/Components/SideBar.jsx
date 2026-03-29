@@ -12,7 +12,7 @@ import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 export default function SideBar() {
   const context = useContext(AuthContext);
-  const { logout, user, setActivePage, activePage, isServer,activeChat } = context;
+  const { logout, user, setActivePage, activePage, isServer } = context;
   const [profileOptionsActive, setProfileOptionsActive] = useState(false);
   const logoutHandler = () => {
     logout();
@@ -21,7 +21,7 @@ export default function SideBar() {
     <NoServer></NoServer>
   ) : (
     <>
-      <div className={`2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
+      <div className={`2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white z-50 fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
         <div className="flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start">
           <img
           loading="lazy"
@@ -34,6 +34,8 @@ export default function SideBar() {
           <div className="">
             {" "}
             <UserCircleIcon
+              onMouseEnter={()=>import('./Profile')}
+            onTouchStart={()=>import('./Profile')}
               onClick={() => {
                 setActivePage(1);
               }}
@@ -52,6 +54,8 @@ export default function SideBar() {
           <div>
             {" "}
             <UserGroupIcon
+            onMouseEnter={()=>import('./Group')}
+            onTouchStart={()=>import('./Group')}
               onClick={() => {
                 setActivePage(2);
               }}
@@ -61,6 +65,8 @@ export default function SideBar() {
           <div>
             {" "}
             <Cog8ToothIcon
+              onMouseEnter={()=>import('./Settings')}
+            onTouchStart={()=>import('./Settings')}
               onClick={() => {
             
                 setActivePage(3);
@@ -87,7 +93,7 @@ export default function SideBar() {
 
       {profileOptionsActive && (
         <div
-          className="fixed inset-0 bg-black/20 "
+          className="fixed z-50 inset-0 bg-black/20 "
           onClick={() => {
             setProfileOptionsActive(false);
           }}

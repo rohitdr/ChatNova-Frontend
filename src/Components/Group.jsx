@@ -52,7 +52,10 @@ export default function Group() {
     }
   };
   useEffect(() => {
-    getAllGroups();
+    if(!allGroups){
+
+      getAllGroups();
+    }
   }, []);
 
   const handleGroupClick = async(element) => {
@@ -65,7 +68,7 @@ export default function Group() {
      socket.emit("join_group",element._id)
      socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
    setConversationId(element._id)
-    setActiveChat(true);
+   
     setActiveGroupChat(true);
     try{
 
@@ -74,6 +77,7 @@ export default function Group() {
     }catch(error){
       console.log(error)
     }
+     setActiveChat(true);
     setTimeout(() => {
       setLoadingMessages(false)
     }, 500);

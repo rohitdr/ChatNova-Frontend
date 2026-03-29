@@ -10,11 +10,16 @@ import LoadingBar from "react-top-loading-bar";
 
 import Alert from "./Components/Alert";
 import AuthContext from "./Context/AuthContext";
-import ForgetPassword from "./Components/ForgetPassword";
-import AdditonalDeatils from "./Components/AdditonalDeatils";
 
+import { Suspense,lazy } from "react";
+import AppLoader from "./Components/AppLoader";
+import { divide } from "firebase/firestore/pipelines";
+  const ForgetPassword = lazy(()=>import("./Components/ForgetPassword"))
+  const AdditonalDeatils=lazy(()=> import("./Components/AdditonalDeatils"))
 
 function App() {
+
+
   const context = useContext(AuthContext);
   const { progress, setProgress } = context;
   const authcontext = useContext(AuthContext);
@@ -27,14 +32,22 @@ function App() {
         progress={progress}
         onLoaderFinished={() => setProgress(0)}
       />
+
       <Routes>
         <Route exact path="/login" element={<Login></Login>}></Route>
         <Route exact path="/" element={<Chat></Chat>}></Route>
-        <Route exact path="/additionaldetails" element={<AdditonalDeatils></AdditonalDeatils>}></Route>
-        <Route exact path="/forgetpassword" element={<ForgetPassword></ForgetPassword>}></Route>
+        <Route exact path="/additionaldetails"  element={
+      <Suspense fallback={<AppLoader />}>
+        <AdditonalDeatils />
+      </Suspense>
+    }></Route>
+        <Route exact path="/forgetpassword" element={
+          <Suspense fallback={     <div><AppLoader></AppLoader></div>  }><ForgetPassword></ForgetPassword>  </Suspense>
+          }></Route>
       
         <Route exact path="/SignUp" element={<SignUp></SignUp>}></Route>
       </Routes>
+    
     </>
   );
 }

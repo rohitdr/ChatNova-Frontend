@@ -1,13 +1,16 @@
 import { useContext, useState } from "react";
 import SideBar from "./SideBar";
 import Users from "./Users";
-import Profile from "./Profile";
-import Chatting from "./Chatting";
 
+
+import { Suspense,lazy } from "react";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
+  const Chatting = lazy(()=>import('./Chatting'));
+
 export default function Chat() {
+
   const context = useContext(ChatNovaContext);
   const { activeChat } = context;
   const authcontext = useState(AuthContext);
@@ -30,7 +33,8 @@ export default function Chat() {
       <div
         className={` ${activeChat ? "block" : "hidden"} order-2 lg:block lg:flex-1`}
       >
-        <Chatting></Chatting>
+        <Suspense fallback={null}>
+        <Chatting></Chatting></Suspense>
       </div>
     </div>
   );

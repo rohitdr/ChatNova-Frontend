@@ -1,6 +1,6 @@
 export default function ChatHeaderSkeleton() {
   return (
-    <div className="shrink-0 flex flex-row p-4 pt-3 lg:p-7 lg:py-3 border justify-between animate-pulse">
+    <div className="shrink-0 flex flex-row p-4 pt-3 lg:p-7 lg:py-3 border justify-between animate-pulse ">
       
       {/* LEFT SIDE */}
       <div className="flex items-center gap-3">

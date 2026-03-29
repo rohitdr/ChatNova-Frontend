@@ -27,6 +27,7 @@ const isInitailLoadRef = useRef(true)
 const [loadingGroups,setLoadingGroups]=useState(false)
 const [hasMoreUsers , setHasMoreUsers]=useState(true)
 const firstItemIndexRef =useRef(10000000)
+const [currentUserLoading,setCurrentUserLoading]=useState(false)
 
 
   let Navigate = useNavigate();
@@ -37,7 +38,7 @@ const firstItemIndexRef =useRef(10000000)
   /// function to get the coversation id between the current chatter and logged in user
   const getConversationId = async (id) => {
     try {
-      setCurrentUsersMessages([])
+     
       const res = await api.get(`/messages/conversationId/${id}`);
       if (res.status === 200) {
           if(!socket) return
@@ -137,19 +138,22 @@ const firstItemIndexRef =useRef(10000000)
   // function to get current chatting user
   const getCureentChattingUser = async (id) => {
     try {
+      setCurrentUserLoading(true)
       const res = await api.get(`/users/getUser/${id}`);
   
         setCurrentChatUser(res.data.user);
-       
+       setTimeout(() => {
+        setCurrentUserLoading(false)
+       }, 300);
     } catch (error) {
     const status = error.response?.status;
 
       if (status === 404) {
         showAlert("Error", error.response.data.message);
-   
+    setCurrentUserLoading(false)
       }
       else{
-       
+        setCurrentUserLoading(false)
         setIsServer(500)
      
       }
@@ -271,7 +275,7 @@ const firstItemIndexRef =useRef(10000000)
       setAllgroups(res.data.groups)
    setTimeout(() => {
     setLoadingGroups(false)
-   }, 500);
+   }, 200);
     } catch (error) {
        setLoadingGroups(false)
      const status = error.response?.status;
@@ -458,7 +462,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         activeGroupChat,
         setActiveGroupChat,
         getAllGroups,
-     
+     currentUserLoading,
         page,
         loadMoreMessages,
        

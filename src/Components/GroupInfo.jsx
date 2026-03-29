@@ -57,7 +57,7 @@ export default function GroupInfo() {
   };
 
 useEffect(()=>{
-currentGroup.participents?.forEach((p)=>{
+currentGroup?.participents?.forEach((p)=>{
  if(p.user._id === user._id && p.role ==="admin"){
   setIsAdmin(true)
  }
@@ -188,7 +188,7 @@ e.preventDefault()
             <ArrowUpCircleIcon
               className={`w-9 h-9 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute ${!isAdmin && "hidden"}`}
               onClick={() => {
-                console.log(currentGroup)
+             
                 updateGroupImage(settingsImage);
                 setSettingsImage(null);
               }}
@@ -225,7 +225,7 @@ e.preventDefault()
         <div className="flex font-medium  pt-2 pb-1">
           {" "}
           <UserGroupIcon className="w-6 font-medium mt-0.5  mx-2 h-6 text-black" />
-          <div className=" text-xl">{currentGroup.participents.length} Members</div></div>
+          <div className=" text-xl">{currentGroup?.participents?.length} Members</div></div>
         <div className="flex font-medium  pt-2 pb-1">
           {" "}
       
@@ -235,7 +235,7 @@ e.preventDefault()
           
           </div>
           <div className="">
-         { currentGroup && currentGroup.participents.map((element) => {
+         { currentGroup && currentGroup?.participents?.map((element) => {
              
                 return (
                   

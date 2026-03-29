@@ -1,9 +1,13 @@
-import React from 'react'
 
-export default function UserItem({element,handleUserClick,capitalizeFirstLetter,image,name,lastMessage}) {
+import React from "react";
+const  UserItem=React.memo(({element,handleUserClick,capitalizeFirstLetter,image,name,lastMessage}) =>{
+   const preload=()=>{
+  import("./Chatting")
+  }
   return (
        <div
-                    
+                     onMouseEnter={preload}
+                     onTouchStart={preload}
                       onClick={() => {
                         handleUserClick(element);
                       }}
@@ -42,4 +46,5 @@ export default function UserItem({element,handleUserClick,capitalizeFirstLetter,
                       </div>
                     </div>
   )
-}
+})
+export default UserItem
