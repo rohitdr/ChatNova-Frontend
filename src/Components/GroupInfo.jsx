@@ -12,7 +12,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import SocketContext from '../Context/SocketContext'
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 
 import NoServer from "./NoServer";
@@ -21,23 +21,25 @@ import ChatNovaContext from "../Context/ChatNovaContext";
 export default function GroupInfo() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,addMember,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,serchUser,addMember,isAdmin,setAllgroups,setCurrentUsersMessages,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
   const { user,updatePassword, isServer,showAlert ,updateUser} = authContext;
-  const [settingsImage, setSettingsImage] = useState(null);
+  const [groupSettingsImage, setGroupSettingsImage] = useState(null);
   const [data,setData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
   const [originaldata,setOriginalData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
  const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
  const socketcontext = useContext(SocketContext)
  const [addUser,setAddUser] = useState(false)
  const [searchingAddUser,setSearchingAddUser]=useState(false)
- const [isAdmin,setIsAdmin]=useState(false)
+ const conversationIdRef=useRef(conversationId)
+
 
  
 
  const {socket}=socketcontext
   const settingImagehandler = (e) => {
-    setSettingsImage(e.target.files[0]);
+    setGroupSettingsImage(e.target.files[0]);
+    e.target.files=""
   };
   const onChangeHandler=(e)=>{
     setData({...data,[e.target.name]:e.target.value})
@@ -56,101 +58,49 @@ export default function GroupInfo() {
     }
   };
 
-useEffect(()=>{
-currentGroup?.participents?.forEach((p)=>{
- if(p.user._id === user._id && p.role ==="admin"){
-  setIsAdmin(true)
- }
-})
-},[conversationId])
+
  
-  const handleUpdate=(e)=>{
-    let updatedfiled={}
-    const argu ={}
-    Object.keys(data).forEach((key)=>{
-      if(data[key] !== originaldata[key]){
-        updatedfiled[key]=data[key]
-      }
-    })
-    e.preventDefault()
-
-    if(data.settingsName.length<3 || data.settingsName.length>20 ){
-      showAlert("Warning","Name should be between length 3 to 20")
-    }
-    else if(data.settingsUsername.length<8 ||data.settingsUsername.length>12){
-      showAlert("Warning","Username should be between length 8 to 12")
-    }
-    else if(String(data.settingsPhoneNumber).trim().length !==10){
-     showAlert("Warning","Phone number should be of length 10")
-    }
-    else if(Object.keys(updatedfiled).length===0){
-         showAlert("Warning","Please Update anything to change the data")
-    }
-    else{
-   if(updatedfiled.settingsName){
-     argu.name=updatedfiled.settingsName
-   }
-   if(updatedfiled.settingsEmail){
-     argu.email=updatedfiled.settingsEmail
-   }
-   if(updatedfiled.settingsUsername){
-     argu.username=updatedfiled.settingsUsername
-   }
-   if(updatedfiled.settingsPhoneNumber){
-     argu.phone_number=updatedfiled.settingsPhoneNumber
-   }
-updateUser(argu)
-setEditMenu(false)
-updatedfiled={}
-
-    }
 
 
+ useEffect(() => {
+  conversationIdRef.current = conversationId;
+}, [conversationId]);
 
-  }
-
-  const onPasswordChangeHandler=(e)=>{
-     setPasswordData({...passwordData,[e.target.name]:e.target.value})
-  }
-  const handlePasswordUpdate=(e)=>{
-e.preventDefault()
- if(passwordData.oldPassword.length<8 || passwordData.newPassword.length<8 || passwordData.confirmPassword.length<8  ){
-      showAlert("Warning","Password should be of length 8")
-    }
-    else if(passwordData.confirmPassword !== passwordData.newPassword){
-         showAlert("Warning","New password and confirm password must be same")
-    }
-    else if(passwordData.oldPassword === passwordData.newPassword){
-         showAlert("Warning","New password and old password must not be same")
-    }
-    else{
-      // console.log(passwordData.oldPassword,passwordData.newPassword)
-  updatePassword(passwordData.oldPassword,passwordData.newPassword)
-   setPasswordData({oldPassword:"",newPassword:"",confirmPassword:""})
-    }
-  }
 
   useEffect(()=>{
     if(!socket) return
     
-     const handler =(group)=>{
-      console.log(group)
-      if(conversationId === group._id){
+     const handler =(populatedConversation)=>{
+
+      console.log(populatedConversation)
+      if(conversationIdRef.current === populatedConversation._id){
        setCurrentGroup((prev)=>({
-        ...prev,...group})
+        ...prev,...populatedConversation})
       )
+      setAllgroups(prev => {
+  if (!prev) return [populatedConversation];
+
+  const filtered = prev.filter(
+    p => p._id.toString() !== populatedConversation._id.toString()
+  );
+  console.log(filtered)
+
+  return [populatedConversation, ...filtered];
+});
       }
-        console.log(currentGroup)
+      
       
     }
 
     const MemberHandler =({groupId,participents})=>{
-      console.log("running")
-      console.log(groupId)
-       if(conversationId===groupId){
+ 
+       if(conversationIdRef.current===groupId){
+        
         setCurrentGroup(prev=>{
             return {...prev,participents}
-       })
+       }
+      ) 
+     
        }
     }
    
@@ -163,6 +113,39 @@ e.preventDefault()
       socket.off("remove_member",MemberHandler)
    }
   },[socket])
+
+  
+  const removeMemberhandler=(element)=>{
+  const tempmessage = {
+        _id: Date.now(),
+        type: "system",
+        text: `Admin removed ${element.name}`,
+        createdAt: Date.now(),
+         senderId: {
+          _id: user._id,
+         
+        },
+      };
+   setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+    removeMember(element._id,tempmessage._id)
+  }
+  const addMemberhandler=(element)=>{
+ 
+  const tempmessage = {
+        _id: Date.now(),
+        type: "system",
+        text: `Admin added ${element.name}`,
+        createdAt: Date.now(),
+         senderId: {
+          _id: user._id,
+         
+        },
+      };
+   setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+    addMember(element._id,tempmessage._id)
+  setAddUser(false);
+      setSearchingAddUser(false)
+  }
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -179,25 +162,25 @@ e.preventDefault()
         <div className="my-2 py-2 relative">
           <input
             type="file"
-            id="settingsImage"
+            id="groupSettingsImage"
             accept="image/*"
             className="hidden"
             onChange={settingImagehandler}
           />
-          {settingsImage ? (
+          {groupSettingsImage ? (
             <ArrowUpCircleIcon
               className={`w-9 h-9 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute ${!isAdmin && "hidden"}`}
               onClick={() => {
              
-                updateGroupImage(settingsImage);
-                setSettingsImage(null);
+                updateGroupImage(groupSettingsImage);
+                setGroupSettingsImage(null);
               }}
             ></ArrowUpCircleIcon>
           ) : (
             <PencilIcon
               className={`w-9 h-9 right-2 bg-white border border-black  p-1.5 text-blue-900 ${!isAdmin && "hidden"}  cursor-pointer rounded-full bottom-3 absolute `}
               onClick={() => {
-                document.getElementById("settingsImage").click();
+                document.getElementById("groupSettingsImage").click();
               }}
             ></PencilIcon>
           )}
@@ -205,8 +188,8 @@ e.preventDefault()
           loading="lazy"
             className="w-28  shadow-md h-28 rounded-full border-white   border-4"
             src={
-              settingsImage
-                ? URL.createObjectURL(settingsImage)
+              groupSettingsImage
+                ? URL.createObjectURL(groupSettingsImage)
                 : currentGroup?.avtar.url
             }
             alt=""
@@ -269,7 +252,7 @@ e.preventDefault()
                      
                     </div>
                     <div className="flex items-center">
-                      <UserMinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer ${!isAdmin&& "hidden"}`} onClick={()=>{removeMember(element.user._id)}}/>
+                      <UserMinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer ${!isAdmin&& "hidden"}`} onClick={()=>{removeMemberhandler(element.user)}}/>
                     </div>
                   </div>
                 );
@@ -328,7 +311,6 @@ e.preventDefault()
               chattedUsersList.length !== 0 && chattedUsersList.map((element) => {
                 const exist =currentGroup.participents.some(p=>
                 p.user._id === element.user._id
-              
                 )
                if(exist) return null
                 return (
@@ -360,8 +342,7 @@ e.preventDefault()
                      
                     </div>
                      <div className="flex items-center">
-                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer" onClick={()=>{addMember(element.user._id);setAddUser(false);
-      setSearchingAddUser(false)}}/>
+                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer" onClick={()=>{addMemberhandler(element.user)}}/>
                     </div>
                   </div>
                 );
@@ -402,8 +383,7 @@ e.preventDefault()
                      
                     </div>
                      <div className="flex items-center">
-                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer"onClick={()=>{addMember(element._id);setAddUser(false);
-      setSearchingAddUser(false)}} />
+                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer"onClick={()=>{addMemberhandler(element)}} />
                     </div>
                   </div>
                 );

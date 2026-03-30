@@ -13,11 +13,10 @@ export default function Chat() {
 
   const context = useContext(ChatNovaContext);
   const { activeChat } = context;
-  const authcontext = useState(AuthContext);
+  const authcontext = useContext(AuthContext);
   const { isServer } = authcontext;
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
+  if(isServer ===500) return (<NoServer></NoServer>)
+  return  (
     <div className="h-screen flex flex-col  lg:flex-row">
       <div
         className={` w-full ${activeChat ? "hidden" : "block"} lg:block order-3 lg:order-1 lg:w-[70px] `}

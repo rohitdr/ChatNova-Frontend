@@ -41,12 +41,13 @@ export default function Chatting() {
 
   const {
     currentChatUser,
+    chattedUsersList,
     currentUserLoading,
     setActiveChat,
     uploadCloudinary,
     currentChatUserId,
     setChattedUsersList,
-    getmessages,
+
     currentUsersMessages,
     chattedUsers,
     setCurrentUsersMessages,
@@ -117,15 +118,7 @@ export default function Chatting() {
     };
   }, [socket]);
 
-  useEffect(() => {
-    if (currentUsersMessages.length && isInitailLoadRef.current) {
-      virtuosoRef.current?.scrollToIndex({
-        index: currentUsersMessages.length - 1,
-        behavior: "auto",
-      });
-      isInitailLoadRef.current = false;
-    }
-  }, []);
+
   useEffect(() => {
     virtuosoRef.current?.scrollToIndex({
       index: currentUsersMessages.length - 1,
@@ -137,12 +130,13 @@ export default function Chatting() {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
+   
       if (
         (activeGroupChat &&
           newMessage._doc.conversationId === conversationId) ||
         (!activeGroupChat && newMessage._doc.conversationId === conversationId)
       ) {
-        console.log("running");
+      
         socket.emit("mark_seen", {
           conversationId: conversationId,
           userId: user._id,
@@ -152,13 +146,17 @@ export default function Chatting() {
         setCurrentUsersMessages((prev) => {
           if (!prev) return [newMessage._doc];
 
-          const exists = prev.some((msg) => msg._id === newMessage.tempId);
-          if (exists) {
+          const existsTempMsg = prev.some((msg) => msg._id === newMessage.tempId);
+          if (existsTempMsg) {
             return prev.map((m) =>
               m._id === newMessage.tempId ? newMessage._doc : m,
             );
           }
-
+          const exists = prev.some((msg) => msg._id === newMessage._doc._id);
+       if (exists) {
+            return prev
+            
+          }
           const audio = new Audio(
             "/universfield-happy-message-ping-351298.mp3",
           );
@@ -169,7 +167,7 @@ export default function Chatting() {
       }
 
       //setting current user list
-      setChattedUsersList((prev) => {
+     !activeGroupChat && setChattedUsersList((prev) => {
         const index = prev.findIndex(
           (c) => c.ConversationId === newMessage._doc.conversationId,
         );
@@ -182,11 +180,12 @@ export default function Chatting() {
           const newuser = newMessage.conversationToSend.participents.find(
             (p) => p.user._id !== user._id,
           );
-          console.log({
+          console.log([{
             ConversationId: newMessage.conversationToSend.ConversationId,
             lastMessage: newMessage.conversationToSend.lastMessage,
-            user: newuser,
-          });
+            user: newuser.user,
+          },...prev]);
+
           return [
             {
               ConversationId: newMessage.conversationToSend.ConversationId,
@@ -203,9 +202,11 @@ export default function Chatting() {
         const filtereduser = prev.filter(
           (c) => c.ConversationId !== newMessage._doc.conversationId,
         );
-
+ 
         return [updateduserlist, ...filtereduser];
       });
+   
+     
       // updatedUserList(currentChatUser)
     };
     socket.on("newMessage", handleNewMessage);
@@ -280,11 +281,13 @@ export default function Chatting() {
       activeGroupChat
         ? sendMessages({
             conversationId: conversationId,
+             receiverId: currentChatUserId,
             message: sendingMessage,
             tempId: tempmessage._id,
           })
         : sendMessages({
             receiverId: currentChatUserId,
+             conversationId: conversationId,
             message: sendingMessage,
             tempId: tempmessage._id,
           });
@@ -359,6 +362,7 @@ export default function Chatting() {
     });
     uploadCloudinary(conversationId, uploadedImage, tempmessage._id);
     setMediaSendModal(false);
+     setUploadedImage(null);
   };
   useEffect(() => {
     if (!socket) return;
@@ -414,6 +418,7 @@ export default function Chatting() {
     });
     uploadCloudinary(conversationId, uploadVideo, tempmessage._id);
     setMediaSendModal(false);
+    setUploadedVideo(null)
   };
 
   const handleTyping = () => {
@@ -438,9 +443,7 @@ export default function Chatting() {
       });
     }, 1500);
   };
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
+  return  (
     <>
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-dvh bg-white`}>

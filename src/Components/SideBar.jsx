@@ -17,9 +17,7 @@ export default function SideBar() {
   const logoutHandler = () => {
     logout();
   };
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
+  return (
     <>
       <div className={`2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white z-50 fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
         <div className="flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start">

@@ -66,12 +66,11 @@ export default function Group() {
     }
      
      socket.emit("join_group",element._id)
-     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
+     socket.emit("mark_seen",{conversationId:element._id,userId:user._id})
    setConversationId(element._id)
-   
+  
     setActiveGroupChat(true);
     try{
-
     await  getGroupById(element._id);
     await  getmessages(element._id);
     }catch(error){
@@ -83,6 +82,7 @@ export default function Group() {
     }, 500);
 
   };
+
   useEffect(()=>{
     if (!socket) return
     const groupHandler =(newGroup)=>{
@@ -131,7 +131,7 @@ export default function Group() {
             filteredGroups.map((element) => {
               return (
                  <div
-                  onClick={()=>{handleGroupClick(element)}}
+                  onClick={handleGroupClick}
                   key={element._id}
                   className="flex shadow  border-2  bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
                 >

@@ -127,9 +127,7 @@ let status = messageStatus(message,currentChatUserId)
   
 
 
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
+  return(
    <> 
   {message.type !=="system" ?<div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}
    onPointerLeave={()=>{clearTimeout(presstimer.current)}} 
@@ -147,16 +145,51 @@ let status = messageStatus(message,currentChatUserId)
       <div className="flex max-w-[85%] flex-col mb-2 relative  ">
         <span className="text-2xs m-1 mx-2  text-black">{!send && activeGroupChat&& message?.senderId?.name}</span>
         <div
-          className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1" : "px-4"} py-1 lg:p-3 ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
+          className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1 " : "px-4 lg:p-3"} py-1  ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
         > 
           <div className="">
           {message.type === "text" && message.text}
-          {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !=="pdf" && <img loading="lazy" src={message.media.url} className="" onClick={()=>{setMediaView(true)}} alt="" />}
+{message.type === "image" && message.media.url.split('.').pop().toLowerCase() !== "pdf" && (
+  <div className="relative group">
+    <img
+      loading="lazy"
+      src={message.media.url}
+      onClick={() => setMediaView(true)}
+      className="
+        max-w-[180px] sm:max-w-[220px] lg:max-w-[260px]
+        max-h-[220px]
+        object-cover
+        rounded-xl
+        cursor-pointer
+        transition duration-200
+        hover:scale-[1.02]
+      "
+      alt="chat-img"
+    />
+
+    {/* Optional overlay on hover */}
+    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition"></div>
+  </div>
+)}
           {message.type === "video" && (
-            <video width="300" className="" autoplay muted loop controls>
-              <source src={message.media.url} type="video/mp4" />
-            </video>
-          )}</div>
+  <div className="relative">
+    <video
+      className="
+        max-w-[180px] sm:max-w-[220px] lg:max-w-[260px]
+        max-h-[220px]
+        object-cover
+        rounded-xl
+        shadow-md
+      "
+      autoPlay
+      muted
+      loop
+      controls
+    >
+      <source src={message.media.url} type="video/mp4" />
+    </video>
+  </div>
+)}</div>
          <div
           className={`flex text-2xs pt-0.5  ${send ? "justify-end" : "justify-start"}`}
         >

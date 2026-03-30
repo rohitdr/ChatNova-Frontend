@@ -1,19 +1,23 @@
 import {
-  ArrowUpCircleIcon,
+  ArrowUpIcon,
   EllipsisVerticalIcon,
   LockClosedIcon,
   PencilIcon,
   UserCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import ChatNovaContext from "../Context/ChatNovaContext"
+import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
 export default function Settings() {
+  const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
+  const {capitalizeFirstLetter} = useContext(ChatNovaContext)
   const authContext = useContext(AuthContext);
-  const { user, updateUserImage,updatePassword, isServer,showAlert ,updateUser} = authContext;
+  const { user, updateUserImage,updatePassword, isServer,showAlert ,updateUser,setUser} = authContext;
   const [settingsImage, setSettingsImage] = useState(null);
   const [data,setData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
   const [originaldata,setOriginalData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
@@ -70,6 +74,21 @@ updatedfiled={}
 
   }
 
+  useEffect(()=>{
+    if(!socket) return
+    const handleSocket=(userToSend)=>{
+      console.log("hel")
+      if(userToSend){
+         
+ setUser(prev => ({ ...userToSend }))
+ console.log(user)
+      }
+    }
+      socket.on("updateUser",handleSocket)
+ return ()=>{
+  socket.off("updateUser",handleSocket)
+ }
+  },[socket])
   const onPasswordChangeHandler=(e)=>{
      setPasswordData({...passwordData,[e.target.name]:e.target.value})
   }
@@ -93,121 +112,182 @@ e.preventDefault()
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
-    <div className="flex h-full flex-col bg-[#F5F7FB] overflow-y-auto scrollbar-hide">
-      <div className="flex justify-between m-2 p-2 mt-4">
-        <div>
-          {" "}
-          <h2 className="text-2xl pt-2 font-medium">My Profile</h2>{" "}
-        </div>
-      </div>
-      <div className="flex flex-col items-center justify-center my-2">
-        <div className="my-2 py-2 relative">
-          <input
-            type="file"
-            id="settingsImage"
-            accept="image/*"
-            className="hidden"
-            onChange={settingImagehandler}
-          />
-          {settingsImage ? (
-            <ArrowUpCircleIcon
-              className="w-7 h-7 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute "
-              onClick={() => {
-                updateUserImage(settingsImage);
-                setSettingsImage(null);
-              }}
-            ></ArrowUpCircleIcon>
-          ) : (
-            <PencilIcon
-              className="w-7 h-7 right-2 bg-white border border-black  p-1.5 text-blue-900  cursor-pointer rounded-full bottom-3 absolute "
-              onClick={() => {
-                document.getElementById("settingsImage").click();
-              }}
-            ></PencilIcon>
-          )}
-          <img
-          loading="lazy"
-            className="w-28  shadow h-28 rounded-full   border-2"
-            src={
-              settingsImage
-                ? URL.createObjectURL(settingsImage)
-                : user?.image.url
-            }
-            alt=""
-          />
-        </div>
-        <p className="my-2 mb-1 font-medium">{user?.name}</p>
-        <p>Active</p>
-      </div>
-      <div className="my-3 py-3 mx-3 px-2 text-sm text-[#8E949D]">
-        Hey! I love connecting with new people and having meaningful conversations.
-Feel free to drop a message anytime!
-      </div>
-      {/* form to update users information */}
-    <div className="flex flex-col mx-3 mb-2">
-        <div className="flex justify-between">
-        <div className="flex font-medium bg-[#F9FAFA] pt-2 pb-3">
-          {" "}
-          <UserCircleIcon className="w-5 font-medium mt-1.5  mx-2 h-5 text-black" />
-          <div className=" text-xl"> About</div></div>
-          { !editMenu &&<div className="p-2 pt-3" onClick={()=>{setEditMenu(true)}}><PencilIcon className="h-4 w-4 cursor-pointer "></PencilIcon></div>}
-          {editMenu &&<div className="p-2 pt-3" onClick={()=>{setEditMenu(false)}}><XMarkIcon className="h-4 w-4 cursor-pointer "></XMarkIcon></div>}
-          </div>
-        
-      {!editMenu &&  <div className="flex flex-col mx-0.5 mb-2 py-3 bg-[#FFFFFF]">
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A] ">Name</div> <div className="text-sm py-1 font-medium">{user?.name}</div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Email</div> <div className="text-sm py-1 font-medium">{user?.email}</div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Username</div> <div className="text-sm py-1 font-medium">{user?.username}</div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Phone Number</div> <div className="text-sm py-1 font-medium">{user?.phone_number}</div></div>
-          
-          
-          
-          </div>}
-       {editMenu &&<> <form onSubmit={handleUpdate}><div className="flex flex-col mx-0.5  py-3 bg-[#FFFFFF]">
-       
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A] ">Name</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="text" name="settingsName"  value={data.settingsName} id="settingsName" onChange={onChangeHandler}/></div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Email</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="email" name="settingsEmail" value={data.settingsEmail} id="settingsEmail" onChange={onChangeHandler} /></div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Username</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="text" name="settingsUsername" value={data.settingsUsername} id="settingsUsername" onChange={onChangeHandler}/></div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Phone Number</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="tel" name="settingsPhoneNumber" value={data.settingsPhoneNumber} id="settingsPhoneNumber" onChange={onChangeHandler}/></div></div>
-     
-          
-          
-          </div>
-               <div className="flex ">
-        <div className="flex font-normal w-full pt-2 pb-3 justify-end"> 
-        <div className="p-2 pt-3"><button type="submit" className="shadow rounded p-2 text-white bg-[#6159CB]">Update</button></div>
-         
-      </div>
-          </div></form></> }
-          
-          </div>
-          {/* form to change password */}
-          <div className="flex flex-col mx-3 mb-20">
-        <div className="flex justify-between">
-        <div className="flex font-medium bg-[#F9FAFA] pt-2 pb-3">
-          {" "}
-          <LockClosedIcon className="w-5 font-medium mt-1.5  mx-2 h-5 text-black" />
-          <div className=" text-xl"> Change Password</div></div>
-     
-          </div>
-        
-       <> <form onSubmit={handlePasswordUpdate}><div className="flex flex-col mx-0.5  py-3 bg-[#FFFFFF]">
-       
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A] ">Old Password</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="text" name="oldPassword"  value={passwordData.oldPassword} id="oldPasswordd" onChange={onPasswordChangeHandler}/></div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">New Passowrd</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="password" name="newPassword" value={passwordData.newPassword} id="newPassword" onChange={onPasswordChangeHandler} /></div></div>
-            <div className="flex flex-col py-2 px-6"> <div className=" text-[#7A7F9A]">Confirm Password</div> <div className="text-sm py-1 font-medium"><input className="outline-none bg-[#F9FAFA] h-8 p-1 w-full" type="text" name="confirmPassword" value={passwordData.confirmPassword} id="confirmPassword" onChange={onPasswordChangeHandler} /></div></div>
-           
-          
-          
-          </div>
-               <div className="flex ">
-        <div className="flex font-normal w-full pt-2 pb-3 justify-end"> 
-        <div className="p-2 pt-3"><button type="submit" className="shadow rounded p-2 text-white bg-[#6159CB]">Update</button></div>
-         
-      </div>
-          </div></form></> 
-          
-          </div>
+  <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide">
+
+
+  <div className="flex justify-between items-center px-6 py-4">
+    <h2 className="text-2xl font-semibold text-gray-800">My Profile</h2>
+  </div>
+
+  {/* Profile Card */}
+  <div className="mx-4 bg-white rounded-2xl shadow-sm p-6 flex flex-col items-center">
+    
+    <div className="relative">
+      <input
+        type="file"
+        id="settingsImage"
+        accept="image/*"
+        className="hidden"
+        onChange={settingImagehandler}
+      />
+
+      {/* Avatar */}
+      <img
+        loading="lazy"
+        className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
+        src={
+          settingsImage
+            ? URL.createObjectURL(settingsImage)
+            : user?.image?.url
+        }
+        alt=""
+      />
+
+
+      {settingsImage ? (
+        <ArrowUpIcon
+          className="w-8 h-8 p-1.5 bg-blue-600 text-white rounded-full shadow absolute bottom-1 right-1 cursor-pointer hover:bg-blue-700 transition"
+          onClick={() => {
+            updateUserImage(settingsImage);
+            setSettingsImage(null);
+          }}
+        />
+      ) : (
+        <PencilIcon
+          className="w-8 h-8 p-1.5 bg-white border shadow rounded-full absolute bottom-1 right-1 cursor-pointer hover:bg-gray-100 transition"
+          onClick={() => {
+            document.getElementById("settingsImage").click();
+          }}
+        />
+      )}
     </div>
+
+    <p className="mt-4 text-lg font-semibold text-gray-800">
+      {capitalizeFirstLetter(user?.name)}
+    </p>
+
+    <p className="text-sm text-gray-500">@{user?.username}</p>
+  </div>
+
+  {/* Bio */}
+  <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-sm text-gray-600 leading-relaxed">
+    Hey! I love connecting with new people and having meaningful conversations.
+    Feel free to drop a message anytime!
+  </div>
+
+  {/* About Section */}
+  <div className="mx-4 mt-4">
+    <div className="flex justify-between items-center mb-2">
+      <div className="flex items-center">
+        <UserCircleIcon className="w-5 h-5 text-gray-700 mr-2" />
+        <h3 className="text-lg font-semibold text-gray-800">About</h3>
+      </div>
+
+      {!editMenu ? (
+        <PencilIcon
+          className="w-5 h-5 cursor-pointer text-gray-500 hover:text-gray-700"
+          onClick={() => setEditMenu(true)}
+        />
+      ) : (
+        <XMarkIcon
+          className="w-5 h-5 cursor-pointer text-gray-500 hover:text-gray-700"
+          onClick={() => setEditMenu(false)}
+        />
+      )}
+    </div>
+
+  
+    {!editMenu && (
+      <div className="bg-white rounded-2xl shadow-sm divide-y">
+        {[
+          { label: "Name", value: user?.name },
+          { label: "Email", value: user?.email },
+          { label: "Username", value: user?.username },
+          { label: "Phone", value: user?.phone_number },
+        ].map((item, i) => (
+          <div key={i} className="p-4 hover:bg-gray-50 transition">
+            <p className="text-xs text-gray-500">{item.label}</p>
+            <p className="text-sm font-medium text-gray-800 mt-1">
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    )}
+
+  
+    {editMenu && (
+      <form onSubmit={handleUpdate} className="bg-white rounded-2xl shadow-sm p-4 space-y-4">
+
+        {[
+          { name: "settingsName", type: "text" },
+          { name: "settingsEmail", type: "email" },
+          { name: "settingsUsername", type: "text" },
+          { name: "settingsPhoneNumber", type: "tel" },
+        ].map((field, i) => (
+          <input
+            key={i}
+            type={field.type}
+            name={field.name}
+            value={data[field.name]}
+            onChange={onChangeHandler}
+            placeholder={field.name.replace("settings", "")}
+            className="w-full px-3 py-2 rounded-lg bg-gray-100 focus:bg-white border border-transparent focus:border-blue-500 outline-none transition"
+          />
+        ))}
+
+        <div className="flex justify-end">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+            Update
+          </button>
+        </div>
+      </form>
+    )}
+  </div>
+
+
+  <div className="mx-4 mt-4 mb-10">
+    <div className="flex items-center mb-2">
+      <LockClosedIcon className="w-5 h-5 text-gray-700 mr-2" />
+      <h3 className="text-lg font-semibold text-gray-800">Change Password</h3>
+    </div>
+
+    <form onSubmit={handlePasswordUpdate} className="bg-white rounded-2xl shadow-sm p-4 space-y-4">
+
+      <input
+        type="password"
+        name="oldPassword"
+        value={passwordData.oldPassword}
+        onChange={onPasswordChangeHandler}
+        placeholder="Old Password"
+        className="input-modern"
+      />
+
+      <input
+        type="password"
+        name="newPassword"
+        value={passwordData.newPassword}
+        onChange={onPasswordChangeHandler}
+        placeholder="New Password"
+        className="input-modern"
+      />
+
+      <input
+        type="password"
+        name="confirmPassword"
+        value={passwordData.confirmPassword}
+        onChange={onPasswordChangeHandler}
+        placeholder="Confirm Password"
+        className="input-modern"
+      />
+
+      <div className="flex justify-end">
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+          Update
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
   );
 }

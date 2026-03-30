@@ -6,7 +6,7 @@ import {
 import { MinusIcon } from "@heroicons/react/24/solid";
 export default function NoServer() {
   return (
-    <div className="flex h-screen justify-center items-center">
+    <div className="flex h-screen  justify-center items-center">
       <div className="flex flex-col">
         <div className="flex justify-center">
           <WrenchScrewdriverIcon className="w-10 mb-4 opacity-40 h-10 text-[#4B5563]"></WrenchScrewdriverIcon>

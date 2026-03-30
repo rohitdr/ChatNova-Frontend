@@ -2,7 +2,7 @@ import { ArrowUpCircleIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { useContext, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 
-import NoServer from "./NoServer";
+
 import { useNavigate } from "react-router-dom";
 
 export default function AdditonalDeatils() {

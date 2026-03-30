@@ -6,30 +6,29 @@ export default function SocketState(props) {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUser] = useState(null);
   const context = useContext(AuthContext);
-  const { refress_token, user } = context;
-  useEffect(() => {
-    if (user) {
-      const newSocket = io(import.meta.env.VITE_SOCKET, {
-        transports: [ "websocket"],
-        query: {
-          userId: user?._id,
-        },
+  const {  user } = context;
+useEffect(() => {
+  if (!user) return
 
-        withCredentials: true,
-      });
-      newSocket.on("getOnlineUsers", (users) => {
-        setOnlineUser(users);
-      });
-      setSocket(newSocket);
-      return () => newSocket.close();
-    } else {
-      if (socket) {
-        socket.close();
+  const newSocket = io(import.meta.env.VITE_SOCKET, {
+    transports: ["websocket"],
+    query: {
+      userId: user?._id,
+    },
+    withCredentials: true,
+  })
 
-        setSocket(null);
-      }
-    }
-  }, [user, refress_token]);
+  newSocket.on("getOnlineUsers", (users) => {
+    setOnlineUser(users)
+  })
+
+  setSocket(newSocket)
+
+  return () => {
+    newSocket.off("getOnlineUsers")   
+    newSocket.disconnect()            
+  }
+}, [user])
   return (
     <SocketContext.Provider value={{ onlineUsers, socket }}>
       {props.children}

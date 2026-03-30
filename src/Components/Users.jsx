@@ -87,7 +87,13 @@ useEffect(() => {
 }, [searchValue]);
   const handleUserClick =useCallback(async(element) => {
    if (!socket || !user?._id || loadingMessages) return;
- console.log("india")
+
+ if(conversationId) {
+      socket.emit("leave_group",conversationId)
+    }
+     
+     socket.emit("join_group",element.ConversationId)
+     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
 setLoadingMessages(true);
 
 
@@ -118,7 +124,7 @@ await Promise.all([
   ]) 
   const handleDatabaseUserClick =useCallback(async(element) => {
      if (!socket || !user?._id) return;
-   
+
     setLoadingMessages(true)
   
     setActiveGroupChat(false);
@@ -128,10 +134,12 @@ await Promise.all([
       setCurrentChatUserId(element._id);
     setSearchClick(true);
     setActiveChat(true);
+
     await Promise.all([
-      getCureentChattingUser(element.user._id),
-  getmessages(element.ConversationId)
+      getCureentChattingUser(element._id),
+ getConversationId(element._id)
 ]);
+setCurrentUsersMessages([])
 
      setTimeout(()=>{
  setLoadingMessages(false)
@@ -156,9 +164,7 @@ await Promise.all([
     
   };
 
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
+  return (
     <>
      
         <div

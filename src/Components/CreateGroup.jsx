@@ -72,39 +72,6 @@ export default function CreateGroup() {
 
 
 
-  useEffect(()=>{
-    if(!socket) return
-    
-     const handler =(group)=>{
-      console.log(group)
-      if(conversationId === group._id){
-       setCurrentGroup((prev)=>({
-        ...prev,...group})
-      )
-      }
-        console.log(currentGroup)
-      
-    }
-
-    const MemberHandler =({groupId,participents})=>{
-      console.log("running")
-      console.log(groupId)
-       if(conversationId===groupId){
-        setCurrentGroup(prev=>{
-            return {...prev,participents}
-       })
-       }
-    }
-   
-    socket.on("member_added",MemberHandler)
-    socket.on("group_update", handler)
-     socket.on("remove_member",MemberHandler)
-   return ()=>{
-      socket.off("group_update", handler)
-      socket.off("member_added",MemberHandler)
-      socket.off("remove_member",MemberHandler)
-   }
-  },[socket])
 
 
   const CreateGroupHandler=()=>{

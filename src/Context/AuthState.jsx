@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "firebase/messaging";
 import { messaging } from "../Firebase/firebase.cjs";
+import { Socket } from "socket.io-client";
 
 export default function AuthState(props) {
   const [isServer, setIsServer] = useState(0);
@@ -155,7 +156,8 @@ export default function AuthState(props) {
       api.defaults.headers.common["Authorization"] =
         `Bearer ${response.data.access_token}`;
       localStorage.setItem("refress_token", response.data.refress_token);
-
+    
+       setUser(response.data.userToSend)
       Navigate("/");
       showAlert("Success", "You have been logged in successfully !");
       setProgress(100);
@@ -262,10 +264,12 @@ export default function AuthState(props) {
       setProgress(50);
       if (response.status === 200) {
         localStorage.removeItem("refress_token");
+        setUser(null)
         showAlert("Success", "You have been logged out successfully !");
         Navigate("/login");
         setProgress(100);
       }
+      
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
@@ -275,7 +279,7 @@ export default function AuthState(props) {
       }
      
       else{
-      showAlert("Error", error.response.data.message);
+      showAlert("Error", error.response.message);
         setProgress(100);
       
       }
@@ -299,7 +303,7 @@ export default function AuthState(props) {
       };
       const responseUpdate = await api.post("/auth/update", { image });
   
-      refreshUser();
+    
         setProgress(100);
     } catch (error) {
       const status = error.response?.status;

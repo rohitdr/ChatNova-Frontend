@@ -5,8 +5,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import api from "../Api/Axios.jsx";
 import AuthContext from "./AuthContext.jsx";
+import SocketContext from "./SocketContext.jsx";
 
 export default function ChatNovaState(props) {
+  const authContext = useContext(AuthContext);
+  const { setProgress,setIsServer,showAlert,setLoadingUser,user } = authContext;
+const {socket} =useContext(SocketContext) 
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
   const [chattedUsersList, setChattedUsersList] = useState([]);
   const [chattedOnlineUsers, setChattedOnlineUsers] = useState(null);
@@ -28,24 +32,51 @@ const [loadingGroups,setLoadingGroups]=useState(false)
 const [hasMoreUsers , setHasMoreUsers]=useState(true)
 const firstItemIndexRef =useRef(10000000)
 const [currentUserLoading,setCurrentUserLoading]=useState(false)
+ const [isAdmin,setIsAdmin]=useState(false)
+useEffect(() => {
 
+setIsAdmin(false)
+  setDataBaseUsers(null)
+  setChattedUsersList([])
+  setChattedOnlineUsers(null)
+  setCurrentChatUserId(null)
+  setCurrentChatUser(null)
+  setCurrentUsersMessages([])
+  setActiveChat(false)
+  setConversationId(null)
+  setAllgroups(null)
+  setpage(2)
+  setHasMore(true)
+  setActiveGroupChat(false)
+  setCurrentGroup(null)
+  setLoadingGroups(false)
+  setHasMoreUsers(true)
+  setCurrentUserLoading(false)
 
+  // reset refs too
+  hasMoreRef.current = true
+  loadingRef.current = false
+  isInitailLoadRef.current = true
+  firstItemIndexRef.current = 10000000
+
+}, [user?.id])
   let Navigate = useNavigate();
-  const authContext = useContext(AuthContext);
-  const { setProgress,setIsServer,showAlert,setLoadingUser } = authContext;
+
   /// function to get User whom with logged in user has chats
 
   /// function to get the coversation id between the current chatter and logged in user
   const getConversationId = async (id) => {
     try {
-     
+      console.log("akdflaj")
       const res = await api.get(`/messages/conversationId/${id}`);
       if (res.status === 200) {
-          if(!socket) return
+          
+     if(!socket) return
+    
     if(conversationId) {
-      socket.emit("leave_group",res.data.conversation._id)
+      socket.emit("leave_group",conversationId)
     }
-     
+    
      socket.emit("join_group",res.data.conversation._id)
  
              setConversationId(res.data.conversation._id)
@@ -291,7 +322,13 @@ const [currentUserLoading,setCurrentUserLoading]=useState(false)
      try {
       const res = await api.get(`/groups/getGroupById/${id}`);
       setCurrentGroup(res.data.message)
-     console.log(res.data.message)
+      console.log(res.data.message)
+ const isAdminUser = res.data.message.participents?.some(
+  (p) => p.user._id === user._id && p.role === "admin"
+);
+
+setIsAdmin(isAdminUser);
+
     } catch (error) {
      const status = error.response?.status;
    if (status === 404) {
@@ -323,7 +360,7 @@ const [currentUserLoading,setCurrentUserLoading]=useState(false)
         publicId: res.data.public_id,
         url: res.data.secure_url,
        
-      }; console.log(image)
+      }; 
       const responseUpdate = await api.put("/groups/groupUpdate", {image,groupId:conversationId });
   
     
@@ -343,7 +380,7 @@ const [currentUserLoading,setCurrentUserLoading]=useState(false)
       }
     }
   };
-//// function to remove member from group
+//// function to add member from group
 const addMember =async(userId)=>{
     try {
       const data = {
@@ -356,7 +393,7 @@ const addMember =async(userId)=>{
      
       const res = await api.post(`/groups/addMember`,data);
     
-     console.log(res.data.message)
+     
     } catch (error) {
      const status = error.response?.status;
    if (status === 404) {
@@ -372,18 +409,20 @@ const addMember =async(userId)=>{
     }
 }
 //// function to remove member from group
-const removeMember =async(userId)=>{
+const removeMember =async(userId,tempId)=>{
     try {
+      console.log("runkdas")
       const data = {
        groupId:conversationId,
        participents:[{
         user:userId,
-       }]
+       }],
+       tempId
       }
      
       const res = await api.post(`/groups/removeMember`,data);
     
-     console.log(res.data.message)
+    
     } catch (error) {
      const status = error.response?.status;
    if (status === 404) {
@@ -496,6 +535,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         hasMoreUsers,
         chattedUsers,
         chattedOnlineUsers,
+        isAdmin,
         currentChatUser,
         setCurrentChatUser,
         loadingGroups,
