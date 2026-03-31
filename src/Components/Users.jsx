@@ -168,7 +168,7 @@ setCurrentUsersMessages([])
     <>
      
         <div
-          className={`h-screen ${activePage===0?"block":"hidden"}  xs:p-2  lg:p-0 flex bg-[#F5F7FB] flex-col `}
+          className={`h-screen ${activePage===0?"block":"hidden"}  xs:p-2  lg:p-0 flex bg-gradient-to-br from-indigo-50 to-purple-50 flex-col `}
         >
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Chats</div>
           <div className="flex p-2  pr-0 rounded-xl border-none mx-3 sm:mx-4 my-2 bg-white shadow">

@@ -42,105 +42,103 @@ export default function ForgetPassword() {
   });
     }
   };
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
-    <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
-      <div className="">
-        <div className=" my-5 flex text-3xl font-medium justify-center">
-         <img
-         loading="lazy"
-            src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"
-            alt=""
-            className=" lg:h-12 lg:w-14 xs:w-10 xs:pb-1 h-8  xs:h-8 w-8 xs:ml-5  2xs:ml-3 2xs:h-7 2xs:w-7  lg:mx-0 rounded-full"
-          />  <h1>ChatNova</h1>
-        </div>
-        <div className=" mb-5 mt-1  flex flex-col items-center">
-          <h2 className="text-2xl pb-2 font-medium">Forget Password</h2>{" "}
-      
-        </div>
+ return isServer === 500 ? (
+  <NoServer />
+) : (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100  px-4">
 
-        <div className="px-7 pt-0 md:pt-2 md:pb-4  pb-1 bg-white w-[320px] sm:w-[450px] rounded-lg shadow-md ">
-          <form onSubmit={handlerSubmit} className="my-3 py-3">
-            <div className="m-1 p-1 flex w-full flex-col">
-              <label htmlFor="forgetEmail" className="pb-2">
-                Email
-              </label>
-              <div className="flex items-center">
-                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
-                  <EnvelopeIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
-                </div>
-                <input
-                  className={`pl-2  border outline-none  h-[45px]  border-gray-300  w-full`}
-                  placeholder="   Enter your Email"
-                  type="email"
-                  name="forgetEmail"
-                  id="forgetEmail"
-                  onChange={onChange}
-                />
-              </div>
-            </div>
-            <div className="m-1 p-1 flex w-full flex-col">
-              <label htmlFor="forgetUsername" className="pb-2">
-                Username
-              </label>
-              <div className="flex items-center">
-                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
-                  <UserIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
-                </div>
-                <input
-                  className={`pl-2 outline-none  border  h-[45px] border-gray-300  w-full`}
-                  placeholder="   Enter your Username"
-                  type="text"
-                  name="forgetUsername"
-                  id="forgetUsername"
-                  onChange={onChange}
-                />
-              </div>
-            </div>
+    <div className="w-full max-w-md bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8">
 
-            <div className="m-1 mb-4 p-1 w-full flex flex-col">
-              <div className="flex justify-between">
-                <label htmlFor="forgetPassword" className="pb-2">
-                 New Passoword
-                </label>
-              </div>
-              <div className="flex items-center border border-gray-300">
-                <div className="w-10 bg-[#F8F9FA] flex justify-center">
-                  <LockClosedIcon className="w-7 px-1  h-[45px] text-gray-500" />
-                </div>
-                <input
-                  type="password"
-                  placeholder="    Enter your Password"
-                  className={`pl-2  outline-none border  h-[45px] border-gray-300  w-full`}
-                  name="forgetPassword"
-                  id="forgetPassword"
-                  onChange={onChange}
-                />
-              </div>{" "}
-            </div>
-            <div className="m-1 p-1">
-              <input
-              
-                type="submit"
-                className={`bg-[#7269EF] cursor-pointer  w-full rounded-lg h-[42px] text-lg text-white`}
-                value="Change Password"
-              />
-            </div>
-          </form>
-        </div>
-        <div className="flex justify-center m-4">
-          <div>
-            <p>
-              Already have an account?{" "}
-              <Link className="text-blue-500" to="/login">
-                {" "}
-                Sign in
-              </Link>
-            </p>
+      {/* Logo */}
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <img
+          loading="lazy"
+          src="https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"
+          alt="logo"
+          className="w-10 h-10 rounded-full"
+        />
+        <h1 className="text-2xl font-semibold text-gray-800">ChatNova</h1>
+      </div>
+
+      <p className="text-center text-gray-500 mb-6">
+        Reset your password 🔐
+      </p>
+
+      <form onSubmit={handlerSubmit} className="space-y-5">
+
+        {/* Email */}
+        <div>
+          <label className="text-sm text-gray-600">Email</label>
+          <div className="flex items-center mt-1 rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400">
+
+            <EnvelopeIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="email"
+              name="forgetEmail"
+              placeholder="Enter your email"
+              value={data.forgetEmail}
+              onChange={onChange}
+              className="w-full h-11 outline-none bg-transparent"
+            />
           </div>
         </div>
-      </div>
+
+        {/* Username */}
+        <div>
+          <label className="text-sm text-gray-600">Username</label>
+          <div className="flex items-center mt-1 rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400">
+
+            <UserIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="text"
+              name="forgetUsername"
+              placeholder="Enter your username"
+              value={data.forgetUsername}
+              onChange={onChange}
+              className="w-full h-11 outline-none bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* New Password */}
+        <div>
+          <label className="text-sm text-gray-600">New Password</label>
+          <div className="flex items-center mt-1 rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400">
+
+            <LockClosedIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="password"
+              name="forgetPassword"
+              placeholder="Enter new password"
+              value={data.forgetPassword}
+              onChange={onChange}
+              className="w-full h-11 outline-none bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Button */}
+        <button
+          type="submit"
+          className="w-full h-11 rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200"
+        >
+          Reset Password
+        </button>
+
+      </form>
+
+      {/* Footer */}
+      <p className="text-center text-sm text-gray-500 mt-6">
+        Remember your password?{" "}
+        <Link to="/login" className="text-indigo-600 hover:underline">
+          Sign in
+        </Link>
+      </p>
+
     </div>
-  );
+  </div>
+);
 }

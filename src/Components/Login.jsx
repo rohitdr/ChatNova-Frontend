@@ -16,15 +16,17 @@ export default function Login() {
   const [Emailerror, setEmailerror] = useState(false);
   const [passworderror, setPasswordError] = useState(false);
   const [data, setData] = useState({ loginEmail: "", loginPassword: "" });
-  const onChangeHandler = (e) => {
-    const array = Array.from(data);
-    setData({ ...data, [e.target.name]: e.target.value });
-    data.loginEmail.length < 5 ? setEmailerror(true) : setEmailerror(false);
-    data.loginPassword.length < 7
-      ? setPasswordError(true)
-      : setPasswordError(false);
-  };
-  const submitHandler = async (e) => {
+ const onChangeHandler = (e) => {
+  const { name, value } = e.target;
+
+  const updatedData = { ...data, [name]: value };
+  setData(updatedData);
+
+
+  setEmailerror(updatedData.loginEmail.length < 5);
+  setPasswordError(updatedData.loginPassword.length < 7);
+};
+  const submitHandler =  (e) => {
     e.preventDefault();
     if (!Emailerror && !passworderror) {
   
@@ -35,93 +37,96 @@ export default function Login() {
       showAlert("Error","Enter the full Deatils and then submit")
     }
   };
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
-    <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
-      <div className="">
-        <div className=" my-5 flex text-3xl font-medium justify-center">
-          <h1>ChatNova</h1>
-        </div>
-        <div className=" my-5 flex flex-col items-center">
-          <h2 className="text-2xl pb-2 font-medium">Sign in</h2>{" "}
-          <p>Sign in to continue to ChatNova</p>
-        </div>
+return isServer === 500 ? (
+  <NoServer />
+) : (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4">
+    
+    <div className="w-full max-w-md bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8">
+      
+      {/* Logo */}
+      <h1 className="text-3xl font-semibold text-center text-gray-800 mb-2">
+        ChatNova
+      </h1>
+      <p className="text-center text-gray-500 mb-6">
+        Welcome back 👋
+      </p>
 
-        <div className="px-7 pt-1 md:pt-7  pb-4 bg-white w-[320px] sm:w-[450px] rounded-lg shadow-md ">
-          <form onSubmit={submitHandler} className="my-3 py-2">
-            <div className="m-1 p-1 flex w-full flex-col">
-              <label htmlFor="loginEmail" className="pb-2">
-                Email
-              </label>
-              <div className="flex items-center">
-                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
-                  <EnvelopeIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
-                </div>
-                <input
-                  className={`pl-2  h-[45px]  w-full border border-r-[0px]  outline-none ${Emailerror ? "border-red-600 " : "border-gray-300"}"`}
-                  placeholder="   Enter your Email"
-                  type="email"
-                  name="loginEmail"
-                  id="loginEmail"
-                  onChange={onChangeHandler}
-                />
-                <div
-                  className={`w-10  justify-center  ${Emailerror ? "block border border-red-500 border-l-[0px]" : "hidden"}`}
-                >
-                  <ExclamationCircleIcon className="w-7 px-1 h-[43px] text-red-600  " />
-                </div>
-              </div>
-            </div>
-            <div className="m-1  p-1 w-full flex flex-col">
-              <div className="flex justify-between">
-                <label htmlFor="loginPassword" className="pb-2">
-                  Passoword
-                </label>
-                <Link className="pb-2 text-gray-500" to="/forgetpassword"> Forget password? </Link>
-              </div>
-              <div className="flex items-center border border-gray-300">
-                <div className="w-10 bg-[#F8F9FA] flex justify-center">
-                  <LockClosedIcon className="w-7 px-1  h-[45px] text-gray-500" />
-                </div>
-                <input
-                  type="password"
-                  placeholder="    Enter your Password"
-                  className={`${passworderror ? "border-red-600 " : "border-gray-300"} pl-2 border-r-[0px] outline-none border  h-[45px]  w-full`}
-                  name="loginPassword"
-                  id="loginPassword"
-                  onChange={onChangeHandler}
-                />
-                <div
-                  className={`w-10  justify-center  ${passworderror ? "block border border-red-500 border-l-[0px]" : "hidden"}`}
-                >
-                  <ExclamationCircleIcon className="w-7 px-1 h-[43px] text-red-600  " />
-                </div>
-              </div>{" "}
-            </div>
+      <form onSubmit={submitHandler} className="space-y-5">
 
-            <div className="m-1 mt-5  p-1">
-              <input
-                // disabled={Emailerror || passworderror}
-                type="submit"
-                className={`bg-[#7269EF] cursor-pointer ${Emailerror || passworderror ? "text-gray-600" : "text-white"} w-full rounded-lg h-[42px] text-lg`}
-                value="Sign in"
-              />
-            </div>
-          </form>
-        </div>
-        <div className="flex justify-center m-4">
-          <div>
-            <p>
-              Don't have an account?{" "}
-              <Link className="text-blue-500" to="/SignUp">
-                {" "}
-                Signup now
-              </Link>
-            </p>
+        {/* Email */}
+        <div>
+          <label className="text-sm text-gray-600">Email</label>
+          <div className={`flex items-center mt-1 rounded-lg border 
+          border-gray-300
+            focus-within:ring-2 focus-within:ring-indigo-400`}>
+
+            <EnvelopeIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="email"
+              name="loginEmail"
+              placeholder="Enter your email"
+              onChange={onChangeHandler}
+              className="w-full h-11 outline-none bg-transparent"
+            />
+
+            {Emailerror && (
+              <ExclamationCircleIcon className="w-5 h-5 mr-3 text-red-500" />
+            )}
           </div>
         </div>
-      </div>
+
+        {/* Password */}
+        <div>
+          <div className="flex justify-between">
+            <label className="text-sm text-gray-600">Password</label>
+            <Link to="/forgetpassword" className="text-sm text-indigo-500 hover:underline">
+              Forgot?
+            </Link>
+          </div>
+
+          <div className={`flex items-center mt-1 rounded-lg border 
+           border-gray-300
+            focus-within:ring-2 focus-within:ring-indigo-400`}>
+
+            <LockClosedIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="password"
+              name="loginPassword"
+              placeholder="Enter your password"
+              onChange={onChangeHandler}
+              className="w-full h-11 outline-none bg-transparent"
+            />
+
+            {passworderror && (
+              <ExclamationCircleIcon className="w-5 h-5 mr-3 text-red-500" />
+            )}
+          </div>
+        </div>
+
+        {/* Button */}
+        <button
+          type="submit"
+          className={`w-full h-11 rounded-lg font-medium transition-all duration-200 
+         
+            bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]`}
+        >
+          Sign in
+        </button>
+
+      </form>
+
+      {/* Footer */}
+      <p className="text-center text-sm text-gray-500 mt-6">
+        Don’t have an account?{" "}
+        <Link to="/SignUp" className="text-indigo-600 hover:underline">
+          Sign up
+        </Link>
+      </p>
+
     </div>
-  );
+  </div>
+);
 }

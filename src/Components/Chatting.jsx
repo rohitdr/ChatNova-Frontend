@@ -323,7 +323,7 @@ export default function Chatting() {
   };
   const virtusoStartReached = () => {
     if (conversationId) {
-      console.log("run");
+    
       loadMoreMessages(conversationId, page);
     }
   };
@@ -441,7 +441,7 @@ export default function Chatting() {
         userId: user._id,
         name: user.name,
       });
-    }, 1500);
+    }, 150000);
   };
   return  (
     <>
@@ -522,7 +522,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               <ChatHeaderSkeleton></ChatHeaderSkeleton>
             )}
             <div
-              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0 pb-1 ${loadingMessages && " overflow-y-auto "} `}
+              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0  ${loadingMessages && " overflow-y-auto "} `}
             >
               { !loadingMessages || currentUsersMessages.length!==0 ? (
                 <Virtuoso
@@ -539,6 +539,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                   increaseViewportBy={{ top: 500, bottom: 300 }}
                   data={currentUsersMessages}
                   followOutput="auto"
+                  ref={virtuosoRef}
                   rangeChanged={(range) => {
                     const isAtTop =
                       range.startIndex <= firstItemIndexRef.current + 2;
@@ -548,10 +549,11 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                     }
                   }}
                   itemContent={(index, message) => (
+                   <div className={index === firstItemIndexRef.current - 21 ? "mb-3" : ""}>
                     <Message
                       send={user._id === message.senderId._id}
                       message={message}
-                    ></Message>
+                    ></Message></div>
                   )}
                   components={{
                     Footer: () =>

@@ -49,6 +49,7 @@ h1,h2{
          transition-all duration-200;
 }
 
+
 @keyframes slideIn {
   from{
       transform: translateX(100%);

@@ -39,101 +39,93 @@ export default function SignUp() {
    signUp(data.signUpEmail, data.signUpPassword, data.signUpUsername);
     }
   };
-  return isServer === 500 ? (
-    <NoServer></NoServer>
-  ) : (
-    <div className="h-screen flex justify-center items-center bg-[#F7F7FF]">
-      <div className="">
-        <div className=" my-5 flex text-3xl font-medium justify-center">
-          <h1>ChatNova</h1>
-        </div>
-        <div className=" mb-5 mt-1  flex flex-col items-center">
-          <h2 className="text-2xl pb-2 font-medium">Register</h2>{" "}
-          <p>Get your ChatNova account now.</p>
-        </div>
+return isServer === 500 ? (
+  <NoServer />
+) : (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100  px-4">
+    
+    <div className="w-full max-w-md bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8">
+      
+      {/* Logo */}
+      <h1 className="text-3xl font-semibold text-center text-gray-800 mb-2">
+        ChatNova
+      </h1>
+      <p className="text-center text-gray-500 mb-6">
+        Create your account 🚀
+      </p>
 
-        <div className="px-7 pt-0 md:pt-2 md:pb-4  pb-1 bg-white w-[320px] sm:w-[450px] rounded-lg shadow-md ">
-          <form onSubmit={handlerSubmit} className="my-3 py-3">
-            <div className="m-1 p-1 flex w-full flex-col">
-              <label htmlFor="signUpEmail" className="pb-2">
-                Email
-              </label>
-              <div className="flex items-center">
-                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
-                  <EnvelopeIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
-                </div>
-                <input
-                  className={`pl-2  border outline-none  h-[45px] border-gray-300  w-full`}
-                  placeholder="   Enter your Email"
-                  type="email"
-                  name="signUpEmail"
-                  id="signUpEmail"
-                  onChange={onChange}
-                />
-              </div>
-            </div>
-            <div className="m-1 p-1 flex w-full flex-col">
-              <label htmlFor="signUpUsername" className="pb-2">
-                Username
-              </label>
-              <div className="flex items-center">
-                <div className="w-10 flex justify-center border border-gray-300 bg-[#F8F9FA]">
-                  <UserIcon className="w-7  px-1  h-[45px]  text-gray-500 " />
-                </div>
-                <input
-                  className={`pl-2 outline-none  border  h-[45px]  border-gray-300  w-full`}
-                  placeholder="   Enter your Username"
-                  type="text"
-                  name="signUpUsername"
-                  id="signUpUsername"
-                  onChange={onChange}
-                />
-              </div>
-            </div>
+      <form onSubmit={handlerSubmit} className="space-y-5">
 
-            <div className="m-1 mb-4 p-1 w-full flex flex-col">
-              <div className="flex justify-between">
-                <label htmlFor="signUpPassword" className="pb-2">
-                  Passoword
-                </label>
-              </div>
-              <div className="flex items-center border border-gray-300">
-                <div className="w-10 bg-[#F8F9FA] flex justify-center">
-                  <LockClosedIcon className="w-7 px-1  h-[45px] text-gray-500" />
-                </div>
-                <input
-                  type="password"
-                  placeholder="    Enter your Password"
-                  className={`pl-2  outline-none border  h-[45px]  border-gray-300  w-full`}
-                  name="signUpPassword"
-                  id="signUpPassword"
-                  onChange={onChange}
-                />
-              </div>{" "}
-            </div>
+        {/* Email */}
+        <div>
+          <label className="text-sm text-gray-600">Email</label>
+          <div className="flex items-center mt-1 rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400">
+            
+            <EnvelopeIcon className="w-5 h-5 mx-3 text-gray-400" />
 
-            <div className="m-1 p-1">
-              <input
-           
-                type="submit"
-                className={`bg-[#7269EF] cursor-pointer  w-full rounded-lg h-[42px] text-lg  text-white`}
-                value="Sign in"
-              />
-            </div>
-          </form>
-        </div>
-        <div className="flex justify-center m-4">
-          <div>
-            <p>
-              Already have an account?{" "}
-              <Link className="text-blue-500" to="/login">
-                {" "}
-                Signup in
-              </Link>
-            </p>
+            <input
+              type="email"
+              name="signUpEmail"
+              placeholder="Enter your email"
+              onChange={onChange}
+              className="w-full h-11 outline-none bg-transparent"
+            />
           </div>
         </div>
-      </div>
+
+        {/* Username */}
+        <div>
+          <label className="text-sm text-gray-600">Username</label>
+          <div className="flex items-center mt-1 rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400">
+            
+            <UserIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="text"
+              name="signUpUsername"
+              placeholder="Choose a username"
+              onChange={onChange}
+              className="w-full h-11 outline-none bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Password */}
+        <div>
+          <label className="text-sm text-gray-600">Password</label>
+          <div className="flex items-center mt-1 rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400">
+            
+            <LockClosedIcon className="w-5 h-5 mx-3 text-gray-400" />
+
+            <input
+              type="password"
+              name="signUpPassword"
+              placeholder="Create a password"
+              onChange={onChange}
+              className="w-full h-11 outline-none bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Button */}
+        <button
+          type="submit"
+          className="w-full h-11 rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200"
+        >
+          Create Account
+        </button>
+
+      </form>
+
+      {/* Footer */}
+      <p className="text-center text-sm text-gray-500 mt-6">
+        Already have an account?{" "}
+        <Link to="/login" className="text-indigo-600 hover:underline">
+          Sign in
+        </Link>
+      </p>
+
     </div>
-  );
+  </div>
+);
 }

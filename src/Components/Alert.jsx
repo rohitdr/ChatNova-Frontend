@@ -29,51 +29,47 @@ export default function Alert(props) {
       clearTimeout(remvoe);
     };
   }, [alert]);
-  if (!alert) return null;
-  return (
-    alert &&
-    !leaving && (
-      <div className="fixed inset-0 bg-black/10 z-50">
-        <div
-          className={` p-2 absolute right-5 top-10 md:right-10 shadow-2xl rounded-md bg-[#101627] ${type === "Warning" ? "border-yellow-200" : ""} ${type === "Error" ? "border-red-600" : ""} ${type === "Success" ? "border-green-500" : ""} border-2 h-20 w-80 md:w-96 
-     ${leaving ? "animate-slide-out" : "animate-slide-in"}
-     `}
-        >
-          <div className="flex justify-between">
-            <div className="flex ">
-              <div className="flex items-center text-white">
-                {type === "Error" && (
-                  <XCircleIcon
-                    className={`w-6 h-6 text-red-600 `}
-                  ></XCircleIcon>
-                )}
-                {type === "Success" && (
-                  <CheckCircleIcon className="w-6 h-6 text-green-500" />
-                )}
-                {type === "Warning" && (
-                  <ExclamationTriangleIcon className="w-6 h-6 text-yellow-400"></ExclamationTriangleIcon>
-                )}
-              </div>
-              <div className="flex flex-col mx-4 py-1 text-white">
-                <div className="">{type}</div>
-                <div
-                  className={`text-xs ${type === "Warning" ? "text-yellow-200" : " text-white"}`}
-                >
-                  {message}
-                </div>
-              </div>
-            </div>
-            <div
-              className="flex items-center text-white"
-              onClick={() => {
-                setLeaving(true);
-              }}
-            >
-              <XMarkIcon className="w-6 h-6 text-white"></XMarkIcon>
-            </div>
-          </div>
-        </div>
+ if (!alert) return null;
+
+return (
+  <div className="fixed top-5 right-5 z-50">
+    <div
+      className={`flex items-start gap-3 w-80 md:w-96 p-4 rounded-xl shadow-xl 
+      backdrop-blur-lg border transition-all duration-300
+      ${leaving ? "opacity-0 translate-x-10" : "opacity-100 translate-x-0"}
+      
+      ${type === "Success" && "bg-green-50/80 border-green-300"}
+      ${type === "Error" && "bg-red-50/80 border-red-300"}
+      ${type === "Warning" && "bg-yellow-50/80 border-yellow-300"}
+      `}
+    >
+      {/* Icon */}
+      <div className="mt-1">
+        {type === "Error" && (
+          <XCircleIcon className="w-6 h-6 text-red-500" />
+        )}
+        {type === "Success" && (
+          <CheckCircleIcon className="w-6 h-6 text-green-500" />
+        )}
+        {type === "Warning" && (
+          <ExclamationTriangleIcon className="w-6 h-6 text-yellow-500" />
+        )}
       </div>
-    )
-  );
+
+      {/* Content */}
+      <div className="flex-1">
+        <p className="font-medium text-gray-800">{type}</p>
+        <p className="text-sm text-gray-600">{message}</p>
+      </div>
+
+      {/* Close */}
+      <button
+        onClick={() => setLeaving(true)}
+        className="text-gray-400 hover:text-gray-600 transition"
+      >
+        <XMarkIcon className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+);
 }
