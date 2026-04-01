@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../Api/Axios.jsx";
 import AuthContext from "./AuthContext.jsx";
 import SocketContext from "./SocketContext.jsx";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export default function ChatNovaState(props) {
   const authContext = useContext(AuthContext);
@@ -16,7 +17,7 @@ const {socket} =useContext(SocketContext)
   const [chattedOnlineUsers, setChattedOnlineUsers] = useState(null);
   const [currentChatUserId, setCurrentChatUserId] = useState(null);
   const [currentChatUser, setCurrentChatUser] = useState(null);
-  const [currentUsersMessages, setCurrentUsersMessages] = useState([]);
+  
   const [activeChat, setActiveChat] = useState(false);
 const [conversationId,setConversationId]=useState(null)
 
@@ -42,7 +43,7 @@ setIsAdmin(false)
   setChattedOnlineUsers(null)
   setCurrentChatUserId(null)
   setCurrentChatUser(null)
-  setCurrentUsersMessages([])
+
   setActiveChat(false)
   setConversationId(null)
   setAllgroups(null)
@@ -117,25 +118,29 @@ setIsAdmin(false)
   };
 
   //function to serach the users with whom logged in user have chatted
-  const chattedUsers = async (page,limit) => {
+  const chattedUsers = async (page) => {
     try {
-      setLoadingUser(true)
+     let limit =15
       const res = await api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
       if (res.status === 200) {
     
-        setChattedUsersList(res.data.users);
-      setTimeout(() => {
-       setLoadingUser(false)
-      }, 500);
+       console.log(res.data.users)
+         return  {
+  users: res.data.users,
+  page: page,
+  hasMore: res.data.hasMore
+}
+
       }
     } catch (error) {
        const status = error.response?.status;
      setLoadingUser(false)
       if(status ===500){
-        setLoadingUser(false)
+     
         setIsServer(500)
      
       }
+      throw  error
     }
   };
   //function to serach the users with whom logged in user have chatted
@@ -192,57 +197,78 @@ setIsAdmin(false)
     }
   };
 
-  const getmessages = async (id) => {
+  const getmessages = async (page,id) => {
     try {
-      const res = await api.get(`/messages/recieveMessage/${id}?page=1&limit=20`);
-      if (res.status === 200) {
     
-        setCurrentUsersMessages(res.data.message.reverse());
-    
-      hasMoreRef.current = res.data.hasMore
-     
-        setHasMore(res.data.hasMore)
-      }
-    } catch (error) {
-      const status = error.response?.status;
-    if(status ===500){
-  
-      setIsServer(500)
-      }
-    }
-  };
-  const loadMoreMessages = async (id,page) => {
-    try {
-     
-      if(isInitailLoadRef.current){
-       isInitailLoadRef.current =false
-     
-        return
-      }
-      if( !hasMoreRef.current || loadingRef.current){
-        return
-      }
-
-      loadingRef.current = true
       const res = await api.get(`/messages/recieveMessage/${id}?page=${page}&limit=20`);
       if (res.status === 200) {
-        setCurrentUsersMessages(prev=>[...res.data.message.reverse(),...prev]);
-        firstItemIndexRef.current -= res.data.message.length
-         setpage(prev=>prev +1)
-               hasMoreRef.current = res.data.hasMore
-                 console.log(hasMoreRef.current)
-        setHasMore(res.data.hasMore)
-           loadingRef.current = false
-           console.log(loadingRef.current)
+       hasMoreRef.current = res.data.hasMore
+             setHasMore(res.data.hasMore)
+        return  {
+  message: res.data.message.reverse(),
+  page: page,
+  hasMore: res.data.hasMore
+};
+    
+   
+     
+  
       }
     } catch (error) {
       const status = error.response?.status;
     if(status ===500){
-  
       setIsServer(500)
+  
       }
+     throw error; 
     }
   };
+
+
+const useMessage =(id)=>{
+return useInfiniteQuery({
+  queryKey:["messages",id],
+  queryFn:({ pageParam = 1, queryKey }) => {
+      const [, id] = queryKey; 
+      return getmessages(pageParam, id);
+    },
+  getNextPageParam:(lastPage)=>{
+    if(lastPage.hasMore){
+      return lastPage.page+1;
+    }
+    return undefined
+  },
+  staleTime: 5000,
+refetchOnWindowFocus: false,
+enabled:!!conversationId
+})
+}
+
+const useUser = ()=>{
+  return useInfiniteQuery({
+    queryKey:["users"],
+    queryFn:({pageParam=1})=>{ return chattedUsers(pageParam)},
+    getNextPageParam:(lastPage)=>{
+      if(lastPage.hasMore){
+       return lastPage.page+1
+      }
+      return undefined
+    },
+      staleTime: 5000,
+refetchOnWindowFocus: false,
+
+  })
+}
+
+
+
+
+
+
+
+
+
+
 //sendmessagee do it 
   const sendMessages = async (message) => {
     try {
@@ -506,8 +532,8 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         page,
         replyMessage,
         setReplyMessage,
-        loadMoreMessages,
-       
+     useUser,
+       useMessage,
         allGroups,
    updateGroupImage,
         conversationId,
@@ -522,8 +548,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         sendMessages,
         setConversationId,
         dataBaseUsers,
-        currentUsersMessages,
-        setCurrentUsersMessages,
+     
         getmessages,
       isInitailLoadRef,
       setHasMore,

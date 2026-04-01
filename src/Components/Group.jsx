@@ -72,7 +72,7 @@ export default function Group() {
     setActiveGroupChat(true);
     try{
     await  getGroupById(element._id);
-    await  getmessages(element._id);
+  
     }catch(error){
       console.log(error)
     }

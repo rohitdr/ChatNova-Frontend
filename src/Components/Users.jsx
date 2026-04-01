@@ -21,20 +21,21 @@ export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
     serchUser,
+    useMessage,
     loadMoreChattedUsers,
     dataBaseUsers,
     getConversationId,
-    currentUsersMessages,
+   
     setChattedUsersList,
     setActiveChat,
     activeChat,
     getCureentChattingUser,
     chattedOnlineUsers,
-    setCurrentUsersMessages,
+  
     isInitailLoadRef,
     setHasMore,
     setpage,
-    chattedUsersList,
+    
     chattedUsers,
     currentChatUserId,
     setCurrentChatUserId,
@@ -44,8 +45,8 @@ export default function Users() {
     setConversationId,
     getmessages,
     hasMoreUsers,
-    loadingMessages
-
+    loadingMessages,
+    useUser
   } = context;
 
   const [searchClick, setSearchClick] = useState(true);
@@ -61,8 +62,11 @@ export default function Users() {
  
   useEffect(() => {
     chattedUsers(userListpage,15);
+
   }, []);
 
+const {data,isLoading,fetchNextPage}=useUser()
+const chattedUsersList = data?.pages.flatMap(page => page.users) || [];
   useEffect(() => {}, [activePage]);
 
   const onChangeHandler = (e) => {
@@ -94,7 +98,7 @@ useEffect(() => {
      
      socket.emit("join_group",element.ConversationId)
      socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
-setLoadingMessages(true);
+
 
 
 setHasMore(true);
@@ -106,12 +110,12 @@ setConversationId(element.ConversationId);
 setActiveChat(true);
 await Promise.all([
   getCureentChattingUser(element.user._id),
-  getmessages(element.ConversationId)
+
 ]);
 
 
    setTimeout(()=>{
- setLoadingMessages(false)
+
    },500)
 
       isInitailLoadRef.current = true;
@@ -139,7 +143,7 @@ await Promise.all([
       getCureentChattingUser(element._id),
  getConversationId(element._id)
 ]);
-setCurrentUsersMessages([])
+
 
      setTimeout(()=>{
  setLoadingMessages(false)
@@ -182,7 +186,7 @@ setCurrentUsersMessages([])
               id="usersearch"
             />
           </div>
-
+{console.log(data?.pages)}
           <div className={`flex pt-2 flex-col    lg:mb-0 sm:p-2 px-3 ${!searchClick && " overflow-y-auto scrollbar-hide "} lg:px-4 h-full`}>
             {!searchClick &&
               dataBaseUsers &&
@@ -195,12 +199,13 @@ setCurrentUsersMessages([])
        </div>
                 );
               })}
+              {console.log(chattedUsersList)}
             
-            {!loadingUser && searchClick ?
+            {!isLoading && searchClick ?
             <div className="h-full">
             <Virtuoso
                 className="scrollbar-hide "
-                endReached={virtusoEndReached}
+                endReached={fetchNextPage}
                 computeItemKey={(index, element) => element.ConversationId}
                 // ref={virtuosoRef}
                 overscan={200}

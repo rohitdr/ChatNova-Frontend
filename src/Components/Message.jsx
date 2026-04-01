@@ -7,15 +7,17 @@ import {
 
   XMarkIcon,
 } from "@heroicons/react/24/solid";
+import { useQueryClient } from "@tanstack/react-query";
 import SocketContext from "../Context/SocketContext";
 import { ArrowUturnLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
 const Message= React.memo((props) =>{
   const [replyIcon,setReplyIcon]=useState("hidden")
+  const queryclient = useQueryClient();
   const { message, send } = props;
   const authContext = useContext(AuthContext);
   const { user, isServer } = authContext;
   const context = useContext(ChatNovaContext);
-  const { currentChatUser,currentChatUserId,conversationId,activeGroupChat ,setCurrentUsersMessages,setReplyMessage} = context;
+  const { currentChatUser,currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} = context;
   const [mediaView,setMediaView]=useState(false)
   const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
  const [display,setDisplay]=useState("hidden")
@@ -41,9 +43,12 @@ const Message= React.memo((props) =>{
  const presstimer = useRef(null)
 const handleReactionClick=(e)=>{
       if(!socket) return
-   setCurrentUsersMessages((prev)=>
-         prev.map(msg=>{
-          let updatedReaction;
+
+      queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+      if(!oldData) return oldData
+      const newPages = oldData.pages.map((page)=>{
+          const updatedMessage = page.message.map((msg)=>
+         { let updatedReaction;
           if(msg._id!==message._id) {return msg}
           const reaction = message.reaction || []
           const existing = reaction.filter((r)=>{
@@ -71,10 +76,18 @@ const handleReactionClick=(e)=>{
             ...msg,
             reaction:updatedReaction
           }
-      
-
- } )
-   )
+        }
+          )
+          return {
+        ...page,
+        message: updatedMessage,
+      };
+      })
+        return {
+      ...oldData,
+      pages: newPages,
+    };
+     })
     
       socket.emit("send_reaction",{
         messageId:message._id,

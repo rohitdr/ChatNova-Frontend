@@ -23,6 +23,8 @@ import { Virtuoso } from "react-virtuoso";
 import TypingIndicator from "./TypingIndicator";
 import MessageSkeleton from "./MessageSkeleton";
 import ChatHeaderSkeleton from "./ChatHeaderSkeleton";
+import { useQueryClient } from "@tanstack/react-query";
+
 export default function Chatting() {
   const [sendingMessage, setSendingMessage] = useState(null);
 
@@ -40,6 +42,7 @@ export default function Chatting() {
   const [isTyping, setIsTyping] = useState(false);
 
   const {
+    useMessage,
     currentChatUser,
     chattedUsersList,
     currentUserLoading,
@@ -50,9 +53,9 @@ export default function Chatting() {
     currentChatUserId,
     setChattedUsersList,
 
-    currentUsersMessages,
+  
     chattedUsers,
-    setCurrentUsersMessages,
+
     sendMessages,
     isInitailLoadRef,
     capitalizeFirstLetter,
@@ -62,23 +65,34 @@ export default function Chatting() {
 
     currentGroup,
     activeChat,
-    page,
-    hasMoreRef,
-    loadingRef,
-    loadMoreMessages,
+   
   } = Context;
+  const {data,isLoading,fetchNextPage}=useMessage(conversationId) 
+
+const messages = data?.pages.slice().reverse().flatMap(page=>page.message)||[]
+const queryclient = useQueryClient();
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
   const virtuosoRef = useRef(null);
   useEffect(() => {
     if (!socket) return;
     const handler = ({ messageId, reaction }) => {
-      console.log("handler");
-      setCurrentUsersMessages((prev) =>
-        prev.map((msg) =>
+        queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+      if(!oldData) return oldData
+      const newPages = oldData.pages.map((page)=>{
+          const updatedMessage = page.message.map((msg)=>
           msg._id === messageId ? { ...msg, reaction: reaction } : msg,
-        ),
-      );
+          )
+          return {
+        ...page,
+        message: updatedMessage,
+      };
+      })
+        return {
+      ...oldData,
+      pages: newPages,
+    };
+     })
     };
     socket.on("reaction_updated", handler);
 
@@ -90,11 +104,25 @@ export default function Chatting() {
   useEffect(() => {
     if (!socket) return;
     const deliverHandler = ({ messageId, deliveredTo }) => {
-      setCurrentUsersMessages((prev) =>
-        prev.map((msg) =>
+     queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+      if(!oldData) return oldData
+      const newPages = oldData.pages.map((page)=>{
+          const updatedMessage = page.message.map((msg)=>
           msg._id === messageId ? { ...msg, deliveredTo: deliveredTo } : msg,
-        ),
-      );
+          )
+          return {
+        ...page,
+        message: updatedMessage,
+      };
+      })
+        return {
+      ...oldData,
+      pages: newPages,
+    };
+     })
+
+
+
     };
 
     socket.on("message_deliverd", deliverHandler);
@@ -106,11 +134,22 @@ export default function Chatting() {
   useEffect(() => {
     if (!socket) return;
     const seenHandler = ({ messageId, seenBy }) => {
-      setCurrentUsersMessages((prev) =>
-        prev.map((msg) =>
+         queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+      if(!oldData) return oldData
+      const newPages = oldData.pages.map((page)=>{
+          const updatedMessage = page.message.map((msg)=>
           msg._id === messageId ? { ...msg, seenBy: seenBy } : msg,
-        ),
-      );
+          )
+          return {
+        ...page,
+        message: updatedMessage,
+      };
+      })
+        return {
+      ...oldData,
+      pages: newPages,
+    };
+     })
     };
 
     socket.on("message_seen", seenHandler);
@@ -119,24 +158,121 @@ export default function Chatting() {
       socket.off("message_seen", seenHandler);
     };
   }, [socket]);
+ const updateMessageToQuerySocket = (newMessage) => {
+  queryclient.setQueryData(["messages", conversationId], (oldData) => {
+    if (!oldData) return oldData;
 
+    let replaced = false;
+let alreadyExists=false
+    const newPages = oldData.pages.map((page) => {
+      const updatedMessages = page.message.map((msg) => {
+        if (msg._id === newMessage.tempId) {
+          replaced = true;
+          return newMessage; // ✅ sender case
+        }
+        if (msg._id === newMessage._id) {
+          alreadyExists = true;
+        }
+        return msg;
+      });
+
+      return {
+        ...page,
+        message: updatedMessages,
+      };
+    });
+
+   
+    if (!replaced && !alreadyExists) {
+      newPages[0] = {
+        ...newPages[0],
+        message: [
+          ...newPages[0].message,
+          newMessage,
+        ],
+      };
+    }
+
+    return {
+      ...oldData,
+      pages: newPages,
+    };
+  });
+};
 
   useEffect(() => {
     virtuosoRef.current?.scrollToIndex({
-      index: currentUsersMessages.length - 1,
+      index: messages.length - 1,
       behavior: "auto",
     });
   }, [typingUser]);
 
+const updateUsersList = (newMessage) => {
+
+  queryclient.setQueryData(["users"], (oldData) => {
+    if (!oldData) return oldData;
+
+    const newPages = oldData.pages.map((page) => {
+      const users = page.users; 
+
+      const index = users.findIndex(
+        (c) => c.ConversationId === newMessage.conversationId
+      );
+    
+      const lastMessage = {
+        text: newMessage.text,
+        createdAt: newMessage.createdAt,
+      };
+
+      if (index === -1) {
+        const newuser = newMessage.conversationToSend.participents.find(
+          (p) => p.user._id !== user._id
+        );
+
+        return {
+          ...page,
+          users: [
+            {
+              ConversationId: newMessage.conversationToSend.ConversationId,
+              lastMessage: newMessage.conversationToSend.lastMessage,
+              user: newuser.user,
+            },
+            ...users,
+          ],
+        };
+      }
+
+     
+      const updatedUser = {
+        ...users[index],
+        lastMessage,
+      };
+
+      const filteredUsers = users.filter(
+        (c) => c.ConversationId !== newMessage.conversationId
+      );
+
+      return {
+        ...page,
+        users: [updatedUser, ...filteredUsers],
+      };
+    });
+
+    return {
+      ...oldData,
+      pages: newPages,
+    };
+  });
+};
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
-   
+       
       if (
         (activeGroupChat &&
-          newMessage._doc.conversationId === conversationId) ||
-        (!activeGroupChat && newMessage._doc.conversationId === conversationId)
+          newMessage.conversationId === conversationId) ||
+        (!activeGroupChat && newMessage.conversationId === conversationId)
       ) {
       
         socket.emit("mark_seen", {
@@ -145,69 +281,50 @@ export default function Chatting() {
         });
 
         /// setting current user chat
-        setCurrentUsersMessages((prev) => {
-          if (!prev) return [newMessage._doc];
-
-          const existsTempMsg = prev.some((msg) => msg._id === newMessage.tempId);
-          if (existsTempMsg) {
-            return prev.map((m) =>
-              m._id === newMessage.tempId ? newMessage._doc : m,
-            );
-          }
-          const exists = prev.some((msg) => msg._id === newMessage._doc._id);
-       if (exists) {
-            return prev
-            
-          }
-          const audio = new Audio(
-            "/universfield-happy-message-ping-351298.mp3",
-          );
-          audio.play().catch((err) => console.log("Audio play error:", err));
-
-          return [...prev, newMessage._doc];
-        });
+       updateMessageToQuerySocket(newMessage)
       }
 
       //setting current user list
-     !activeGroupChat && setChattedUsersList((prev) => {
-        const index = prev.findIndex(
-          (c) => c.ConversationId === newMessage._doc.conversationId,
-        );
-        console.log(index);
-        const lastMessage = {
-          text: newMessage._doc.text,
-          createdAt: newMessage._doc.createdAt,
-        };
-        if (index === -1) {
-          const newuser = newMessage.conversationToSend.participents.find(
-            (p) => p.user._id !== user._id,
-          );
-          console.log([{
-            ConversationId: newMessage.conversationToSend.ConversationId,
-            lastMessage: newMessage.conversationToSend.lastMessage,
-            user: newuser.user,
-          },...prev]);
+     !activeGroupChat && updateUsersList(newMessage)
+      // setChattedUsersList((prev) => {
+      //   const index = prev.findIndex(
+      //     (c) => c.ConversationId === newMessage.conversationId,
+      //   );
+      //   console.log(index);
+      //   const lastMessage = {
+      //     text: newMessage.text,
+      //     createdAt: newMessage.createdAt,
+      //   };
+      //   if (index === -1) {
+      //     const newuser = newMessage.conversationToSend.participents.find(
+      //       (p) => p.user._id !== user._id,
+      //     );
+      //     console.log([{
+      //       ConversationId: newMessage.conversationToSend.ConversationId,
+      //       lastMessage: newMessage.conversationToSend.lastMessage,
+      //       user: newuser.user,
+      //     },...prev]);
 
-          return [
-            {
-              ConversationId: newMessage.conversationToSend.ConversationId,
-              lastMessage: newMessage.conversationToSend.lastMessage,
-              user: newuser.user,
-            },
-            ...prev,
-          ];
-        }
-        const updateduserlist = {
-          ...prev[index],
-          lastMessage,
-        };
-        const filtereduser = prev.filter(
-          (c) => c.ConversationId !== newMessage._doc.conversationId,
-        );
+      //     return [
+      //       {
+      //         ConversationId: newMessage.conversationToSend.ConversationId,
+      //         lastMessage: newMessage.conversationToSend.lastMessage,
+      //         user: newuser.user,
+      //       },
+      //       ...prev,
+      //     ];
+      //   }
+      //   const updateduserlist = {
+      //     ...prev[index],
+      //     lastMessage,
+      //   };
+      //   const filtereduser = prev.filter(
+      //     (c) => c.ConversationId !== newMessage.conversationId,
+      //   );
  
-        return [updateduserlist, ...filtereduser];
-      });
-   
+      //   return [updateduserlist, ...filtereduser];
+      // });
+     
      
       // updatedUserList(currentChatUser)
     };
@@ -218,15 +335,7 @@ export default function Chatting() {
     };
   }, [conversationId]);
 
-  // useEffect(() => {
-  //   const handleBack = () => {
-  //     setActiveChat(false);
-  //   };
-  //   window.addEventListener("popstate", handleBack);
-  //   return () => {
-  //     window.removeEventListener("popstate", handleBack);
-  //   };
-  // }, []);
+
 
   const imagechangehandler = (e) => {
     if (e.target.files[0].size > 10000000) {
@@ -265,6 +374,16 @@ export default function Chatting() {
 
     return last.toLocaleDateString("en-GB");
   };
+
+  const sendMessageToQueryUser=(message)=>{
+queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+ if(!oldData) return oldData
+ const newPages = [...oldData.pages]
+  newPages[0].message.push(message)
+  return {...oldData,pages:newPages}
+})
+  }
+
   const handleSendMessage = () => {
     if (sendingMessage !== "") {
       const tempmessage = {
@@ -293,42 +412,38 @@ export default function Chatting() {
             message: sendingMessage,
             tempId: tempmessage._id,
           });
-      setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+      sendMessageToQueryUser(tempmessage);
 
       setSendingMessage("");
-      setChattedUsersList((prev) => {
-        const index = prev.findIndex((c) => c.user._id === currentChatUserId);
+     
+      // setChattedUsersList((prev) => {
+      //   const index = prev.findIndex((c) => c.user._id === currentChatUserId);
 
-        const lastMessage = {
-          text: tempmessage.text,
-          createdAt: tempmessage.createdAt,
-        };
-        if (index === -1) return prev;
-        const updateduserlit = {
-          ...prev[index],
-          lastMessage,
-        };
-        const filtereduser = prev.filter(
-          (c) => c.user._id !== currentChatUserId,
-        );
-        console.log([updateduserlit, ...filtereduser]);
-        return [updateduserlit, ...filtereduser];
-      });
+      //   const lastMessage = {
+      //     text: tempmessage.text,
+      //     createdAt: tempmessage.createdAt,
+      //   };
+      //   if (index === -1) return prev;
+      //   const updateduserlit = {
+      //     ...prev[index],
+      //     lastMessage,
+      //   };
+      //   const filtereduser = prev.filter(
+      //     (c) => c.user._id !== currentChatUserId,
+      //   );
+      //   console.log([updateduserlit, ...filtereduser]);
+      //   return [updateduserlit, ...filtereduser];
+      // });
     }
     setTimeout(() => {
       virtuosoRef.current?.scrollToIndex({
-        index: currentUsersMessages.length - 1,
+        index: messages.length - 1,
         align: "end",
         behavior: "auto",
       });
     }, 0);
   };
-  const virtusoStartReached = () => {
-    if (conversationId) {
-    
-      loadMoreMessages(conversationId, page);
-    }
-  };
+ 
   const handleUploadImage = () => {
     const tempmessage = {
       _id: Date.now(),
@@ -345,7 +460,7 @@ export default function Chatting() {
         url: URL.createObjectURL(uploadedImage),
       },
     };
-    setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+    sendMessageToQueryUser(tempmessage);
     setChattedUsersList((prev) => {
       const index = prev.findIndex((c) => c.user._id === currentChatUserId);
 
@@ -401,7 +516,7 @@ export default function Chatting() {
         url: URL.createObjectURL(uploadVideo),
       },
     };
-    setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+   sendMessageToQueryUser(tempmessage);
     setChattedUsersList((prev) => {
       const index = prev.findIndex((c) => c.user._id === currentChatUserId);
 
@@ -446,11 +561,11 @@ export default function Chatting() {
     }, 150000);
   };
   return  (
-    <>
+    <>  
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-dvh bg-white`}>
           <div className="flex h-full flex-col justify-between">
-            {!currentUserLoading || currentUsersMessages.length!==0 ? (
+            {!currentUserLoading || messages.length!==0 ? (
               <div
                 className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
 bg-white/80 backdrop-blur-md border-b shadow-sm"
@@ -524,30 +639,30 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               <ChatHeaderSkeleton></ChatHeaderSkeleton>
             )}
             <div
-              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0  ${loadingMessages && " overflow-y-auto "} `}
+              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0  ${isLoading && " overflow-y-auto "} `}
             >
-              { !loadingMessages || currentUsersMessages.length!==0 ? (
+              { !isLoading || messages.length!==0 ? (
                 <Virtuoso
                   className="scrollbar-hide"
-                  startReached={virtusoStartReached}
+                 
                   computeItemKey={(index, message) => message._id}
                   firstItemIndex={firstItemIndexRef.current}
                   initialTopMostItemIndex={
-                    currentUsersMessages.length > 0
-                      ? currentUsersMessages.length - 1
+                    messages.length > 0
+                      ? messages.length - 1
                       : undefined
                   }
                   style={{ height: "100%" }}
                   increaseViewportBy={{ top: 500, bottom: 300 }}
-                  data={currentUsersMessages}
+                  data={messages}
                   followOutput="auto"
-                  ref={virtuosoRef}
+                  // ref={virtuosoRef}
                   rangeChanged={(range) => {
                     const isAtTop =
                       range.startIndex <= firstItemIndexRef.current + 2;
 
                     if (isAtTop) {
-                      virtusoStartReached();
+                      fetchNextPage()
                     }
                   }}
                   itemContent={(index, message) => (

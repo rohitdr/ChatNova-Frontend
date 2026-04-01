@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { getToken } from "firebase/messaging";
 import { messaging } from "../Firebase/firebase.cjs";
 import { Socket } from "socket.io-client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AuthState(props) {
   const [isServer, setIsServer] = useState(0);
@@ -17,7 +18,7 @@ export default function AuthState(props) {
   const [alert, setAlert] = useState(null);
   const [loadingUser,setLoadingUser]=useState(false)
   const [loadingMessages,setLoadingMessages] =useState(true)
-  
+  const queryClient = useQueryClient()
   const showAlert = (type, message) => {
     setAlert({
       type: type,
@@ -263,8 +264,10 @@ export default function AuthState(props) {
       const response = await api.post("/auth/logout");
       setProgress(50);
       if (response.status === 200) {
+          queryClient.clear()
         localStorage.removeItem("refress_token");
         setUser(null)
+      
         showAlert("Success", "You have been logged out successfully !");
         Navigate("/login");
         setProgress(100);

@@ -17,11 +17,12 @@ import AuthContext from "../Context/AuthContext";
 
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function GroupInfo() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,addMember,isAdmin,setAllgroups,setCurrentUsersMessages,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,serchUser,addMember,isAdmin,setAllgroups,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
   const { user,updatePassword, isServer,showAlert ,updateUser} = authContext;
   const [groupSettingsImage, setGroupSettingsImage] = useState(null);
@@ -32,7 +33,7 @@ export default function GroupInfo() {
  const [addUser,setAddUser] = useState(false)
  const [searchingAddUser,setSearchingAddUser]=useState(false)
  const conversationIdRef=useRef(conversationId)
-
+const queryclient = useQueryClient();
 
  
 
@@ -114,7 +115,14 @@ export default function GroupInfo() {
    }
   },[socket])
 
-  
+    const sendMessageToQueryUser=(message)=>{
+queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+ if(!oldData) return oldData
+ const newPages = [...oldData.pages]
+  newPages[0].message.push(message)
+  return {...oldData,pages:newPages}
+})
+  }
   const removeMemberhandler=(element)=>{
   const tempmessage = {
         _id: Date.now(),
@@ -126,7 +134,7 @@ export default function GroupInfo() {
          
         },
       };
-   setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+sendMessageToQueryUser(tempmessage)
     removeMember(element._id,tempmessage._id)
   }
   const addMemberhandler=(element)=>{
@@ -141,7 +149,7 @@ export default function GroupInfo() {
          
         },
       };
-   setCurrentUsersMessages((prev) => [...prev, tempmessage]);
+  sendMessageToQueryUser(tempmessage)
     addMember(element._id,tempmessage._id)
   setAddUser(false);
       setSearchingAddUser(false)
