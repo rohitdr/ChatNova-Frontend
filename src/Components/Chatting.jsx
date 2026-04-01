@@ -43,6 +43,8 @@ export default function Chatting() {
     currentChatUser,
     chattedUsersList,
     currentUserLoading,
+     replyMessage,
+      
     setActiveChat,
     uploadCloudinary,
     currentChatUserId,
@@ -572,7 +574,9 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
             </div>
 
             <div className="shrink-0 flex xs:p-2 md:p-4 sticky bottom-0 justify-between bg-white border">
-              <div className="w-full ">
+             
+              <div className="w-full">
+               
                 <input
                   type="text"
                   onChange={(e) => {
@@ -581,7 +585,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                     setSendingMessage(e.target.value);
                   }}
                   className="bg-[#E6EBF5] rounded-full outline-none  h-full w-full pl-2 "
-                  placeholder="Enter Message..."
+                  placeholder={` ${replyMessage && replyMessage.text+" :" } Enter Message here ...`}
                   value={sendingMessage}
                   name="sendmessageinput"
                   id="sendmessageinput"

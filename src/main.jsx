@@ -7,9 +7,10 @@ import ChatNovaState from "./Context/ChatNovaState.jsx";
 import AuthState from "./Context/AuthState.jsx";
 import SocketState from "./Context/SocketState.jsx";
 import AuthContext from "./Context/AuthContext.jsx";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+const queryClient = new QueryClient();
 createRoot(document.getElementById("root")).render(
-
+ <QueryClientProvider client={queryClient}>
   <BrowserRouter>
     <StrictMode>
       <AuthState>
@@ -20,7 +21,8 @@ createRoot(document.getElementById("root")).render(
         </SocketState>
       </AuthState>
     </StrictMode>
-  </BrowserRouter>,
+  </BrowserRouter>
+  </QueryClientProvider>,
 );
 function Root (){
   const {user}=useContext(AuthContext)

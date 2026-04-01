@@ -33,6 +33,7 @@ const [hasMoreUsers , setHasMoreUsers]=useState(true)
 const firstItemIndexRef =useRef(10000000)
 const [currentUserLoading,setCurrentUserLoading]=useState(false)
  const [isAdmin,setIsAdmin]=useState(false)
+ const [replyMessage,setReplyMessage]=useState(null)
 useEffect(() => {
 
 setIsAdmin(false)
@@ -503,6 +504,8 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         getAllGroups,
      currentUserLoading,
         page,
+        replyMessage,
+        setReplyMessage,
         loadMoreMessages,
        
         allGroups,

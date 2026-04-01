@@ -8,13 +8,14 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import SocketContext from "../Context/SocketContext";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { ArrowUturnLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
 const Message= React.memo((props) =>{
+  const [replyIcon,setReplyIcon]=useState("hidden")
   const { message, send } = props;
   const authContext = useContext(AuthContext);
   const { user, isServer } = authContext;
   const context = useContext(ChatNovaContext);
-  const { currentChatUser,currentChatUserId,conversationId,activeGroupChat ,setCurrentUsersMessages} = context;
+  const { currentChatUser,currentChatUserId,conversationId,activeGroupChat ,setCurrentUsersMessages,setReplyMessage} = context;
   const [mediaView,setMediaView]=useState(false)
   const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
  const [display,setDisplay]=useState("hidden")
@@ -115,18 +116,37 @@ if(!delivered) return "sent"
 if(!seen) return "delivered"
 return "seen"
   }
- 
-
-
-
 }
 
+const clickReplyIcon=()=>{
+  let text;
+  if(message.type === "text"){
+     text =message.text
+  }
+if(message.type === "image"){
+     text ="image" && "📷 Photo"
+  }
+  if(message.type === "vide"){
+     text ="video" && "🎥 Video"
+  }
+  setReplyMessage({
+    messageId:message._id,
+        messageType:message.type,
+        text,
+        senderId:user?.Id
+  })
 
+}
+const onMouseEnterMessage=()=>{
+  setReplyIcon("flex")
+}
+const onMouseLeaveMessage=()=>{
+  setTimeout(() => {
+     setReplyIcon("hidden")
+  }, 2000);
+ 
+}
 let status = messageStatus(message,currentChatUserId)
-
-  
-
-
   return(
    <> 
   {message.type !=="system" ?<div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}
@@ -146,7 +166,36 @@ let status = messageStatus(message,currentChatUserId)
         <span className="text-2xs m-1 mx-2  text-black">{!send && activeGroupChat&& message?.senderId?.name}</span>
         <div
           className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1 " : "px-4 lg:p-3"} py-1  ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
+        onMouseEnter={onMouseEnterMessage} onMouseLeave={onMouseLeaveMessage} 
         > 
+     
+{message.replyTo && (
+  <div
+    className={`
+      px-2 py-2 mb-1 rounded-md 
+      border-l-4 border-[#6C63FF]
+      ${send 
+        ? "bg-white/10 border-white/40 text-white" 
+        : "bg-black/5 border-[#6C63FF]/70 text-black"}
+    `}
+  >
+    {/* Sender */}
+    <p className={`text-[11px] font-semibold leading-none 
+      ${send ? "text-white/80" : "text-[#6C63FF]"}`}>
+      
+      {send ? "You" : message.replyTo?.senderId?.name || "User"}
+    </p>
+
+    {/* Preview */}
+    <p className={`text-xs truncate leading-tight mt-[2px] 
+      ${send ? "text-white/70" : "text-gray-600"}`}>
+      
+      {message.replyTo?.messageType === "text" && message.replyTo?.text} 
+      {message.replyTo?.messageType === "image" && "📷 Photo"}
+      {message.replyTo?.messageType === "video" && "🎥 Video"}
+    </p>
+  </div>
+)}
           <div className="">
           {message.type === "text" && message.text}
 {message.type === "image" && message.media.url.split('.').pop().toLowerCase() !== "pdf" && (
@@ -229,6 +278,12 @@ let status = messageStatus(message,currentChatUserId)
           {message.reaction.map(element => {
              return <span key={element.user}>{element.emoji}</span> 
           })}</div>}
+          <div className={`${replyIcon} items-center px-4 `} > 
+<div className="rounded-full bg-black/10 shadow-xl p-2" onClick={clickReplyIcon}>
+
+         <ArrowUturnLeftIcon className="h-3 w-3 text-gray-500 cursor-pointer hover:text-[#6C63FF]" />
+</div>
+          </div>
     </div>:
     <div className="flex justify-center my-3">
   <div className="px-4 py-1.5 text-xs font-medium text-gray-500 bg-gray-100/80 backdrop-blur-sm rounded-full shadow-sm">
