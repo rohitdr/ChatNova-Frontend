@@ -295,10 +295,12 @@ try{
       setProgress(30);
       const response = await api.post("/auth/logout");
       setProgress(50);
+        console.log(response.status)
       if (response.status === 200) {
+      
           queryClient.clear()
         localStorage.removeItem("refress_token");
-        localStorage.removeItem("access_token")
+        localStorage.removeItem("access_token");
  
       
         showAlert("Success", "You have been logged out successfully !");
@@ -311,12 +313,6 @@ try{
       if (status === 500) {
           setIsServer(500)
           setProgress(100);
-      
-      }
-     
-      else{
-      showAlert("Error", error.response.message);
-        setProgress(100);
       
       }
     }

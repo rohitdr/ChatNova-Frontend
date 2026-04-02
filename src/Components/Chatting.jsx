@@ -107,7 +107,7 @@ const queryclient = useQueryClient();
     return () => {
       socket.off("reaction_updated", handler);
     };
-  }, [socket]);
+  }, [socket,conversationId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -138,7 +138,7 @@ const queryclient = useQueryClient();
     return () => {
       socket.off("message_deliverd", deliverHandler);
     };
-  }, [socket]);
+  }, [socket,conversationId]);
   useEffect(() => {
     if (!socket) return;
     const seenHandler = ({ messageId, seenBy }) => {
@@ -165,7 +165,7 @@ const queryclient = useQueryClient();
     return () => {
       socket.off("message_seen", seenHandler);
     };
-  }, [socket]);
+  }, [socket,conversationId]);
  const updateMessageToQuerySocket = (newMessage) => {
   queryclient.setQueryData(["messages", conversationId], (oldData) => {
     if (!oldData) return oldData;
@@ -276,13 +276,13 @@ const updateUsersList = (newMessage) => {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
-       
+   
       if (
         (activeGroupChat &&
           newMessage.conversationId === conversationId) ||
         (!activeGroupChat && newMessage.conversationId === conversationId)
       ) {
-      
+   
         socket.emit("mark_seen", {
           conversationId: conversationId,
           userId: Me._id,
@@ -341,7 +341,7 @@ const updateUsersList = (newMessage) => {
     return () => {
       socket.off("newMessage", handleNewMessage);
     };
-  }, [conversationId]);
+  }, [conversationId,socket]);
 
 
 
@@ -566,7 +566,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
         userId: Me._id,
         name: Me.name,
       });
-    }, 150000);
+    }, 1500);
   };
   return  (
     <>  
