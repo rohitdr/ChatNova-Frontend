@@ -5,15 +5,23 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API,
   withCredentials: true,
 });
-
+api.interceptors.request.use((config)=>{
+  const token = localStorage.getItem("access_token")
+  if(token){
+    config.headers.Authorization=`Bearer ${token}`
+  }
+  return config
+})
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const token =localStorage.getItem("refress_token")
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      originalRequest.url !== "/auth/refresh"
+      originalRequest.url !== "/auth/refresh" && 
+    token
     ) {
       originalRequest._retry = true;
       try {
@@ -22,14 +30,12 @@ api.interceptors.response.use(
           {},
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("refress_token")}`,
+              Authorization: `Bearer ${token}`,
             },
           },
         );
-        api.defaults.headers.common["Authorization"] =
-          `Bearer ${refressRes.data.access_token}`;
-        originalRequest.headers["Authorization"] =
-          `Bearer ${refressRes.data.access_token}`;
+     
+          localStorage.setItem("access_token",refressRes.data.access_token)
         return api(originalRequest);
       } catch(error) {
         console.log(error)

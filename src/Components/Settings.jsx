@@ -8,21 +8,21 @@ import {
 } from "@heroicons/react/24/solid";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../Context/AuthContext";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
+
 import ChatNovaContext from "../Context/ChatNovaContext"
 import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
-  const {capitalizeFirstLetter} = useContext(ChatNovaContext)
+  const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
   const authContext = useContext(AuthContext);
-  const { user, updateUserImage,updatePassword, isServer,showAlert ,updateUser,setUser} = authContext;
+  const { Me, updateUserImage,updatePassword, isServer,showAlert ,updateUser} = authContext;
   const [settingsImage, setSettingsImage] = useState(null);
-  const [data,setData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
-  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
+  const [data,setData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
+  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
  const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
- 
+
   const settingImagehandler = (e) => {
     setSettingsImage(e.target.files[0]);
   };
@@ -74,14 +74,19 @@ updatedfiled={}
 
   }
 
+
+ 
   useEffect(()=>{
     if(!socket) return
     const handleSocket=(userToSend)=>{
-      console.log("hel")
+  
       if(userToSend){
-         
- setUser(prev => ({ ...userToSend }))
- console.log(user)
+    
+ queryClient.setQueryData(["Me"],(oldData)=>{
+    return [...oldData,...userToSend]
+
+  })
+
       }
     }
       socket.on("updateUser",handleSocket)
@@ -138,7 +143,7 @@ e.preventDefault()
         src={
           settingsImage
             ? URL.createObjectURL(settingsImage)
-            : user?.image?.url
+            : Me?.image?.url
         }
         alt=""
       />
@@ -163,10 +168,10 @@ e.preventDefault()
     </div>
 
     <p className="mt-4 text-lg font-semibold text-gray-800">
-      {capitalizeFirstLetter(user?.name)}
+      {capitalizeFirstLetter(Me?.name)}
     </p>
 
-    <p className="text-sm text-gray-500">@{user?.username}</p>
+    <p className="text-sm text-gray-500">@{Me?.username}</p>
   </div>
 
   {/* Bio */}
@@ -200,10 +205,10 @@ e.preventDefault()
     {!editMenu && (
       <div className="bg-white rounded-2xl shadow-sm divide-y">
         {[
-          { label: "Name", value: user?.name },
-          { label: "Email", value: user?.email },
-          { label: "Username", value: user?.username },
-          { label: "Phone", value: user?.phone_number },
+          { label: "Name", value: Me?.name },
+          { label: "Email", value: Me?.email },
+          { label: "Username", value: Me?.username },
+          { label: "Phone", value: Me?.phone_number },
         ].map((item, i) => (
           <div key={i} className="p-4 hover:bg-gray-50 transition">
             <p className="text-xs text-gray-500">{item.label}</p>

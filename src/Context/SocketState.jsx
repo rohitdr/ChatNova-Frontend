@@ -6,14 +6,14 @@ export default function SocketState(props) {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUser] = useState(null);
   const context = useContext(AuthContext);
-  const {  user } = context;
+  const {  Me } = context;
 useEffect(() => {
-  if (!user) return
+  if (!Me) return
 
   const newSocket = io(import.meta.env.VITE_SOCKET, {
     transports: ["websocket"],
     query: {
-      userId: user?._id,
+      userId: Me?._id,
     },
     withCredentials: true,
   })
@@ -28,7 +28,7 @@ useEffect(() => {
     newSocket.off("getOnlineUsers")   
     newSocket.disconnect()            
   }
-}, [user])
+}, [Me])
   return (
     <SocketContext.Provider value={{ onlineUsers, socket }}>
       {props.children}

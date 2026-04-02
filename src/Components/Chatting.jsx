@@ -33,7 +33,7 @@ export default function Chatting() {
   const [uploadFile, setUplaodFile] = useState(null);
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer, loadingMessages, showAlert, setActivePage } =
+  const { user, isServer, loadingMessages, showAlert, setActivePage,Me } =
     authContext;
   const [fileType, setFileType] = useState(null);
 
@@ -43,16 +43,18 @@ export default function Chatting() {
 
   const {
     useMessage,
-    currentChatUser,
+    useSelectedUser,
+
     chattedUsersList,
     currentUserLoading,
      replyMessage,
-      
+      selectedUser,
+      selectedUserLoading,
     setActiveChat,
     uploadCloudinary,
     currentChatUserId,
     setChattedUsersList,
-
+useSelectedGroup,
   
     chattedUsers,
 
@@ -62,7 +64,8 @@ export default function Chatting() {
     conversationId,
     firstItemIndexRef,
     activeGroupChat,
-
+selectedGroup,
+selectedGroupLoading,
     currentGroup,
     activeChat,
    
@@ -74,6 +77,11 @@ const queryclient = useQueryClient();
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
   const virtuosoRef = useRef(null);
+
+
+
+
+
   useEffect(() => {
     if (!socket) return;
     const handler = ({ messageId, reaction }) => {
@@ -120,7 +128,7 @@ const queryclient = useQueryClient();
       pages: newPages,
     };
      })
-
+      
 
 
     };
@@ -226,7 +234,7 @@ const updateUsersList = (newMessage) => {
 
       if (index === -1) {
         const newuser = newMessage.conversationToSend.participents.find(
-          (p) => p.user._id !== user._id
+          (p) => p.user._id !== Me._id
         );
 
         return {
@@ -277,7 +285,7 @@ const updateUsersList = (newMessage) => {
       
         socket.emit("mark_seen", {
           conversationId: conversationId,
-          userId: user._id,
+          userId: Me._id,
         });
 
         /// setting current user chat
@@ -326,7 +334,7 @@ const updateUsersList = (newMessage) => {
       // });
      
      
-      // updatedUserList(currentChatUser)
+      // updatedUserList(selectedUser)
     };
     socket.on("newMessage", handleNewMessage);
 
@@ -392,9 +400,9 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
         text: sendingMessage,
         createdAt: Date.now(),
         senderId: {
-          _id: user._id,
+          _id: Me._id,
           image: {
-            url: user.image?.url,
+            url: Me.image?.url,
           },
         },
       };
@@ -451,9 +459,9 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       text: "New Photo",
       createdAt: Date.now(),
       senderId: {
-        _id: user._id,
+        _id: Me._id,
         image: {
-          url: user.image?.url,
+          url: Me.image?.url,
         },
       },
       media: {
@@ -507,9 +515,9 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       text: "New Video",
       createdAt: Date.now(),
       senderId: {
-        _id: user._id,
+        _id: Me._id,
         image: {
-          url: user.image?.url,
+          url: Me.image?.url,
         },
       },
       media: {
@@ -543,8 +551,8 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       setIsTyping(true);
       socket.emit("typing", {
         conversationId,
-        userId: user._id,
-        name: user.name,
+        userId: Me._id,
+        name: Me.name,
       });
     }
   };
@@ -555,8 +563,8 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
     typingTimout = setTimeout(() => {
       socket.emit("stop_typing", {
         conversationId,
-        userId: user._id,
-        name: user.name,
+        userId: Me._id,
+        name: Me.name,
       });
     }, 150000);
   };
@@ -565,7 +573,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-dvh bg-white`}>
           <div className="flex h-full flex-col justify-between">
-            {!currentUserLoading || messages.length!==0 ? (
+            {!selectedUserLoading  || messages.length!==0 ? (
               <div
                 className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
 bg-white/80 backdrop-blur-md border-b shadow-sm"
@@ -582,14 +590,14 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                       className="lg:h-12 lg:w-12 h-10 w-10 rounded-full object-cover border-2 border-white shadow"
                       src={
                         activeGroupChat
-                          ? currentGroup?.avtar?.url
-                          : currentChatUser?.image.url
+                          ? selectedGroup?.avtar?.url
+                          : selectedUser?.image.url
                       }
                       alt=""
                     />
 
                     {!activeGroupChat &&
-                      onlineUsers?.includes(currentChatUser?._id) && (
+                      onlineUsers?.includes(selectedUser?._id) && (
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                       )}
                   </div>
@@ -606,19 +614,19 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                     <h2 className="text-sm lg:text-lg font-semibold text-gray-900">
                       {capitalizeFirstLetter(
                         activeGroupChat
-                          ? currentGroup?.name
-                          : currentChatUser?.name,
+                          ? selectedGroup?.name
+                          : selectedUser?.name,
                       )}
                     </h2>
 
                     {!activeGroupChat &&
-                      (onlineUsers?.includes(currentChatUser?._id) ? (
+                      (onlineUsers?.includes(selectedUser?._id) ? (
                         <span className="text-xs text-green-500 font-medium">
                           online
                         </span>
                       ) : (
                         <span className="text-xs text-gray-400">
-                          {formatLastSeen(currentChatUser?.lastSeen || "")}
+                          {formatLastSeen(selectedUser?.lastSeen || "")}
                         </span>
                       ))}
                   </div>
@@ -640,7 +648,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
             )}
             <div
               className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0  ${isLoading && " overflow-y-auto "} `}
-            >
+            >  
               { !isLoading || messages.length!==0 ? (
                 <Virtuoso
                   className="scrollbar-hide"
@@ -665,10 +673,11 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                       fetchNextPage()
                     }
                   }}
+               
                   itemContent={(index, message) => (
                    <div className={index === firstItemIndexRef.current - 21 ? "mb-3" : ""}>
                     <Message
-                      send={user._id === message.senderId._id}
+                      send={Me._id === message.senderId._id}
                       message={message}
                     ></Message></div>
                   )}
@@ -844,7 +853,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                 <PaperAirplaneIcon
                   className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"
                   onClick={() => {
-                    uploadCloudinary(currentChatUserId, uploadVideo);
+                    uploadCloudinary(selectedUser, uploadVideo);
                     setMediaSendModal(false);
                   }}
                 />

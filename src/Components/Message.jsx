@@ -15,9 +15,9 @@ const Message= React.memo((props) =>{
   const queryclient = useQueryClient();
   const { message, send } = props;
   const authContext = useContext(AuthContext);
-  const { user, isServer } = authContext;
+  const { user, isServer,Me } = authContext;
   const context = useContext(ChatNovaContext);
-  const { currentChatUser,currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} = context;
+  const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} = context;
   const [mediaView,setMediaView]=useState(false)
   const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
  const [display,setDisplay]=useState("hidden")
@@ -52,19 +52,19 @@ const handleReactionClick=(e)=>{
           if(msg._id!==message._id) {return msg}
           const reaction = message.reaction || []
           const existing = reaction.filter((r)=>{
-           r.user === user._id
+           r.user === Me._id
           }
        )
         if(existing){
           if(existing.emoji === e.target.innerHTML){
            updatedReaction = reaction.filter((r)=>
-            r.user !==user._id
+            r.user !==Me._id
           )
           
           }
           else{
              updatedReaction = reaction.map((r)=>
-             r.user ===user._id?{...r,emoji:e.target.value}:r
+             r.user ===Me._id?{...r,emoji:e.target.value}:r
             )
           }
          
@@ -93,7 +93,7 @@ const handleReactionClick=(e)=>{
         messageId:message._id,
         conversationId:conversationId,
         emoji:e.target.innerHTML,
-        userId:user._id
+        userId:Me._id
 
       })
      
@@ -146,7 +146,7 @@ if(message.type === "image"){
     messageId:message._id,
         messageType:message.type,
         text,
-        senderId:user?.Id
+        senderId:Me?.Id
   })
 
 }
@@ -171,7 +171,7 @@ let status = messageStatus(message,currentChatUserId)
         <img
         loading="lazy"
           className="w-[40px] h-[38px]        lg:w-[40px]  lg:h-[41px] rounded-full  border-white border-4"
-          src={send ? user?.image?.url : message?.senderId?.image?.url}
+          src={send ? Me?.image?.url : message?.senderId?.image?.url}
           alt=""
         />
       </div>

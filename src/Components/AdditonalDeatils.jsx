@@ -9,7 +9,7 @@ export default function AdditonalDeatils() {
   let Navigate = useNavigate();
 
   const authContext = useContext(AuthContext);
-  const { updateUserImage, isServer, showAlert, updateUser } = authContext;
+  const { updateUserImage, showAlert, updateUser } = authContext;
   const [settingsImage, setSettingsImage] = useState(null);
   const [data, setData] = useState({ signUpPhoneNumber: "", signUpName: "" });
 

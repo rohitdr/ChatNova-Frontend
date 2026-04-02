@@ -10,9 +10,11 @@ import {
 } from "@heroicons/react/24/solid";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
+import ChatNovaContext from "../Context/ChatNovaContext";
 export default function SideBar() {
   const context = useContext(AuthContext);
-  const { logout, user, setActivePage, activePage, isServer } = context;
+  const {setIsGroup} =useContext(ChatNovaContext)
+  const { logout, Me, setActivePage, activePage, isServer } = context;
   const [profileOptionsActive, setProfileOptionsActive] = useState(false);
   const logoutHandler = () => {
     logout();
@@ -44,6 +46,7 @@ export default function SideBar() {
             {" "}
             <ChatBubbleLeftRightIcon
               onClick={() => {
+                 setIsGroup(false)
                 setActivePage(0);
               }}
               className={`lg:w-9 sm:ml-12 w-7 h-7 cursor-pointer md:w-9 md:h-9 2xs:mx-2 xs:mx-4 lg:my-2 lg:mx-2 lg:h-9  ${activePage === 0 ? "text-blue-700" : "text-black"}`}
@@ -55,7 +58,9 @@ export default function SideBar() {
             onMouseEnter={()=>import('./Group')}
             onTouchStart={()=>import('./Group')}
               onClick={() => {
+            
                 setActivePage(2);
+
               }}
               className={`lg:w-9  w-7 md:w-9 lg:my-2 h-7 md:h-9 sm:ml-12 cursor-pointer lg:h-9 mx-4 lg:mx-2  ${activePage === 2 ? "text-blue-700" : "text-black"}`}
             />
@@ -82,7 +87,7 @@ export default function SideBar() {
                 ? setProfileOptionsActive(false)
                 : setProfileOptionsActive(true);
             }}
-            src={user?.image.url}
+            src={Me?.image.url}
             alt=""
             className=" 2xs:h-7 2xs:w-7 border-black cursor-pointer border-2 2xs:mr-2 xs:mr-5 lg:mx-0 lg:h-10 lg:w-10 h-8 w-8 xs:mb-1 rounded-full"
           />

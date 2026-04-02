@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { getToken } from "firebase/messaging";
 import { messaging } from "../Firebase/firebase.cjs";
 import { Socket } from "socket.io-client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function AuthState(props) {
   const [isServer, setIsServer] = useState(0);
@@ -19,12 +19,35 @@ export default function AuthState(props) {
   const [loadingUser,setLoadingUser]=useState(false)
   const [loadingMessages,setLoadingMessages] =useState(true)
   const queryClient = useQueryClient()
+  const [authReady,setAuthReady]=useState(false)
   const showAlert = (type, message) => {
     setAlert({
       type: type,
       message: message,
     });
   };
+
+  useEffect(()=>{
+const init=async()=>{
+const token = localStorage.getItem('access_token')
+if(!token){
+  setAuthReady(true)
+  return
+}
+try{
+  console.log("hello")
+ await refreshSession()
+}catch(error)
+{
+  console.log("Refress Failed")
+}finally{
+  setAuthReady(true)
+}
+}
+
+
+ init();
+  },[])
   // route to signup
   const signUp = async (email, password, username) => {
     setProgress(30);
@@ -34,8 +57,8 @@ export default function AuthState(props) {
         password: password,
         username: username,
       });
-      api.defaults.headers.common["Authorization"] =
-        `Bearer ${response.data.access_token}`;
+    
+        localStorage.setItem("access_token",response.data.access_token)
       localStorage.setItem("refress_token", response.data.refress_token);
 
       showAlert("Success", "You have been logged in successfully !");
@@ -102,7 +125,9 @@ export default function AuthState(props) {
   const refreshUser = async () => {
     try {
       const res = await api.get("/auth/getUser");
-      setUser(res.data.user);
+     console.log("runnig")
+  
+      return res.data.user
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
@@ -111,27 +136,34 @@ export default function AuthState(props) {
    
       }
      
-      else{
-      
-         showAlert("Error", error.response.message);
-      
-      }
+     
     }
   };
 
+
+  const useMe=()=>{
+    return useQuery({
+      queryKey:["Me"],
+      queryFn:refreshUser,
+      staleTime:5000,
+      refetchOnWindowFocus:true,
+    enabled:authReady
+    })
+  }
+  const {data:Me}=useMe()
+
   const refreshSession = async () => {
     try {
-      const refressRes = await api.post(
-        "/auth/refresh",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${refress_token}`,
+       const refressRes = await axios.post(`${import.meta.env.VITE_API}/auth/refresh`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refress_token}`,
+            },
           },
-        },
-      );
-      api.defaults.headers.common["Authorization"] =
-        `Bearer ${refressRes.data.access_token}`;
+        );
+    
+        localStorage.setItem("access_token",refressRes.data.access_token)
     
     } catch (error) {
      const status = error.response?.status;
@@ -154,11 +186,11 @@ export default function AuthState(props) {
 
       setProgress(50);
 
-      api.defaults.headers.common["Authorization"] =
-        `Bearer ${response.data.access_token}`;
+    
+        localStorage.setItem("access_token",response.data.access_token)
       localStorage.setItem("refress_token", response.data.refress_token);
     
-       setUser(response.data.userToSend)
+      queryClient.invalidateQueries(["Me"])
       Navigate("/");
       showAlert("Success", "You have been logged in successfully !");
       setProgress(100);
@@ -266,7 +298,8 @@ export default function AuthState(props) {
       if (response.status === 200) {
           queryClient.clear()
         localStorage.removeItem("refress_token");
-        setUser(null)
+        localStorage.removeItem("access_token")
+ 
       
         showAlert("Success", "You have been logged out successfully !");
         Navigate("/login");
@@ -328,8 +361,8 @@ export default function AuthState(props) {
     if (!refress_token) {
       Navigate("/login");
     } else {
-      refreshSession();
-      refreshUser();
+      // refreshSession();
+      // refreshUser();
       // Request permission and initialize FCM
       Notification.requestPermission().then(async (permission) => {
         if (permission === "granted") {
@@ -345,6 +378,7 @@ export default function AuthState(props) {
   return (
     <AuthContext.Provider
       value={{
+        Me,
         user,
         updatePassword,
         updateUser,

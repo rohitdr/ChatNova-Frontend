@@ -35,9 +35,9 @@ export default function Users() {
     isInitailLoadRef,
     setHasMore,
     setpage,
-    
+
     chattedUsers,
-    currentChatUserId,
+  
     setCurrentChatUserId,
     capitalizeFirstLetter,
     setActiveGroupChat,
@@ -46,12 +46,15 @@ export default function Users() {
     getmessages,
     hasMoreUsers,
     loadingMessages,
-    useUser
+    useUser,
+    chattedUsersList,
+    userListFetchNextPage,
+    isUsersListLoading
   } = context;
 
   const [searchClick, setSearchClick] = useState(true);
   const authContext = useContext(AuthContext);
-  const { activePage, isServer, user, setLoadingMessages,loadingUser } = authContext;
+  const { activePage, isServer, user, setLoadingMessages,loadingUser,Me } = authContext;
   const socketcontext = useContext(SocketContext);
   const { onlineUsers, socket } = socketcontext;
   const [unseenMessages, setUnseenMessages] = useState(0);
@@ -65,8 +68,7 @@ export default function Users() {
 
   }, []);
 
-const {data,isLoading,fetchNextPage}=useUser()
-const chattedUsersList = data?.pages.flatMap(page => page.users) || [];
+
   useEffect(() => {}, [activePage]);
 
   const onChangeHandler = (e) => {
@@ -90,69 +92,50 @@ useEffect(() => {
   return () => clearTimeout(delay); 
 }, [searchValue]);
   const handleUserClick =useCallback(async(element) => {
-   if (!socket || !user?._id || loadingMessages) return;
-
+  
+   if (!socket) return;
+console.log("good")
  if(conversationId) {
       socket.emit("leave_group",conversationId)
     }
-     
      socket.emit("join_group",element.ConversationId)
-     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:user._id})
+     socket.emit("mark_seen",{conversationId:element.ConversationId,userId:Me._id})
 
 
 
-setHasMore(true);
-setpage(2);
+
 setActiveGroupChat(false);
 setCurrentChatUserId(element.user._id);
 
 setConversationId(element.ConversationId);
 setActiveChat(true);
-await Promise.all([
-  getCureentChattingUser(element.user._id),
-
-]);
 
 
-   setTimeout(()=>{
 
-   },500)
+ 
 
-      isInitailLoadRef.current = true;
-  },[
-    socket,
-  user?._id,
+    
+  },[socket,
   conversationId,
-  getmessages,
-  getCureentChattingUser
   ]) 
   const handleDatabaseUserClick =useCallback(async(element) => {
-     if (!socket || !user?._id) return;
+     if (!socket) return;
 
-    setLoadingMessages(true)
+  
   
     setActiveGroupChat(false);
   
-      setHasMore(true),
-      setpage(2),
+  
+  
       setCurrentChatUserId(element._id);
     setSearchClick(true);
     setActiveChat(true);
 
     await Promise.all([
-      getCureentChattingUser(element._id),
+   
  getConversationId(element._id)
 ]);
-
-
-     setTimeout(()=>{
- setLoadingMessages(false)
-   },500)
-  
-   
-      isInitailLoadRef.current = true;
   },[socket,
-  user?._id,
   getConversationId,
   getCureentChattingUser]
 ) 
@@ -186,7 +169,7 @@ await Promise.all([
               id="usersearch"
             />
           </div>
-{console.log(data?.pages)}
+
           <div className={`flex pt-2 flex-col    lg:mb-0 sm:p-2 px-3 ${!searchClick && " overflow-y-auto scrollbar-hide "} lg:px-4 h-full`}>
             {!searchClick &&
               dataBaseUsers &&
@@ -201,11 +184,11 @@ await Promise.all([
               })}
               {console.log(chattedUsersList)}
             
-            {!isLoading && searchClick ?
+            {!isUsersListLoading && searchClick ?
             <div className="h-full">
             <Virtuoso
                 className="scrollbar-hide "
-                endReached={fetchNextPage}
+                endReached={userListFetchNextPage}
                 computeItemKey={(index, element) => element.ConversationId}
                 // ref={virtuosoRef}
                 overscan={200}
@@ -226,7 +209,7 @@ await Promise.all([
               />
              </div>
                 
-              : searchClick && !loadingUser && (
+              : searchClick && !isUsersListLoading && (
                   <div className="flex h-screen justify-center items-center">
                     <div className="text-center flex flex-col">
                       {" "}
@@ -238,7 +221,7 @@ await Promise.all([
                     </div>
                   </div>
                 )}
-            {loadingUser &&[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
+            {isUsersListLoading &&[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
           </div>
         </div>
       

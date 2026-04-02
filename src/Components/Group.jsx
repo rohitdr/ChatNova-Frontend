@@ -10,21 +10,24 @@ import {
 import ChatNovaContext from "../Context/ChatNovaContext";
 import SocketContext from "../Context/SocketContext";
 import UserSkeleton from "./UserSkeleton";
+import UserItem from "./UserItem";
 
 export default function Group() {
   const socketcontext=useContext(SocketContext)
   const {socket}=socketcontext
   const authcontext = useContext(AuthContext);
-  const { isServer,user,setActivePage,setLoadingMessages } = authcontext;
+  const { isServer,user,setActivePage,setLoadingMessages,Me } = authcontext;
   const context = useContext(ChatNovaContext);
  
   const {
     chattedUsersList,
+    setIsGroup,
     capitalizeFirstLetter,
     getAllGroups,
-    allGroups,
+    allGroup,
+    isAllGroupLoading,
     setActiveChat,
-   
+   queryClient,
     getConversationId,
     serchGroup,
     setConversationId,
@@ -38,7 +41,7 @@ export default function Group() {
     setLoadingGroups
     
   } = context;
-  const [filteredGroups,setFilteredGroups]=useState(allGroups)
+  const [filteredGroups,setFilteredGroups]=useState(allGroup)
   const [searchClick, setSearchClick] = useState(true);
   const onChangeHandler = (e) => {
     let value = e.target.value;
@@ -47,51 +50,37 @@ export default function Group() {
       setSearchClick(true);
     } else {
       setSearchClick(false);
-    let groups = allGroups.filter((grp)=>grp.name.toString().includes(value.toString()))
+    let groups = allGroup.filter((grp)=>grp.name.toString().includes(value.toString()))
   setFilteredGroups(groups)
     }
   };
-  useEffect(() => {
-    if(!allGroups){
-
-      getAllGroups();
-    }
-  }, []);
+ 
 
   const handleGroupClick = async(element) => {
+    console.log("hello")
     if(!socket) return
-    setLoadingMessages(true)
     if(conversationId) {
       socket.emit("leave_group",conversationId)
     }
+    console.log(element._id)
      
      socket.emit("join_group",element._id)
-     socket.emit("mark_seen",{conversationId:element._id,userId:user._id})
-   setConversationId(element._id)
-  
-    setActiveGroupChat(true);
-    try{
-    await  getGroupById(element._id);
-  
-    }catch(error){
-      console.log(error)
-    }
+     socket.emit("mark_seen",{conversationId:element._id,userId:Me._id})
+     setConversationId(element._id)
+     setActiveGroupChat(true);
      setActiveChat(true);
-    setTimeout(() => {
-      setLoadingMessages(false)
-    }, 500);
-
+      setIsGroup(true)
   };
 
   useEffect(()=>{
     if (!socket) return
     const groupHandler =(newGroup)=>{
-   
-      setAllgroups(prev=>{
-        const filterd =prev.filter((group)=>group._id !== newGroup._id)
-        return [newGroup,...filterd]
-      }
-      )
+      queryClient.setQueryData(["groups"],(oldData)=>{
+       if(!oldData) return oldData
+        const filterd =oldData.filter((group)=>group._id !== newGroup._id)
+          return [newGroup,...filterd]
+      })
+
      
     }
     socket.on("group_created",groupHandler)
@@ -103,7 +92,7 @@ export default function Group() {
     <NoServer></NoServer>
   ) : (
     <>
-      <div className="h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-[#F5F7FB] flex-col">
+      <div className="h-screen  2xs:p-0 xs:p-1  lg:p-0 flex bg-gradient-to-br from-indigo-50 to-purple-50 flex-col">
         <div className="flex justify-between">
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Groups</div>
           <div className="pt-2">
@@ -130,79 +119,13 @@ export default function Group() {
             filteredGroups.length !== 0 &&
             filteredGroups.map((element) => {
               return (
-                 <div
-                  onClick={handleGroupClick}
-                  key={element._id}
-                  className="flex shadow  border-2  bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                >
-                  <div className="pt-2">
-                    <img
-                    loading="lazy"
-                      className="w-12 h-10 rounded-full border-white border-2"
-                      src={element.avtar.url}
-                      alt=""
-                    />
-                  </div>
-                  <div className="flex flex-col w-full justify-between py-1">
-                    <div className="flex  flex-1 justify-between items-center pl-2 ">
-                      <p className="font-small text-xs  xs:text-sm text-black">
-                        {capitalizeFirstLetter(element.name)}
-                      </p>
-                      <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
-                        {element.lastMessageTime === null
-                          ? ""
-                          : new Date(
-                              element.lastMessage.createdAt,
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                      </p>
-                    </div>
-                    <div className="pl-2  text-[10px] xs:text-sm text-gray-400">
-                      {element.lastMessage.text}
-                    </div>
-                  </div>
-                </div>
+              <UserItem element={element} image={element.avtar.url} name={element.name} lastMessage={null}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
               );
             })}
-          {!loadingGroups ? searchClick && allGroups && allGroups.length !== 0 ? (
-            allGroups.map((element) => {
-              return (
-                <div
-                  onClick={()=>{handleGroupClick(element)}}
-                  key={element._id}
-                  className="flex shadow-lg  border-2 hover:shadow-xl bg-white cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                >
-                  <div className="pt-2">
-                    <img
-                    loading="lazy"
-                      className="w-10 h-10 object-cover shadow rounded-full border-white border-2"
-                      src={element.avtar.url}
-                      alt=""
-                    />
-                  </div>
-                  <div className="flex flex-col w-full justify-between py-1">
-                    <div className="flex  flex-1 justify-between items-center pl-2 ">
-                      <p className="font-small text-xs  xs:text-sm text-black">
-                        {capitalizeFirstLetter(element.name)}
-                      </p>
-                      <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
-                        {element.lastMessageTime === null
-                          ? ""
-                          : new Date(
-                              element.lastMessage.createdAt,
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                      </p>
-                    </div>
-                    <div className="pl-2  text-[10px] xs:text-sm text-gray-400">
-                      {element.lastMessage.text}
-                    </div>
-                  </div>
-                </div>
+          {!isAllGroupLoading ? searchClick && allGroup && allGroup.length !== 0 ? (
+            allGroup.map((element) => {
+              return ( 
+                 <UserItem element={element} image={element.avtar.url} name={element.name}  lastMessage={element.lastMessage}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
               );
             })
           ) : (

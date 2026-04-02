@@ -11,7 +11,7 @@ import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 export default function Profile() {
   const authContext = useContext(AuthContext);
-  const { user, isServer } = authContext;
+  const { Me, isServer } = authContext;
   const { capitalizeFirstLetter } = useContext(ChatNovaContext);
 
   return isServer === 500 ? (
@@ -32,17 +32,17 @@ export default function Profile() {
         <div className="relative">
           <img
             className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
-            src={user?.image?.url}
+            src={Me?.image?.url}
             alt=""
             loading="lazy"
           />
         </div>
 
         <p className="mt-4 text-lg font-semibold text-gray-800">
-          {capitalizeFirstLetter(user?.name)}
+          {capitalizeFirstLetter(Me?.name)}
         </p>
 
-        <p className="text-sm text-gray-500">@{user?.username}</p>
+        <p className="text-sm text-gray-500">@{Me?.username}</p>
       </div>
 
     
@@ -63,28 +63,28 @@ export default function Profile() {
           <div className="p-4 hover:bg-gray-50 transition">
             <p className="text-xs text-gray-500">Name</p>
             <p className="text-sm font-medium text-gray-800 mt-1">
-              {user?.name}
+              {Me?.name}
             </p>
           </div>
 
           <div className="p-4 hover:bg-gray-50 transition">
             <p className="text-xs text-gray-500">Email</p>
             <p className="text-sm font-medium text-gray-800 mt-1">
-              {user?.email}
+              {Me?.email}
             </p>
           </div>
 
           <div className="p-4 hover:bg-gray-50 transition">
             <p className="text-xs text-gray-500">Username</p>
             <p className="text-sm font-medium text-gray-800 mt-1">
-              {user?.username}
+              {Me?.username}
             </p>
           </div>
 
           <div className="p-4 hover:bg-gray-50 transition">
             <p className="text-xs text-gray-500">Phone</p>
             <p className="text-sm font-medium text-gray-800 mt-1">
-              {user?.phone_number}
+              {Me?.phone_number}
             </p>
           </div>
 

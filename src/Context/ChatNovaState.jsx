@@ -6,14 +6,14 @@ import { useNavigate } from "react-router-dom";
 import api from "../Api/Axios.jsx";
 import AuthContext from "./AuthContext.jsx";
 import SocketContext from "./SocketContext.jsx";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function ChatNovaState(props) {
   const authContext = useContext(AuthContext);
-  const { setProgress,setIsServer,showAlert,setLoadingUser,user } = authContext;
+  const { setProgress,setIsServer,showAlert,setLoadingUser,Me } = authContext;
 const {socket} =useContext(SocketContext) 
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
-  const [chattedUsersList, setChattedUsersList] = useState([]);
+
   const [chattedOnlineUsers, setChattedOnlineUsers] = useState(null);
   const [currentChatUserId, setCurrentChatUserId] = useState(null);
   const [currentChatUser, setCurrentChatUser] = useState(null);
@@ -35,11 +35,12 @@ const firstItemIndexRef =useRef(10000000)
 const [currentUserLoading,setCurrentUserLoading]=useState(false)
  const [isAdmin,setIsAdmin]=useState(false)
  const [replyMessage,setReplyMessage]=useState(null)
+ const [isGroup,setIsGroup]=useState(false)
 useEffect(() => {
-
+setIsGroup(false)
 setIsAdmin(false)
   setDataBaseUsers(null)
-  setChattedUsersList([])
+
   setChattedOnlineUsers(null)
   setCurrentChatUserId(null)
   setCurrentChatUser(null)
@@ -61,8 +62,9 @@ setIsAdmin(false)
   isInitailLoadRef.current = true
   firstItemIndexRef.current = 10000000
 
-}, [user?.id])
+}, [Me?.id])
   let Navigate = useNavigate();
+  const queryClient = useQueryClient()
 
   /// function to get User whom with logged in user has chats
 
@@ -143,54 +145,27 @@ setIsAdmin(false)
       throw  error
     }
   };
-  //function to serach the users with whom logged in user have chatted
-  const loadMoreChattedUsers = async (page,limit) => {
-    try {
-   if(!hasMoreUsers) return
-      const res = await api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
-      if (res.status === 200) {
-    
-       setChattedUsersList(prev => {
-  const map = new Map();
-
-  [...prev, ...res.data.users].forEach(item => {
-    map.set(item.ConversationId, item); // unique by conversation
-  });
-
-  return Array.from(map.values());
-});
-        setHasMoreUsers(res.data.hasMore)
-      }
-    } catch (error) {
-       const status = error.response?.status;
-     setLoadingUser(false)
-      if(status ===500){
-   
-        setIsServer(500)
-     
-      }
-    }
-  };
+ 
 
   // function to get current chatting user
   const getCureentChattingUser = async (id) => {
     try {
-      setCurrentUserLoading(true)
+   
       const res = await api.get(`/users/getUser/${id}`);
   
-        setCurrentChatUser(res.data.user);
-       setTimeout(() => {
-        setCurrentUserLoading(false)
-       }, 300);
+      console.log(res.data.user)
+    return  res.data.user
+    
+    
     } catch (error) {
     const status = error.response?.status;
 
       if (status === 404) {
         showAlert("Error", error.response.data.message);
-    setCurrentUserLoading(false)
+
       }
       else{
-        setCurrentUserLoading(false)
+   
         setIsServer(500)
      
       }
@@ -240,7 +215,8 @@ return useInfiniteQuery({
   },
   staleTime: 5000,
 refetchOnWindowFocus: false,
-enabled:!!conversationId
+enabled:!!conversationId,
+  keepPreviousData:false
 })
 }
 
@@ -259,8 +235,23 @@ refetchOnWindowFocus: false,
 
   })
 }
+const {data:usersList,isLoading:isUsersListLoading,fetchNextPage:userListFetchNextPage}=useUser()
+const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
+const useSelectedUser=(id)=>{
+  return useQuery({
+    queryKey:["user",id],
+    queryFn:({queryKey }) => {
+      const [, id] = queryKey; 
+      return getCureentChattingUser( id);
+    },
+    staleTime:5000,
+    enabled:!!id,
+    refetchOnWindowFocus:false,
+     keepPreviousData:false
+  })
+}
 
-
+   const {data:selectedUser,isLoading:selectedUserLoading}=useSelectedUser(currentChatUserId);
 
 
 
@@ -328,19 +319,18 @@ refetchOnWindowFocus: false,
   /// function to get all groups
   const getAllGroups =async()=>{
  try {
-  setLoadingGroups(true)
+
       const res = await api.get(`/groups/allgroups?page=1&limit=20`);
-      setAllgroups(res.data.groups)
-   setTimeout(() => {
-    setLoadingGroups(false)
-   }, 200);
+   
+   return res.data.groups
     } catch (error) {
-       setLoadingGroups(false)
+  
      const status = error.response?.status;
     if(status ===500){
        setLoadingGroups(false)
           setIsServer(500)
       }
+      throw error
     }
   }
 
@@ -348,30 +338,50 @@ refetchOnWindowFocus: false,
   const getGroupById=async(id)=>{
      try {
       const res = await api.get(`/groups/getGroupById/${id}`);
-      setCurrentGroup(res.data.message)
-      console.log(res.data.message)
- const isAdminUser = res.data.message.participents?.some(
-  (p) => p.user._id === user._id && p.role === "admin"
+    
+      
+ const isAdminUser = res.data.group.participents?.some(
+  (p) => p.user._id === Me._id && p.role === "admin"
 );
+
 
 setIsAdmin(isAdminUser);
 
+return res.data.group
+
     } catch (error) {
      const status = error.response?.status;
-   if (status === 404) {
-        showAlert("Error", error.response.data.message);
+   if (status === 500) {
+          setIsServer(500)
    
       }
-      else{
-       
-        setIsServer(500)
-     
-      }
+      throw error
     
     }
   }
+  const useSelectedGroup=(id,isGroup)=>{
+      return useQuery({
+        queryKey:["Group",id],
+        queryFn:({queryKey})=>{
+          const [,id]=queryKey
+          return getGroupById(id)
+        },
+        staleTime:5000,
+        enabled:!!id && isGroup===true,
+        refetchOnWindowFocus:false
+      })
+    }
+ const {data:selectedGroup, isLoading:selectedGroupLoading}=useSelectedGroup(conversationId,isGroup)
  
-
+ const useGroups =()=>{
+  return useQuery({
+    queryKey:["groups"],
+    queryFn:getAllGroups,
+    staleTime:5000,
+    refetchOnWindowFocus:false
+  })
+ }
+const {data:allGroup,isLoading:isAllGroupLoading}=useGroups()
     const updateGroupImage = async (file) => {
     try {
         setProgress(30);
@@ -521,6 +531,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
     <ChatNovaContext.Provider
       value={{
         getGroupById,
+        useSelectedGroup,
         createGroup,
         removeMember,
         setCurrentGroup,
@@ -531,24 +542,28 @@ const createGroup =async(participents,name,inviteCode,file)=>{
      currentUserLoading,
         page,
         replyMessage,
+        allGroup,
         setReplyMessage,
      useUser,
+     selectedUser,
+     selectedUserLoading,
        useMessage,
         allGroups,
+        isAllGroupLoading,
    updateGroupImage,
         conversationId,
     addMember,
     firstItemIndexRef,
         activeChat,
         setActiveChat,
-        loadMoreChattedUsers,
+   
         uploadCloudinary,
         capitalizeFirstLetter,
         serchUser,
         sendMessages,
         setConversationId,
         dataBaseUsers,
-     
+     isGroup,setIsGroup,
         getmessages,
       isInitailLoadRef,
       setHasMore,
@@ -558,16 +573,19 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         setDataBaseUsers,
         setCurrentChatUserId,
         currentChatUserId,
-        setChattedUsersList,
+     userListFetchNextPage,
+     isUsersListLoading,
         chattedUsersList,
         hasMoreUsers,
         chattedUsers,
+        queryClient,
         chattedOnlineUsers,
         isAdmin,
         currentChatUser,
         setCurrentChatUser,
         loadingGroups,
-        setAllgroups
+        setAllgroups,selectedGroup,
+        selectedGroupLoading
       }}
     >
       {props.children}

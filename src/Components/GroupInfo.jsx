@@ -22,12 +22,12 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function GroupInfo() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,addMember,isAdmin,setAllgroups,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,serchUser,addMember,isAdmin,isGroup,queryClient,activeGroupChat,selectedGroup,setAllgroups,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
-  const { user,updatePassword, isServer,showAlert ,updateUser} = authContext;
+  const { updatePassword, isServer,showAlert ,updateUser,Me} = authContext;
   const [groupSettingsImage, setGroupSettingsImage] = useState(null);
-  const [data,setData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
-  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:user?.phone_number,settingsEmail:user?.email,settingsName:user?.name,settingsUsername:user?.username})
+  const [data,setData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
+  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
  const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
  const socketcontext = useContext(SocketContext)
  const [addUser,setAddUser] = useState(false)
@@ -69,38 +69,46 @@ const queryclient = useQueryClient();
 
 
   useEffect(()=>{
-    if(!socket) return
-    
+   
+    if(!socket || !isGroup) return
+  
      const handler =(populatedConversation)=>{
 
       console.log(populatedConversation)
       if(conversationIdRef.current === populatedConversation._id){
-       setCurrentGroup((prev)=>({
-        ...prev,...populatedConversation})
-      )
-      setAllgroups(prev => {
-  if (!prev) return [populatedConversation];
-
-  const filtered = prev.filter(
+        queryClient.setQueryData(["Group",conversationId],(oldData)=>{
+          if(!oldData) return oldData
+          console.log(oldData)
+        return { ...oldData,...populatedConversation}}
+        )
+        queryClient.setQueryData(["groups"],(oldData)=>{
+          if(!oldData) return [populatedConversation]
+        
+            const filtered = oldData.filter(
     p => p._id.toString() !== populatedConversation._id.toString()
   );
-  console.log(filtered)
+
 
   return [populatedConversation, ...filtered];
-});
-      }
+  
+      })
       
-      
+    }
     }
 
     const MemberHandler =({groupId,participents})=>{
- 
+  console.log("haam")
        if(conversationIdRef.current===groupId){
         
-        setCurrentGroup(prev=>{
-            return {...prev,participents}
-       }
-      ) 
+         queryClient.setQueryData(["Group",conversationId],(oldData)=>{
+         if(!oldData) return oldData
+        return { ...oldData,participents}}
+        )
+        
+      //   setCurrentGroup(prev=>{
+      //       return {...prev,participents}
+      //  }
+      // ) 
      
        }
     }
@@ -113,7 +121,7 @@ const queryclient = useQueryClient();
       socket.off("member_added",MemberHandler)
       socket.off("remove_member",MemberHandler)
    }
-  },[socket])
+  },[socket,isGroup])
 
     const sendMessageToQueryUser=(message)=>{
 queryclient.setQueryData(["messages",conversationId],(oldData)=>{
@@ -130,7 +138,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
         text: `Admin removed ${element.name}`,
         createdAt: Date.now(),
          senderId: {
-          _id: user._id,
+          _id: Me._id,
          
         },
       };
@@ -145,7 +153,7 @@ sendMessageToQueryUser(tempmessage)
         text: `Admin added ${element.name}`,
         createdAt: Date.now(),
          senderId: {
-          _id: user._id,
+          _id: Me._id,
          
         },
       };
@@ -198,12 +206,12 @@ sendMessageToQueryUser(tempmessage)
             src={
               groupSettingsImage
                 ? URL.createObjectURL(groupSettingsImage)
-                : currentGroup?.avtar.url
+                : selectedGroup?.avtar.url
             }
             alt=""
           />
         </div>
-        <p className=" font-medium">{capitalizeFirstLetter(currentGroup?.name)}</p>
+        <p className=" font-medium">{capitalizeFirstLetter(selectedGroup?.name)}</p>
       
       </div>
       <div className=" mt-2 mb-4 mx-6 px-2 text-sm text-[#8E949D]   ">
@@ -216,7 +224,7 @@ sendMessageToQueryUser(tempmessage)
         <div className="flex font-medium  pt-2 pb-1">
           {" "}
           <UserGroupIcon className="w-6 font-medium mt-0.5  mx-2 h-6 text-black" />
-          <div className=" text-xl">{currentGroup?.participents?.length} Members</div></div>
+          <div className=" text-xl">{selectedGroup?.participents?.length} Members</div></div>
         <div className="flex font-medium  pt-2 pb-1">
           {" "}
       
@@ -226,7 +234,7 @@ sendMessageToQueryUser(tempmessage)
           
           </div>
           <div className="">
-         { currentGroup && currentGroup?.participents?.map((element) => {
+         { selectedGroup && selectedGroup?.participents?.map((element) => {
              
                 return (
                   
@@ -248,7 +256,7 @@ sendMessageToQueryUser(tempmessage)
                     <div className="flex flex-col w-full justify-between py-1">
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
                         <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)} {element.user._id === user._id && "(You)"}
+                          {capitalizeFirstLetter(element.user.name)} {element.user._id === Me._id && "(You)"}
                         </p>
                     
                        
@@ -317,7 +325,7 @@ sendMessageToQueryUser(tempmessage)
             <div className="">
                 {!searchingAddUser && chattedUsersList &&
               chattedUsersList.length !== 0 && chattedUsersList.map((element) => {
-                const exist =currentGroup.participents.some(p=>
+                const exist =selectedGroup.participents.some(p=>
                 p.user._id === element.user._id
                 )
                if(exist) return null
@@ -357,7 +365,7 @@ sendMessageToQueryUser(tempmessage)
               })}
                 {searchingAddUser && dataBaseUsers &&
               dataBaseUsers.length !== 0 && dataBaseUsers.map((element) => {
-                const exist =currentGroup.participents.some(p=>
+                const exist =selectedGroup.participents.some(p=>
                 p.user._id === element._id
               
                 )

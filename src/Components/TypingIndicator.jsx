@@ -5,8 +5,8 @@ import AuthContext from "../Context/AuthContext"
 
 function TypingIndicator({typingUser}) {
     const authcontext = useContext(AuthContext)
-    const {user} = authcontext
-    const filterusers = typingUser.filter(t=>t.user!==user._id)
+    const {Me} = authcontext
+    const filterusers = typingUser.filter(t=>t.user!==Me._id)
     if(filterusers.length===0) return null
     const names = filterusers.map(t=>t.name).join(' , ')
 
