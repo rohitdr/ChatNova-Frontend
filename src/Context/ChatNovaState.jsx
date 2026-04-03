@@ -127,7 +127,7 @@ setIsAdmin(false)
       const res = await api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
       if (res.status === 200) {
     
-       console.log(res.data.users)
+     
          return  {
   users: res.data.users,
   page: page,
@@ -154,7 +154,7 @@ setIsAdmin(false)
    
       const res = await api.get(`/users/getUser/${id}`);
   
-      console.log(res.data.user)
+
     return  res.data.user
     
     
@@ -284,7 +284,7 @@ const useSelectedUser=(id)=>{
     } catch (error) {
      const status = error.response?.status;
     if(status ===500){
-      console.log(error.message)
+   
           setIsServer(500)
       }
     }
@@ -302,7 +302,7 @@ const useSelectedUser=(id)=>{
         formdata,
       );
       setProgress(30);
-       console.log(res.data)
+   
       const message = {
         publicId: res.data.public_id,
 
@@ -311,7 +311,7 @@ const useSelectedUser=(id)=>{
         url: res.data.secure_url,
         tempId:tempId
       };
-      console.log(message)
+   
     
       setProgress(60);
       sendMedia(id, message);

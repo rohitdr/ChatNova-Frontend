@@ -63,7 +63,7 @@ export default function Group() {
     if(conversationId) {
       socket.emit("leave_group",conversationId)
     }
-    console.log(element._id)
+
      
      socket.emit("join_group",element._id)
      socket.emit("mark_seen",{conversationId:element._id,userId:Me._id})
@@ -205,13 +205,13 @@ export default function Group() {
             filteredGroups.length !== 0 &&
             filteredGroups.map((element) => {
               return (
-              <UserItem element={element} image={element.avtar.url} name={element.name} lastMessage={null}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+              <UserItem key={element._id} element={element} image={element.avtar.url} name={element.name} lastMessage={null}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
               );
             })}
           {!isAllGroupLoading ? searchClick && allGroup && allGroup.length !== 0 ? (
             allGroup.map((element) => {
               return ( 
-                 <UserItem element={element} image={element.avtar.url} name={element.name}  lastMessage={element.lastMessage}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+                 <UserItem key={element._id} element={element} image={element.avtar.url} name={element.name}  lastMessage={element.lastMessage}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
               );
             })
           ) : (

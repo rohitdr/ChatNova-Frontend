@@ -217,60 +217,75 @@ let alreadyExists=false
 
 const updateUsersList = (newMessage) => {
 
-  queryclient.setQueryData(["users"], (oldData) => {
-    if (!oldData) return oldData;
+queryclient.setQueryData(["users"], (oldData) => {
+  if (!oldData) return oldData;
 
-    const newPages = oldData.pages.map((page) => {
-      const users = page.users; 
+  // ✅ check globally (all pages)
+  const alreadyExists = oldData.pages.some((page) =>
+    page.users.some(
+      (c) => c.ConversationId === newMessage.conversationId
+    )
+  );
 
-      const index = users.findIndex(
-        (c) => c.ConversationId === newMessage.conversationId
-      );
-    
-      const lastMessage = {
-        text: newMessage.text,
-        createdAt: newMessage.createdAt,
-      };
+  const lastMessage = {
+    text: newMessage.text,
+    createdAt: newMessage.createdAt,
+  };
 
-      if (index === -1) {
-        const newuser = newMessage.conversationToSend.participents.find(
-          (p) => p.user._id !== Me._id
-        );
+  const newPages = oldData.pages.map((page, pageIndex) => {
+    let users = [...page.users]; // ✅ clone (important)
 
-        return {
-          ...page,
-          users: [
-            {
-              ConversationId: newMessage.conversationToSend.ConversationId,
-              lastMessage: newMessage.conversationToSend.lastMessage,
-              user: newuser.user,
-            },
-            ...users,
-          ],
-        };
-      }
+    const index = users.findIndex(
+      (c) => c.ConversationId === newMessage.conversationId
+    );
 
-     
+    // ✅ CASE 1: user exists → update + move top
+    if (index !== -1) {
       const updatedUser = {
         ...users[index],
         lastMessage,
       };
 
-      const filteredUsers = users.filter(
+      users = users.filter(
         (c) => c.ConversationId !== newMessage.conversationId
       );
 
       return {
         ...page,
-        users: [updatedUser, ...filteredUsers],
+        users: [updatedUser, ...users],
       };
-    });
+    }
 
-    return {
-      ...oldData,
-      pages: newPages,
-    };
+    // ✅ CASE 2: new user → ONLY add in first page
+    if (!alreadyExists && pageIndex === 0) {
+      const newuser = newMessage.conversationToSend?.participents?.find(
+        (p) => p.user._id !== Me._id
+      );
+
+      if (!newuser) return page;
+
+      return {
+        ...page,
+        users: [
+          {
+            ConversationId:
+              newMessage.conversationToSend.ConversationId,
+            lastMessage,
+            user: newuser.user,
+          },
+          ...users,
+        ],
+      };
+    }
+
+    return page;
   });
+
+  return {
+    ...oldData,
+    pages: newPages,
+  };
+});
 };
   useEffect(() => {
     if (!socket) return;
@@ -427,25 +442,6 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
 
       setSendingMessage("");
       setReplyMessage(null)
-     
-      // setChattedUsersList((prev) => {
-      //   const index = prev.findIndex((c) => c.user._id === currentChatUserId);
-
-      //   const lastMessage = {
-      //     text: tempmessage.text,
-      //     createdAt: tempmessage.createdAt,
-      //   };
-      //   if (index === -1) return prev;
-      //   const updateduserlit = {
-      //     ...prev[index],
-      //     lastMessage,
-      //   };
-      //   const filtereduser = prev.filter(
-      //     (c) => c.user._id !== currentChatUserId,
-      //   );
-      //   console.log([updateduserlit, ...filtereduser]);
-      //   return [updateduserlit, ...filtereduser];
-      // });
     }
     setTimeout(() => {
       virtuosoRef.current?.scrollToIndex({
@@ -475,22 +471,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       },
     };
     sendMessageToQueryUser(tempmessage);
-    setChattedUsersList((prev) => {
-      const index = prev.findIndex((c) => c.user._id === currentChatUserId);
 
-      const lastMessage = {
-        text: tempmessage.text,
-        createdAt: tempmessage.createdAt,
-      };
-      if (index === -1) return prev;
-      const updateduserlit = {
-        ...prev[index],
-        lastMessage,
-      };
-      const filtereduser = prev.filter((c) => c.user._id !== currentChatUserId);
-      console.log([updateduserlit, ...filtereduser]);
-      return [updateduserlit, ...filtereduser];
-    });
     uploadCloudinary(conversationId, uploadedImage, tempmessage._id);
     setMediaSendModal(false);
      setUploadedImage(null);
@@ -531,22 +512,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       },
     };
    sendMessageToQueryUser(tempmessage);
-    setChattedUsersList((prev) => {
-      const index = prev.findIndex((c) => c.user._id === currentChatUserId);
 
-      const lastMessage = {
-        text: tempmessage.text,
-        createdAt: tempmessage.createdAt,
-      };
-      if (index === -1) return prev;
-      const updateduserlit = {
-        ...prev[index],
-        lastMessage,
-      };
-      const filtereduser = prev.filter((c) => c.user._id !== currentChatUserId);
-      console.log([updateduserlit, ...filtereduser]);
-      return [updateduserlit, ...filtereduser];
-    });
     uploadCloudinary(conversationId, uploadVideo, tempmessage._id);
     setMediaSendModal(false);
     setUploadedVideo(null)

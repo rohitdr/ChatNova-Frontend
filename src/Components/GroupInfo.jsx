@@ -74,11 +74,11 @@ const queryclient = useQueryClient();
   
      const handler =(populatedConversation)=>{
 
-      console.log(populatedConversation)
+   
       if(conversationIdRef.current === populatedConversation._id){
         queryClient.setQueryData(["Group",conversationId],(oldData)=>{
           if(!oldData) return oldData
-          console.log(oldData)
+     
         return { ...oldData,...populatedConversation}}
         )
         queryClient.setQueryData(["groups"],(oldData)=>{

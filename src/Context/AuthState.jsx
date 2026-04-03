@@ -35,7 +35,7 @@ if(!token){
   return
 }
 try{
-  console.log("hello")
+
  await refreshSession()
 }catch(error)
 {
@@ -125,7 +125,7 @@ try{
   const refreshUser = async () => {
     try {
       const res = await api.get("/auth/getUser");
-     console.log("runnig")
+   
   
       return res.data.user
     } catch (error) {
@@ -295,7 +295,7 @@ try{
       setProgress(30);
       const response = await api.post("/auth/logout");
       setProgress(50);
-        console.log(response.status)
+     
       if (response.status === 200) {
       
           queryClient.clear()

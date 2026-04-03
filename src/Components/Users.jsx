@@ -94,7 +94,7 @@ useEffect(() => {
   const handleUserClick =useCallback(async(element) => {
   
    if (!socket) return;
-console.log("good")
+
  if(conversationId) {
       socket.emit("leave_group",conversationId)
     }
@@ -182,7 +182,7 @@ setActiveChat(true);
        </div>
                 );
               })}
-              {console.log(chattedUsersList)}
+           
             
             {!isUsersListLoading && searchClick ?
             <div className="h-full">
