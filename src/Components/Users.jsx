@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useContext, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import ChatNovaContext from "../Context/ChatNovaContext";
 const Profile = lazy(()=>import('./Profile'))
@@ -8,45 +8,32 @@ const CreateGroup = lazy(()=>import('./CreateGroup'))
 const Group = lazy(()=>import('./Group'))
 import AuthContext from "../Context/AuthContext";
 import SocketContext from "../Context/SocketContext";
-import NoServer from "./NoServer";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 
-import { VideoCameraIcon, PhotoIcon } from "@heroicons/react/24/solid";
 
 import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem"
 import { Virtuoso } from "react-virtuoso";
-import AppLoader from "./AppLoader"
+
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
     serchUser,
-    useMessage,
-    loadMoreChattedUsers,
+    isSearchLoading,
+  
     dataBaseUsers,
     getConversationId,
    
-    setChattedUsersList,
+    
     setActiveChat,
-    activeChat,
-    getCureentChattingUser,
   
-  
-    isInitailLoadRef,
-    setHasMore,
-    setpage,
-
-    chattedUsers,
   
     setCurrentChatUserId,
-    capitalizeFirstLetter,
+ 
     setActiveGroupChat,
     conversationId,
     setConversationId,
-    getmessages,
-    hasMoreUsers,
-    loadingMessages,
-    useUser,
+  
     chattedUsersList,
     userListFetchNextPage,
     isUsersListLoading
@@ -54,22 +41,17 @@ export default function Users() {
 
   const [searchClick, setSearchClick] = useState(true);
   const authContext = useContext(AuthContext);
-  const { activePage, isServer, user, setLoadingMessages,loadingUser,Me } = authContext;
+  const { activePage,Me } = authContext;
   const socketcontext = useContext(SocketContext);
-  const { onlineUsers, socket } = socketcontext;
-  const [unseenMessages, setUnseenMessages] = useState(0);
-  const [userListpage,setUserListPage]=useState(1)
-  const [isFetching, setIsFetching] = useState(false);
+  const {  socket } = socketcontext;
+  
   const [searchValue,setSearchValue]=useState("")
 
  
-  useEffect(() => {
-    chattedUsers(userListpage,15);
-
-  }, []);
 
 
-  useEffect(() => {}, [activePage]);
+
+
 
   const onChangeHandler = (e) => {
     let value = e.target.value;
@@ -116,41 +98,57 @@ setActiveChat(true);
 
     
   },[socket,
-  conversationId,
+  conversationId,Me?._id
   ]) 
   const handleDatabaseUserClick =useCallback(async(element) => {
      if (!socket) return;
 
-  
-  
     setActiveGroupChat(false);
-  
-  
   
       setCurrentChatUserId(element._id);
     setSearchClick(true);
     setActiveChat(true);
 
-    await Promise.all([
-   
- getConversationId(element._id)
-]);
+    await getConversationId(element._id)
+
   },[socket,
   getConversationId,
-  getCureentChattingUser]
+  ]
 ) 
-  const virtusoEndReached = async() => {
-    if (!hasMoreUsers || isFetching) return;
-   setIsFetching(true)
-  await loadMoreChattedUsers(userListpage + 1, 15);
 
-  setUserListPage(prev => prev + 1);
 
-  
- setIsFetching(false)
+
+  const normalizeItem = useCallback((element,type)=>{
+    if(type==="chat"){
+         return{
+          element,
+          name:element.user?.name,
+          image:element.user?.image?.url,
+          lastMessage:element.lastMessage,
+           _id:element.user._id
+         }
+         
+        }
+        if(type==="search"){
+        return{
+           element,
+         name:element.name,
+         image:element.image?.url,
+         lastMessage:null,
+         _id:element._id
+        }
+        }
     
-  };
+    
+  },[])
 
+  const NormalizedChattedUsers=useMemo(()=>chattedUsersList?.map((element)=>
+    normalizeItem(element,"chat")
+  ),[chattedUsersList,normalizeItem])
+  const NormalizedDatabaseUsers=useMemo(()=>dataBaseUsers?.map((element)=>
+    normalizeItem(element,"search")
+  ),[dataBaseUsers,normalizeItem])
+  
   return (
     <>
      
@@ -170,18 +168,25 @@ setActiveChat(true);
             />
           </div>
 
-          <div className={`flex pt-2 flex-col    lg:mb-0 sm:p-2 px-3 ${!searchClick && " overflow-y-auto scrollbar-hide "} lg:px-4 h-full`}>
-            {!searchClick &&
-              dataBaseUsers &&
-              dataBaseUsers.length !== 0 &&
-              dataBaseUsers.map((element) => {
-                return (
-               
-                      <div key ={element._id }style={{ height: 65 }} className="my-1" >
-               <UserItem element={element} image={element.image.url} name={element.name} lastMessage={null}  handleUserClick={handleDatabaseUserClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
-       </div>
-                );
-              })}
+          <div className={`flex pt-2 flex-col    lg:mb-0 sm:p-2 px-3 ${!searchClick && " overflow-y-auto scrollbar-hide "}  lg:px-4 h-full`}>
+         { !isSearchLoading&&!searchClick && (
+  <>
+    {NormalizedDatabaseUsers?.length > 0 ? (
+      NormalizedDatabaseUsers.map((element) => (
+        <div key={element._id} style={{ height: 65 }} className="my-1">
+          <UserItem
+            user={element}
+            handleUserClick={handleDatabaseUserClick}
+          />
+        </div>
+      ))
+    ) : (
+      <div className="flex justify-center items-center h-full text-gray-500">
+        No users found
+      </div>
+    )}
+  </>
+)}   
            
             
             {!isUsersListLoading && searchClick ?
@@ -189,19 +194,22 @@ setActiveChat(true);
             <Virtuoso
                 className="scrollbar-hide "
                 endReached={userListFetchNextPage}
-                computeItemKey={(index, element) => element.ConversationId}
+                computeItemKey={(index, element) => element._id}
                 // ref={virtuosoRef}
                 overscan={200}
                
                 defaultItemHeight={65}
                 style={{ height: "100%"}}
               increaseViewportBy={{ top: 0, bottom: 400 }}
-                data={chattedUsersList}
+                data={NormalizedChattedUsers}
                followOutput={false}
             components={{Footer:()=><div  style={{ height: "70px"}}/>}}
                 itemContent={(index, element) => (
                   <div style={{ height: 65 }}>
-               <UserItem element={element} image={element.user.image.url} name={element.user.name} lastMessage={element.lastMessage} handleUserClick={handleUserClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+                
+                   <UserItem user={element} key={element._id}  handleUserClick={handleUserClick} ></UserItem>
+
+                 
        </div>
                 )}
                 
@@ -221,7 +229,7 @@ setActiveChat(true);
                     </div>
                   </div>
                 )}
-            {isUsersListLoading &&[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
+            {(isUsersListLoading || isSearchLoading )&&[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
           </div>
         </div>
       

@@ -20,8 +20,7 @@ const {socket} =useContext(SocketContext)
   
   const [activeChat, setActiveChat] = useState(false);
 const [conversationId,setConversationId]=useState(null)
-
-
+const [isSearchLoading,setIsSearchLoading]=useState(false)
   const [page,setpage]=useState(2)
   const [hasMore,setHasMore]=useState(true)
   const [activeGroupChat,setActiveGroupChat]=useState(false)
@@ -41,7 +40,7 @@ setIsGroup(false)
 setIsAdmin(false)
   setDataBaseUsers(null)
 
-
+setIsSearchLoading(false)
   setCurrentChatUserId(null)
 
 
@@ -99,24 +98,28 @@ setIsAdmin(false)
   // function to search users from database to chat with search query
   const serchUser = async (searchValue) => {
     try {
+      setIsSearchLoading(true)
       const res = await api.get(`/users/search?search=${searchValue}`);
       if (res.status === 200) {
         setDataBaseUsers(res.data.users);
-     
+        setTimeout(() => {
+           setIsSearchLoading(false)
+        }, 1000);
+    
       }
     } catch (error) {
      const status = error.response?.status;
 
-      if (status === 404) {
-     
-        showAlert("Error", error.response.data.message);
+      if (status === 500) {
+         setIsServer(500)
+      
    
       }
-      else{
-     
-        setIsServer(500)
-     
-      }
+        setTimeout(() => {
+           setIsSearchLoading(false)
+        }, 1000);
+    
+      
     }
   };
 
@@ -606,6 +609,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
    updateGroupImage,
         conversationId,
     addMember,
+    isSearchLoading,
     deleteGroup,
     firstItemIndexRef,
         activeChat,

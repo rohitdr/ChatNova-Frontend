@@ -52,4 +52,6 @@ function TypingIndicator({typingUser}) {
         
   )
 }
+TypingIndicator.displayName="TypingIndicator"
 export default React.memo(TypingIndicator)
+

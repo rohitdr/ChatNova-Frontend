@@ -26,7 +26,6 @@ export default function AuthState(props) {
       message: message,
     });
   };
-
   useEffect(()=>{
 const init=async()=>{
 const token = localStorage.getItem('access_token')

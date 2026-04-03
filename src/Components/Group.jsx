@@ -171,8 +171,35 @@ export default function Group() {
 
   
 
-
-
+  const normalizeItem = (element,type)=>{
+    if(type==="chat"){
+         return{
+          element,
+          name:element.name,
+          image:element.avtar?.url,
+          lastMessage:element.lastMessage,
+           _id:element._id
+         }
+         
+        }
+        if(type==="search"){
+        return{
+           element,
+         name:element.name,
+         image:element.avtar?.url,
+         lastMessage:null,
+         _id:element._id
+        }
+        }
+    
+    
+  }
+const allNormailizedGroups=allGroup?.map((element)=>
+  normalizeItem(element,"chat")
+)
+const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
+  normalizeItem(element,"search")
+)
   
   return isServer === 500 ? (
     <NoServer></NoServer>
@@ -201,17 +228,19 @@ export default function Group() {
 
         <div className="flex pt-2 flex-col mb-14 lg:mb-0 p-2 px-4 overflow-y-auto scrollbar-hide">
           {!searchClick &&
-            filteredGroups &&
-            filteredGroups.length !== 0 &&
-            filteredGroups.map((element) => {
+            allNormailizedfilteredGroups &&
+            allNormailizedfilteredGroups.length !== 0 &&
+            allNormailizedfilteredGroups.map((element) => {
               return (
-              <UserItem key={element._id} element={element} image={element.avtar.url} name={element.name} lastMessage={null}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+          
+              <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem>
               );
             })}
-          {!isAllGroupLoading ? searchClick && allGroup && allGroup.length !== 0 ? (
+          {!isAllGroupLoading ? searchClick && allNormailizedGroups && allNormailizedGroups.length !== 0 ? (
             allGroup.map((element) => {
               return ( 
-                 <UserItem key={element._id} element={element} image={element.avtar.url} name={element.name}  lastMessage={element.lastMessage}  handleUserClick={handleGroupClick} capitalizeFirstLetter={capitalizeFirstLetter}></UserItem>
+              
+                 <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem>
               );
             })
           ) : (
