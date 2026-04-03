@@ -16,21 +16,20 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const token =localStorage.getItem("refress_token")
+    const refress_token =localStorage.getItem("refress_token")
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       originalRequest.url !== "/auth/refresh" && 
-    token
+    refress_token
     ) {
       originalRequest._retry = true;
       try {
-        const refressRes = await api.post(
-          "/auth/refresh",
+         const refressRes = await axios.post(`${import.meta.env.VITE_API}/auth/refresh`,
           {},
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${refress_token}`,
             },
           },
         );

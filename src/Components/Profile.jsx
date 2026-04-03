@@ -24,7 +24,6 @@ export default function Profile() {
         <h2 className="text-2xl font-semibold text-gray-800 tracking-tight">
           My Profile
         </h2>
-        <EllipsisVerticalIcon className="w-6 h-6 text-gray-500 cursor-pointer hover:text-gray-700 transition" />
       </div>
 
    

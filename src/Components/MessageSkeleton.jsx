@@ -9,7 +9,6 @@ export default function MessageSkeleton({ send }) {
         <div className="w-[40px] h-[38px] rounded-full shimmer border-white border-4"></div>
       </div>
 
-   
       <div className="flex max-w-[85%] flex-col mb-2">
         
   

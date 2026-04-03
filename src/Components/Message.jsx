@@ -146,7 +146,8 @@ if(message.type === "image"){
     messageId:message._id,
         messageType:message.type,
         text,
-        senderId:Me?.Id
+        senderId:message.senderId._id,
+        senderName:message.senderId.name
   })
 
 }
@@ -192,14 +193,14 @@ let status = messageStatus(message,currentChatUserId)
         : "bg-black/5 border-[#6C63FF]/70 text-black"}
     `}
   >
-    {/* Sender */}
+ 
     <p className={`text-[11px] font-semibold leading-none 
       ${send ? "text-white/80" : "text-[#6C63FF]"}`}>
       
-      {send ? "You" : message.replyTo?.senderId?.name || "User"}
+      {message.replyTo?.senderName|| ""}
     </p>
 
-    {/* Preview */}
+  
     <p className={`text-xs truncate leading-tight mt-[2px] 
       ${send ? "text-white/70" : "text-gray-600"}`}>
       

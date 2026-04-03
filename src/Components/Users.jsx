@@ -30,7 +30,7 @@ export default function Users() {
     setActiveChat,
     activeChat,
     getCureentChattingUser,
-    chattedOnlineUsers,
+  
   
     isInitailLoadRef,
     setHasMore,

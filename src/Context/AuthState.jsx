@@ -357,9 +357,6 @@ try{
     if (!refress_token) {
       Navigate("/login");
     } else {
-      // refreshSession();
-      // refreshUser();
-      // Request permission and initialize FCM
       Notification.requestPermission().then(async (permission) => {
         if (permission === "granted") {
           initFCM();

@@ -22,7 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function GroupInfo() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,addMember,isAdmin,isGroup,queryClient,activeGroupChat,selectedGroup,setAllgroups,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,serchUser,addMember,isAdmin,isGroup,deleteGroup,LeaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
   const { updatePassword, isServer,showAlert ,updateUser,Me} = authContext;
   const [groupSettingsImage, setGroupSettingsImage] = useState(null);
@@ -97,18 +97,15 @@ const queryclient = useQueryClient();
     }
 
     const MemberHandler =({groupId,participents})=>{
-  console.log("haam")
+
        if(conversationIdRef.current===groupId){
-        
+     
          queryClient.setQueryData(["Group",conversationId],(oldData)=>{
          if(!oldData) return oldData
         return { ...oldData,participents}}
         )
         
-      //   setCurrentGroup(prev=>{
-      //       return {...prev,participents}
-      //  }
-      // ) 
+    
      
        }
     }
@@ -274,16 +271,13 @@ sendMessageToQueryUser(tempmessage)
                 );
               })} </div>
                  <div
-                
+                onClick={()=>{isAdmin?deleteGroup():LeaveGroup()}}
                 
                     className="flex    border-2  cursor-pointer rounded-2xl mt-8 bg-white  hover:bg-[#E6EBF5]    xs:p-2"
                   >
                     
-                    <div className="">
-                       
-                     
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-2">
+                  
+                    <div className="flex flex-col w-full justify-between py-2" >
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
                         <p className="font-small text-xs  xs:text-sm text-red-500">
                   {isAdmin?"Delete Group":"Exit Group"}

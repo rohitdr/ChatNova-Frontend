@@ -44,7 +44,7 @@ export default function Chatting() {
   const {
     useMessage,
     useSelectedUser,
-
+setReplyMessage,
     chattedUsersList,
     currentUserLoading,
      replyMessage,
@@ -405,6 +405,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
             url: Me.image?.url,
           },
         },
+        replyTo:replyMessage
       };
 
       activeGroupChat
@@ -413,16 +414,19 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
              receiverId: currentChatUserId,
             message: sendingMessage,
             tempId: tempmessage._id,
+            replyTo:replyMessage
           })
         : sendMessages({
             receiverId: currentChatUserId,
              conversationId: conversationId,
             message: sendingMessage,
             tempId: tempmessage._id,
+            replyTo:replyMessage
           });
       sendMessageToQueryUser(tempmessage);
 
       setSendingMessage("");
+      setReplyMessage(null)
      
       // setChattedUsersList((prev) => {
       //   const index = prev.findIndex((c) => c.user._id === currentChatUserId);
@@ -452,6 +456,8 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
     }, 0);
   };
  
+
+
   const handleUploadImage = () => {
     const tempmessage = {
       _id: Date.now(),
@@ -697,10 +703,24 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               )}
             </div>
 
-            <div className="shrink-0 flex xs:p-2 md:p-4 sticky bottom-0 justify-between bg-white border">
-             
-              <div className="w-full">
-               
+            <div className="shrink-0 flex flex-col xs:p-2 md:p-4 sticky bottom-0  bg-white border">
+           
+             <div className="bottom-0 flex justify-between shrink-0">
+              <div className="w-full relative">
+               {replyMessage !== null && (
+  <div  className={`w-full  shadow-md pl-3 pr-2 py-1 text-md  bg-[#f1f3f7] rounded-sm border-l-4  flex justify-between items-center `} >
+    
+    <div className="truncate text-gray-600">
+      {replyMessage.text} 
+    </div>
+
+    <XMarkIcon
+      onClick={() => setReplyMessage(null)}
+      className="w-4 h-4 cursor-pointer text-gray-400 hover:text-black"
+    />
+    
+  </div>
+)}
                 <input
                   type="text"
                   onChange={(e) => {
@@ -708,14 +728,14 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                     handleStopTyping();
                     setSendingMessage(e.target.value);
                   }}
-                  className="bg-[#E6EBF5] rounded-full outline-none  h-full w-full pl-2 "
-                  placeholder={` ${replyMessage && replyMessage.text+" :" } Enter Message here ...`}
+                  className={`bg-[#E6EBF5] rounded-lg shadow-sm outline-none ${replyMessage===null?"h-full":"h-8 md:h-12"} w-full pl-2 `}
+                  placeholder={` Enter Message here ...`}
                   value={sendingMessage}
                   name="sendmessageinput"
                   id="sendmessageinput"
                 />
               </div>
-              <div className=" flex justify-between">
+              <div className=" flex justify-between items-center">
                 <div
                   className="p-2.5 px-1 sm:px-2.5  "
                   onClick={() => {
@@ -770,6 +790,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                   <PaperAirplaneIcon className=" w-5 h-5 sm:w-6 -rotate-90 sm:h-6 text-white cursor-pointer" />
                 </div>
               </div>
+</div>
             </div>
           </div>
         </div>

@@ -10,18 +10,18 @@ import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-quer
 
 export default function ChatNovaState(props) {
   const authContext = useContext(AuthContext);
-  const { setProgress,setIsServer,showAlert,setLoadingUser,Me } = authContext;
+  const { setProgress,setIsServer,showAlert,setLoadingUser,Me,setActivePage } = authContext;
 const {socket} =useContext(SocketContext) 
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
 
-  const [chattedOnlineUsers, setChattedOnlineUsers] = useState(null);
+
   const [currentChatUserId, setCurrentChatUserId] = useState(null);
-  const [currentChatUser, setCurrentChatUser] = useState(null);
+
   
   const [activeChat, setActiveChat] = useState(false);
 const [conversationId,setConversationId]=useState(null)
 
-  const [allGroups,setAllgroups]=useState(null)
+
   const [page,setpage]=useState(2)
   const [hasMore,setHasMore]=useState(true)
   const [activeGroupChat,setActiveGroupChat]=useState(false)
@@ -41,13 +41,13 @@ setIsGroup(false)
 setIsAdmin(false)
   setDataBaseUsers(null)
 
-  setChattedOnlineUsers(null)
+
   setCurrentChatUserId(null)
-  setCurrentChatUser(null)
+
 
   setActiveChat(false)
   setConversationId(null)
-  setAllgroups(null)
+
   setpage(2)
   setHasMore(true)
   setActiveGroupChat(false)
@@ -63,7 +63,8 @@ setIsAdmin(false)
   firstItemIndexRef.current = 10000000
 
 }, [Me?.id])
-  let Navigate = useNavigate();
+ let Navigate = useNavigate()
+
   const queryClient = useQueryClient()
 
   /// function to get User whom with logged in user has chats
@@ -71,7 +72,7 @@ setIsAdmin(false)
   /// function to get the coversation id between the current chatter and logged in user
   const getConversationId = async (id) => {
     try {
-      console.log("akdflaj")
+   
       const res = await api.get(`/messages/conversationId/${id}`);
       if (res.status === 200) {
           
@@ -273,6 +274,10 @@ const useSelectedUser=(id)=>{
     }
   };
 
+
+  useEffect(()=>{
+ setReplyMessage(null)
+  },[conversationId])
   const sendMedia = async (id, message) => {
     try {
       const res = await api.post(`/messages/sendFile/${id}`, message);
@@ -448,7 +453,7 @@ const addMember =async(userId)=>{
 //// function to remove member from group
 const removeMember =async(userId,tempId)=>{
     try {
-      console.log("runkdas")
+   
       const data = {
        groupId:conversationId,
        participents:[{
@@ -460,6 +465,54 @@ const removeMember =async(userId,tempId)=>{
       const res = await api.post(`/groups/removeMember`,data);
     
     
+    } catch (error) {
+     const status = error.response?.status;
+   if (status === 404) {
+        showAlert("Error", error.response.data.message);
+   
+      }
+      else{
+       
+        setIsServer(500)
+     
+      }
+    
+    }
+}
+const LeaveGroup =async()=>{
+    try {
+      const data = {
+       groupId:conversationId,
+      }
+     
+      const res = await api.patch(`/groups/leaveGroup`,data);
+    setActiveGroupChat(false);
+    setConversationId(null)
+    setActivePage(2)
+    } catch (error) {
+     const status = error.response?.status;
+   if (status === 404) {
+        showAlert("Error", error.response.data.message);
+   
+      }
+      else{
+       
+        setIsServer(500)
+     
+      }
+    
+    }
+}
+const deleteGroup =async()=>{
+    try {
+      const data = {
+       groupId:conversationId,
+      }
+   
+      const res = await api.delete(`/groups/delete`,{data});
+    setActiveGroupChat(false);
+    setConversationId(null)
+    setActivePage(2)
     } catch (error) {
      const status = error.response?.status;
    if (status === 404) {
@@ -548,11 +601,12 @@ const createGroup =async(participents,name,inviteCode,file)=>{
      selectedUser,
      selectedUserLoading,
        useMessage,
-        allGroups,
+     
         isAllGroupLoading,
    updateGroupImage,
         conversationId,
     addMember,
+    deleteGroup,
     firstItemIndexRef,
         activeChat,
         setActiveChat,
@@ -579,12 +633,10 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         hasMoreUsers,
         chattedUsers,
         queryClient,
-        chattedOnlineUsers,
+    
         isAdmin,
-        currentChatUser,
-        setCurrentChatUser,
-        loadingGroups,
-        setAllgroups,selectedGroup,
+    LeaveGroup,
+        loadingGroups,selectedGroup,
         selectedGroupLoading
       }}
     >

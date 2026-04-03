@@ -22,6 +22,7 @@ export default function Group() {
   const {
     chattedUsersList,
     setIsGroup,
+    activeChat,
     capitalizeFirstLetter,
     getAllGroups,
     allGroup,
@@ -57,7 +58,7 @@ export default function Group() {
  
 
   const handleGroupClick = async(element) => {
-    console.log("hello")
+  
     if(!socket) return
     if(conversationId) {
       socket.emit("leave_group",conversationId)
@@ -88,6 +89,91 @@ export default function Group() {
     socket.off("group_created",groupHandler)
    }
   },[socket])
+  useEffect(()=>{
+    if (!socket) return
+    const groupLeaveHandler =({groupId})=>{
+      queryClient.setQueryData(["groups"],(oldData)=>{
+       if(!oldData) return oldData
+        const filterd =oldData.filter((group)=>group._id !== groupId)
+          return [...filterd]
+      })
+
+     
+    }
+    socket.on("group_leaved",groupLeaveHandler)
+   return ()=>{
+    socket.off("group_leaved",groupLeaveHandler)
+   }
+  },[socket])
+  useEffect(()=>{
+    if (!socket) return
+    const addedHandler =({groupId,conversationToSend})=>{
+      queryClient.setQueryData(["groups"],(oldData)=>{
+       if(!oldData) return [conversationId]
+        const filterd =oldData.filter((group)=>group._id !== groupId)
+          return [conversationToSend,...filterd]
+      })
+
+     
+    }
+    socket.on("added_to_group",addedHandler)
+   return ()=>{
+    socket.off("added_to_group",addedHandler)
+   }
+  },[socket])
+  useEffect(()=>{
+    if (!socket) return
+    const removedHandler =({groupId})=>{
+      queryClient.setQueryData(["groups"],(oldData)=>{
+       if(!oldData) return oldData
+        const filterd =oldData.filter((group)=>group._id !== groupId)
+          return [...filterd]
+      })
+     if(conversationId === groupId){
+  
+    queryClient.removeQueries({ queryKey: ['Group',conversationId] });
+      setActivePage(2)
+      setActiveGroupChat(false)
+      setConversationId(null)
+      activeChat(null)
+     }
+     
+    }
+    socket.on("removed_from_group",removedHandler)
+   return ()=>{
+    socket.off("removed_from_group",removedHandler)
+   }
+  },[socket])
+  useEffect(()=>{
+    if (!socket) return
+    const groupDeleteHandler =({groupId})=>{
+      queryClient.setQueryData(["groups"],(oldData)=>{
+       if(!oldData) return oldData
+        const filterd =oldData.filter((group)=>group._id !== groupId)
+          return [...filterd]
+      })
+     if(conversationId === groupId){
+  
+    queryClient.removeQueries({ queryKey: ['Group',conversationId] });
+      setActivePage(2)
+      setActiveGroupChat(false)
+      setConversationId(null)
+      activeChat(false)
+     }
+     
+    }
+    socket.on("group_deleted",groupDeleteHandler)
+   return ()=>{
+    socket.off("group_deleted",groupDeleteHandler)
+   }
+  },[socket])
+
+
+  
+
+
+
+  
   return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
@@ -136,7 +222,7 @@ export default function Group() {
                   {" "}
                   <MagnifyingGlassCircleIcon className="h-12 w-12 text-gray-600"></MagnifyingGlassCircleIcon>
                 </div>
-                <div>Search User to chat With...</div>{" "}
+                <div>Create Group to chat With...</div>{" "}
               </div>
             </div>
           ):[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
