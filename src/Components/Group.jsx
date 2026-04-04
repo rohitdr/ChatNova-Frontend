@@ -178,7 +178,8 @@ export default function Group() {
           name:element.name,
           image:element.avtar?.url,
           lastMessage:element.lastMessage,
-           _id:element._id
+           _id:element._id,
+             unreadCount:0
          }
          
         }
@@ -188,7 +189,8 @@ export default function Group() {
          name:element.name,
          image:element.avtar?.url,
          lastMessage:null,
-         _id:element._id
+         _id:element._id,
+           unreadCount:0
         }
         }
     

@@ -125,7 +125,8 @@ setActiveChat(true);
           name:element.user?.name,
           image:element.user?.image?.url,
           lastMessage:element.lastMessage,
-           _id:element.user._id
+           _id:element.user._id,
+           unreadCount:element.unreadCount
          }
          
         }
@@ -135,7 +136,8 @@ setActiveChat(true);
          name:element.name,
          image:element.image?.url,
          lastMessage:null,
-         _id:element._id
+         _id:element._id,
+         unreadCount:element.unreadCount
         }
         }
     
@@ -188,7 +190,7 @@ setActiveChat(true);
   </>
 )}   
            
-            
+            {console.log(chattedUsersList)}
             {!isUsersListLoading && searchClick ?
             <div className="h-full">
             <Virtuoso

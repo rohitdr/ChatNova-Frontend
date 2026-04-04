@@ -108,7 +108,35 @@ const queryclient = useQueryClient();
       socket.off("reaction_updated", handler);
     };
   }, [socket,conversationId]);
+useEffect(() => {
+  if (!conversationId) return;
 
+  queryclient.setQueryData(["users"], (oldData) => {
+    if (!oldData) return oldData;
+
+    const newPages = oldData.pages.map((page) => {
+      const updatedUsers = page.users.map((user) => {
+        if (user.ConversationId === conversationId) {
+          return {
+            ...user,
+            unreadCount: 0,
+          };
+        }
+        return user;
+      });
+
+      return {
+        ...page,
+        users: updatedUsers,
+      };
+    });
+
+    return {
+      ...oldData,
+      pages: newPages,
+    };
+  });
+}, [conversationId]);
   useEffect(() => {
     if (!socket) return;
     const deliverHandler = ({ messageId, deliveredTo }) => {
@@ -116,7 +144,7 @@ const queryclient = useQueryClient();
       if(!oldData) return oldData
       const newPages = oldData.pages.map((page)=>{
           const updatedMessage = page.message.map((msg)=>
-          msg._id === messageId ? { ...msg, deliveredTo: deliveredTo } : msg,
+          msg._id === messageId ? { ...msg, deliveredTo: [...new Set([...msg.deliveredTo, ...deliveredTo])] } : msg,
           )
           return {
         ...page,
@@ -141,13 +169,19 @@ const queryclient = useQueryClient();
   }, [socket,conversationId]);
   useEffect(() => {
     if (!socket) return;
-    const seenHandler = ({ messageId, seenBy }) => {
+    const seenHandler = ({ conversationId,userId, seenAt }) => {
          queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       if(!oldData) return oldData
       const newPages = oldData.pages.map((page)=>{
-          const updatedMessage = page.message.map((msg)=>
-          msg._id === messageId ? { ...msg, seenBy: seenBy } : msg,
-          )
+          const updatedMessage = page.message.map((msg)=>{
+         const alreadySeen = msg.seenBy.some((s)=>s.user ===userId)
+       if(msg.senderId !==userId && !alreadySeen){
+        return{
+          ...msg,
+          seenBy:[...msg.seenBy,{user:userId,seenAt}]
+        }
+       }
+        return msg})
           return {
         ...page,
         message: updatedMessage,
@@ -215,77 +249,81 @@ let alreadyExists=false
     });
   }, [typingUser]);
 
-const updateUsersList = (newMessage) => {
+const updateUsersList = (newMessage, currentUserId, activeConversationId) => {
+  queryclient.setQueryData(["users"], (oldData) => {
+    if (!oldData) return oldData;
 
-queryclient.setQueryData(["users"], (oldData) => {
-  if (!oldData) return oldData;
+    const lastMessage = {
+      text: newMessage.text,
+      createdAt: newMessage.createdAt,
+    };
 
-  // ✅ check globally (all pages)
-  const alreadyExists = oldData.pages.some((page) =>
-    page.users.some(
-      (c) => c.ConversationId === newMessage.conversationId
-    )
-  );
+    const newPages = oldData.pages.map((page, pageIndex) => {
+      let users = [...page.users];
 
-  const lastMessage = {
-    text: newMessage.text,
-    createdAt: newMessage.createdAt,
-  };
-
-  const newPages = oldData.pages.map((page, pageIndex) => {
-    let users = [...page.users]; // ✅ clone (important)
-
-    const index = users.findIndex(
-      (c) => c.ConversationId === newMessage.conversationId
-    );
-
-    // ✅ CASE 1: user exists → update + move top
-    if (index !== -1) {
-      const updatedUser = {
-        ...users[index],
-        lastMessage,
-      };
-
-      users = users.filter(
-        (c) => c.ConversationId !== newMessage.conversationId
+      const index = users.findIndex(
+        (c) => c.ConversationId === newMessage.conversationId
       );
 
-      return {
-        ...page,
-        users: [updatedUser, ...users],
-      };
-    }
+      const isCurrentChatOpen =
+        newMessage.conversationId === activeConversationId;
 
-    // ✅ CASE 2: new user → ONLY add in first page
-    if (!alreadyExists && pageIndex === 0) {
-      const newuser = newMessage.conversationToSend?.participents?.find(
-        (p) => p.user._id !== Me._id
-      );
+      if (index !== -1) {
+        const oldUser = users[index];
 
-      if (!newuser) return page;
+        const updatedUser = {
+          ...oldUser,
+          lastMessage,
+          participents: newMessage.conversationToSend?.participents,
+          unreadCount:
+            oldUser.user._id !== newMessage.senderId
+              ? isCurrentChatOpen
+                ? 0
+                : (oldUser.unreadCount || 0) + 1
+              : 0,
+        };
 
-      return {
-        ...page,
-        users: [
-          {
-            ConversationId:
-              newMessage.conversationToSend.ConversationId,
-            lastMessage,
-            user: newuser.user,
-          },
-          ...users,
-        ],
-      };
-    }
+        users = users.filter(
+          (c) => c.ConversationId !== newMessage.conversationId
+        );
 
-    return page;
+        return {
+          ...page,
+          users: [updatedUser, ...users],
+        };
+      }
+
+      if (pageIndex === 0) {
+        const newuser = newMessage.conversationToSend?.participents?.find(
+          (p) => p.user._id !== currentUserId
+        );
+
+        if (!newuser) return page;
+
+        return {
+          ...page,
+          users: [
+            {
+              ConversationId: newMessage.conversationToSend.ConversationId,
+              lastMessage,
+              user: newuser.user,
+              unreadCount:
+                newuser.user._id !== newMessage.senderId
+                  ? isCurrentChatOpen
+                    ? 0
+                    : 1
+                  : 0,
+            },
+            ...users,
+          ],
+        };
+      }
+
+      return page;
+    });
+
+    return { ...oldData, pages: newPages };
   });
-
-  return {
-    ...oldData,
-    pages: newPages,
-  };
-});
 };
   useEffect(() => {
     if (!socket) return;
@@ -308,7 +346,7 @@ queryclient.setQueryData(["users"], (oldData) => {
       }
 
       //setting current user list
-     !activeGroupChat && updateUsersList(newMessage)
+     !activeGroupChat && updateUsersList(newMessage,Me._id,conversationId)
       // setChattedUsersList((prev) => {
       //   const index = prev.findIndex(
       //     (c) => c.ConversationId === newMessage.conversationId,

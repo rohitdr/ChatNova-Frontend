@@ -12,7 +12,7 @@ const UserItem = React.memo(
   }) => {
 
 
-    const {image,lastMessage,name,element} =user
+    const {image,lastMessage,name,element,unreadCount} =user
     const preload = useCallback(() => {
       import("./Chatting");
     },[]);
@@ -31,7 +31,7 @@ const UserItem = React.memo(
         onMouseEnter={preload}
         onTouchStart={preload}
         onClick={handleClick}
-        className="flex shadow  border-2 h-[65px]   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
+        className="flex shadow  border-2 h-[65px]   cursor-pointer rounded-2xl my-2 bg-white  hover:bg-[#E6EBF5] p-0   xs:p-2"
       >
         <div className="">
           <img
@@ -48,17 +48,23 @@ const UserItem = React.memo(
             </p>
 
             {lastMessage && (
-              <p className=" pt-1 text-[10px] xs:text-xs text-gray-400">
+              <p className=" pt-1 text-[10px] xs:text-xs text-gray-400 flex col">
                 { time}
+                
               </p>
             )}
           </div>
+          <div className="flex justify-between">
           {lastMessage && (
             <div className="pl-2  text-[10px] xs:text-sm text-gray-400 flex justify-between truncate">
               {lastMessage.text}
             </div>
           )}
-        </div>
+           {unreadCount!==0 && unreadCount && <p className=" mx-6 text-[10px] bg-green-500 rounded-full h-4 w-4 text-white bg xs:text-xs flex items-center justify-center">
+               {unreadCount}
+                
+              </p>}
+        </div></div>
       </div>
     );
   },
