@@ -60,7 +60,7 @@ const UserItem = React.memo(
               {lastMessage.text}
             </div>
           )}
-           {unreadCount!==0 && unreadCount && <p className=" mx-6 text-[10px] bg-green-500 rounded-full h-4 w-4 text-white bg xs:text-xs flex items-center justify-center">
+           {unreadCount!==0 && unreadCount && <p className="2xs:mx-2  xs:mx-6 text-[10px] bg-green-500 rounded-full h-4 w-4 text-white bg xs:text-xs flex items-center justify-center">
                {unreadCount}
                 
               </p>}

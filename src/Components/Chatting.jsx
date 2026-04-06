@@ -576,7 +576,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
   return  (
     <>  
       {currentChatUserId || activeGroupChat ? (
-        <div className={`h-dvh bg-white`}>
+        <div className={`h-[100svh] md:h-screen bg-white`}>
           <div className="flex h-full flex-col justify-between">
             {!selectedUserLoading  || messages.length!==0 ? (
               <div
@@ -668,7 +668,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                   style={{ height: "100%" }}
                   increaseViewportBy={{ top: 500, bottom: 300 }}
                   data={messages}
-                  followOutput="auto"
+                  // followOutput="auto"
                
                   rangeChanged={(range) => {
                     const isAtTop =
@@ -702,7 +702,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               )}
             </div>
 
-            <div className="shrink-0 flex flex-col xs:p-2 md:p-4 sticky bottom-0  bg-white border">
+            <div className="shrink-0 flex flex-col xs:p-2 md:p-4 sticky   bg-white border">
            
              <div className="bottom-0 flex justify-between shrink-0">
               <div className="w-full relative">
