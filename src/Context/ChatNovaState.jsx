@@ -176,17 +176,18 @@ setIsSearchLoading(false)
     }
   };
 
-  const getmessages = async (page,id) => {
+  const getmessages = async (id,cursor) => {
     try {
-    
-      const res = await api.get(`/messages/recieveMessage/${id}?page=${page}&limit=20`);
+    let url = `/messages/recieveMessage/${id}`
+    if(cursor){
+      url +=`?cursor=${cursor}`
+    }
+      const res = await api.get(url);
       if (res.status === 200) {
-       hasMoreRef.current = res.data.hasMore
-             setHasMore(res.data.hasMore)
+      
         return  {
-  message: res.data.message.reverse(),
-  page: page,
-  hasMore: res.data.hasMore
+  message: res.data.message,
+  nextCursor:res.data.nextCursor
 };
     
    
@@ -207,16 +208,11 @@ setIsSearchLoading(false)
 const useMessage =(id)=>{
 return useInfiniteQuery({
   queryKey:["messages",id],
-  queryFn:({ pageParam = 1, queryKey }) => {
+  queryFn:({ pageParam, queryKey }) => {
       const [, id] = queryKey; 
-      return getmessages(pageParam, id);
+      return getmessages(id,pageParam);
     },
-  getNextPageParam:(lastPage)=>{
-    if(lastPage.hasMore){
-      return lastPage.page+1;
-    }
-    return undefined
-  },
+  getNextPageParam:(lastPage)=>lastPage.nextCursor,
   staleTime: 5000,
 refetchOnWindowFocus: false,
 enabled:!!conversationId,

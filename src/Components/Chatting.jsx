@@ -72,13 +72,13 @@ selectedGroupLoading,
    
   } = Context;
   const {data,isLoading,fetchNextPage}=useMessage(conversationId) 
-
-const messages = data?.pages.slice().reverse().flatMap(page=>page.message)||[]
+  const messages = data?.pages.flatMap(page=>page.message).reverse()||[]
+const totalCount = data?.pages.reduce((acc, page) => acc + page.message.length, 0) || 0;
 const queryclient = useQueryClient();
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
 
-
+const virtuosoRef =useRef(null)
 
 
 
@@ -262,12 +262,12 @@ let alreadyExists=false
   });
 };
 
-  // useEffect(() => {
-  //   virtuosoRef.current?.scrollToIndex({
-  //     index: messages.length - 1,
-  //     behavior: "auto",
-  //   });
-  // }, [typingUser]);
+  useEffect(() => {
+    virtuosoRef.current?.scrollToIndex({
+      index: 100000,
+      behavior: "auto",
+    });
+  }, [typingUser]);
 
 const updateUsersList = (newMessage, currentUserId, activeConversationId) => {
   //checking conversationType
@@ -346,6 +346,10 @@ if (newMessage.conversationToSend?.type !== "private") return;
 
     return { ...oldData, pages: newPages };
   });
+    virtuosoRef.current?.scrollToIndex({
+      index: 100000,
+      behavior: "auto",
+    });
 };
 
  const UpdateGroupList =(newMessage)=>{
@@ -435,7 +439,7 @@ if (newMessage.conversationToSend?.type !== "group") return;
 queryclient.setQueryData(["messages",conversationId],(oldData)=>{
  if(!oldData) return oldData
  const newPages = [...oldData.pages]
-  newPages[0].message.push(message)
+  newPages[0].message.unshift(message)
   return {...oldData,pages:newPages}
 })
   }
@@ -476,13 +480,13 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       setSendingMessage("");
       setReplyMessage(null)
     }
-    // setTimeout(() => {
-    //   virtuosoRef.current?.scrollToIndex({
-    //     index: messages.length - 1,
-    //     align: "end",
-    //     behavior: "auto",
-    //   });
-    // }, 0);
+    setTimeout(() => {
+      virtuosoRef.current?.scrollToIndex({
+        index: 100000,
+        align: "end",
+        behavior: "auto",
+      });
+    }, 0);
   };
  
 
@@ -571,8 +575,18 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
         userId: Me._id,
         name: Me.name,
       });
-    }, 4000);
+    }, 1500);
   };
+
+  const loadMore = async ()=>{
+    const prevHeight = virtuosoRef.current.scrollHeight;
+
+  await fetchNextPage();
+
+  const newHeight = virtuosoRef.current.scrollHeight;
+
+  virtuosoRef.current.scrollTop += newHeight - prevHeight;
+  }
   return  (
     <>  
       {currentChatUserId || activeGroupChat ? (
@@ -657,25 +671,21 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               { !isLoading || messages.length!==0 ? (
                 <Virtuoso
                   className="scrollbar-hide"
-                 
+                 ref={virtuosoRef}
                   computeItemKey={(index, message) => message._id}
-                  firstItemIndex={firstItemIndexRef.current}
-                  initialTopMostItemIndex={
-                    messages.length > 0
-                      ? messages.length - 1
-                      : undefined
-                  }
+                  firstItemIndex={100000-totalCount}
+                  initialTopMostItemIndex={100000}
                   style={{ height: "100%" }}
                   increaseViewportBy={{ top: 500, bottom: 300 }}
                   data={messages}
-                  // followOutput="auto"
+                  followOutput="auto"
                
                   rangeChanged={(range) => {
                     const isAtTop =
-                      range.startIndex <= firstItemIndexRef.current + 2;
+                      range.startIndex<(100005-(totalCount))
 
                     if (isAtTop) {
-                      fetchNextPage()
+               fetchNextPage()
                     }
                   }}
                
@@ -686,14 +696,15 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                       message={message}
                     ></Message></div>
                   )}
-                  components={{
-                    Footer: () =>
-                      typingUser.length > 0 && (
-                        <TypingIndicator
-                          typingUser={typingUser}
-                        ></TypingIndicator>
-                      ),
-                  }}
+                 components={{
+  Footer: () => (
+    <div style={{ minHeight: "24px" }}>
+      {typingUser.length > 0 && (
+        <TypingIndicator typingUser={typingUser} />
+      )}
+    </div>
+  ),
+}}
                 />
               ) : (
                 [...Array(10)].map((_, i) => (
