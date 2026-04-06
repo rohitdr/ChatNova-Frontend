@@ -576,7 +576,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
   return  (
     <>  
       {currentChatUserId || activeGroupChat ? (
-        <div className={`h-[100svh] md:h-screen bg-white`}>
+        <div className={`h-[100dvh] md:h-screen bg-white overflow-hidden`}>
           <div className="flex h-full flex-col ">
             {!selectedUserLoading  || messages.length!==0 ? (
               <div
