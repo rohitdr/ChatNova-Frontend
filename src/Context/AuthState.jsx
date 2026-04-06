@@ -145,7 +145,7 @@ try{
       queryKey:["Me"],
       queryFn:refreshUser,
       staleTime:5000,
-      refetchOnWindowFocus:true,
+      // refetchOnWindowFocus:true,
     enabled:authReady
     })
   }
@@ -296,7 +296,6 @@ try{
       setProgress(50);
      
       if (response.status === 200) {
-      
           queryClient.clear()
         localStorage.removeItem("refress_token");
         localStorage.removeItem("access_token");

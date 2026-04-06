@@ -172,6 +172,11 @@ export default function Group() {
   
 
   const normalizeItem = (element,type)=>{
+    
+    const participant = element.participents.find(
+  (p) => p.user.toString() === Me._id
+);
+console.log(participant?.unreadCount)
     if(type==="chat"){
          return{
           element,
@@ -179,7 +184,7 @@ export default function Group() {
           image:element.avtar?.url,
           lastMessage:element.lastMessage,
            _id:element._id,
-             unreadCount:0
+             unreadCount:participant?.unreadCount ||0
          }
          
         }
@@ -197,6 +202,7 @@ export default function Group() {
     
   }
 const allNormailizedGroups=allGroup?.map((element)=>
+  // console.log(element)
   normalizeItem(element,"chat")
 )
 const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
@@ -238,24 +244,13 @@ const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
               <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem>
               );
             })}
-          {!isAllGroupLoading ? searchClick && allNormailizedGroups && allNormailizedGroups.length !== 0 ? (
-            allGroup.map((element) => {
+          {!isAllGroupLoading ? searchClick && allNormailizedGroups && allNormailizedGroups.length !== 0 && (
+            allNormailizedGroups.map((element) => {
               return ( 
-              
-                 <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem>
+                <div className="h-[72px]">
+                 <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem></div>
               );
             })
-          ) : (
-            <div className="flex h-screen justify-center items-center">
-              <div className="text-center flex flex-col">
-                {" "}
-                <div className="flex justify-center">
-                  {" "}
-                  <MagnifyingGlassCircleIcon className="h-12 w-12 text-gray-600"></MagnifyingGlassCircleIcon>
-                </div>
-                <div>Create Group to chat With...</div>{" "}
-              </div>
-            </div>
           ):[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
         </div>
       </div>

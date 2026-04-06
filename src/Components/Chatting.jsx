@@ -33,7 +33,7 @@ export default function Chatting() {
   const [uploadFile, setUplaodFile] = useState(null);
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer, loadingMessages, showAlert, setActivePage,Me } =
+  const { user, isServer, activePage, showAlert, setActivePage,Me } =
     authContext;
   const [fileType, setFileType] = useState(null);
 
@@ -45,6 +45,7 @@ export default function Chatting() {
     useMessage,
     useSelectedUser,
 setReplyMessage,
+
     chattedUsersList,
     currentUserLoading,
      replyMessage,
@@ -55,7 +56,7 @@ setReplyMessage,
     currentChatUserId,
     setChattedUsersList,
 useSelectedGroup,
-  
+  isGroup,
     chattedUsers,
 
     sendMessages,
@@ -76,7 +77,7 @@ const messages = data?.pages.slice().reverse().flatMap(page=>page.message)||[]
 const queryclient = useQueryClient();
   const socketcontext = useContext(SocketContext);
   const { socket, onlineUsers } = socketcontext;
-  const virtuosoRef = useRef(null);
+
 
 
 
@@ -169,13 +170,14 @@ useEffect(() => {
   }, [socket,conversationId]);
   useEffect(() => {
     if (!socket) return;
-    const seenHandler = ({ conversationId,userId, seenAt }) => {
-         queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+    const seenHandler = ({conversationId:convId,userId, seenAt }) => {
+  
+         queryclient.setQueryData(["messages",convId],(oldData)=>{
       if(!oldData) return oldData
       const newPages = oldData.pages.map((page)=>{
           const updatedMessage = page.message.map((msg)=>{
-         const alreadySeen = msg.seenBy.some((s)=>s.user ===userId)
-       if(msg.senderId !==userId && !alreadySeen){
+         const alreadySeen = msg.seenBy.some((s)=>s.user.toString() === userId)
+       if(msg.senderId.toString() !==userId && !alreadySeen){
         return{
           ...msg,
           seenBy:[...msg.seenBy,{user:userId,seenAt}]
@@ -192,6 +194,24 @@ useEffect(() => {
       pages: newPages,
     };
      })
+   queryclient.setQueryData(["groups"], (oldData) => {
+  if (!oldData) return oldData;
+
+  const groups = oldData.map((group) => {
+    const participents = group.participents?.map((p) => {
+      if (p.user.toString() === userId) {
+        return { ...p, unreadCount: 0 };
+      }
+      return p;
+    });
+
+    return { ...group, participents };
+  });
+
+  return [...groups];
+});
+   
+
     };
 
     socket.on("message_seen", seenHandler);
@@ -199,7 +219,7 @@ useEffect(() => {
     return () => {
       socket.off("message_seen", seenHandler);
     };
-  }, [socket,conversationId]);
+  }, [socket]);
  const updateMessageToQuerySocket = (newMessage) => {
   queryclient.setQueryData(["messages", conversationId], (oldData) => {
     if (!oldData) return oldData;
@@ -242,14 +262,16 @@ let alreadyExists=false
   });
 };
 
-  useEffect(() => {
-    virtuosoRef.current?.scrollToIndex({
-      index: messages.length - 1,
-      behavior: "auto",
-    });
-  }, [typingUser]);
+  // useEffect(() => {
+  //   virtuosoRef.current?.scrollToIndex({
+  //     index: messages.length - 1,
+  //     behavior: "auto",
+  //   });
+  // }, [typingUser]);
 
 const updateUsersList = (newMessage, currentUserId, activeConversationId) => {
+  //checking conversationType
+if (newMessage.conversationToSend?.type !== "private") return;
   queryclient.setQueryData(["users"], (oldData) => {
     if (!oldData) return oldData;
 
@@ -276,7 +298,7 @@ const updateUsersList = (newMessage, currentUserId, activeConversationId) => {
           lastMessage,
           participents: newMessage.conversationToSend?.participents,
           unreadCount:
-            oldUser.user._id !== newMessage.senderId
+            Me?._id !== newMessage.senderId._id
               ? isCurrentChatOpen
                 ? 0
                 : (oldUser.unreadCount || 0) + 1
@@ -308,7 +330,7 @@ const updateUsersList = (newMessage, currentUserId, activeConversationId) => {
               lastMessage,
               user: newuser.user,
               unreadCount:
-                newuser.user._id !== newMessage.senderId
+                Me?._id !== newMessage.senderId._id
                   ? isCurrentChatOpen
                     ? 0
                     : 1
@@ -325,69 +347,42 @@ const updateUsersList = (newMessage, currentUserId, activeConversationId) => {
     return { ...oldData, pages: newPages };
   });
 };
+
+ const UpdateGroupList =(newMessage)=>{
+if (newMessage.conversationToSend?.type !== "group") return;
+  console.log(newMessage.conversationToSend)
+      queryclient.setQueryData(["groups"],(oldData)=>{
+       if(!oldData) return oldData
+      
+        const filterd =oldData.filter((group)=>group._id !== newMessage.conversationToSend._id)
+          return [newMessage.conversationToSend,...filterd]
+      })
+
+     
+    }
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
-   
       if (
-        (activeGroupChat &&
-          newMessage.conversationId === conversationId) ||
-        (!activeGroupChat && newMessage.conversationId === conversationId)
+        (newMessage.conversationId === conversationId) 
       ) {
-   
-        socket.emit("mark_seen", {
-          conversationId: conversationId,
-          userId: Me._id,
-        });
+       if(newMessage.senderId._id !== Me?._id){
 
+         socket.emit("mark_seen", {
+           conversationId: conversationId,
+           userId: Me._id,
+         });
+       }
         /// setting current user chat
        updateMessageToQuerySocket(newMessage)
       }
+  
+      UpdateGroupList(newMessage)
+      updateUsersList(newMessage,Me._id,conversationId)
+  
 
-      //setting current user list
-     !activeGroupChat && updateUsersList(newMessage,Me._id,conversationId)
-      // setChattedUsersList((prev) => {
-      //   const index = prev.findIndex(
-      //     (c) => c.ConversationId === newMessage.conversationId,
-      //   );
-      //   console.log(index);
-      //   const lastMessage = {
-      //     text: newMessage.text,
-      //     createdAt: newMessage.createdAt,
-      //   };
-      //   if (index === -1) {
-      //     const newuser = newMessage.conversationToSend.participents.find(
-      //       (p) => p.user._id !== user._id,
-      //     );
-      //     console.log([{
-      //       ConversationId: newMessage.conversationToSend.ConversationId,
-      //       lastMessage: newMessage.conversationToSend.lastMessage,
-      //       user: newuser.user,
-      //     },...prev]);
-
-      //     return [
-      //       {
-      //         ConversationId: newMessage.conversationToSend.ConversationId,
-      //         lastMessage: newMessage.conversationToSend.lastMessage,
-      //         user: newuser.user,
-      //       },
-      //       ...prev,
-      //     ];
-      //   }
-      //   const updateduserlist = {
-      //     ...prev[index],
-      //     lastMessage,
-      //   };
-      //   const filtereduser = prev.filter(
-      //     (c) => c.ConversationId !== newMessage.conversationId,
-      //   );
- 
-      //   return [updateduserlist, ...filtereduser];
-      // });
-     
-     
-      // updatedUserList(selectedUser)
+    
     };
     socket.on("newMessage", handleNewMessage);
 
@@ -481,13 +476,13 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       setSendingMessage("");
       setReplyMessage(null)
     }
-    setTimeout(() => {
-      virtuosoRef.current?.scrollToIndex({
-        index: messages.length - 1,
-        align: "end",
-        behavior: "auto",
-      });
-    }, 0);
+    // setTimeout(() => {
+    //   virtuosoRef.current?.scrollToIndex({
+    //     index: messages.length - 1,
+    //     align: "end",
+    //     behavior: "auto",
+    //   });
+    // }, 0);
   };
  
 
@@ -576,7 +571,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
         userId: Me._id,
         name: Me.name,
       });
-    }, 1500);
+    }, 4000);
   };
   return  (
     <>  
@@ -674,7 +669,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                   increaseViewportBy={{ top: 500, bottom: 300 }}
                   data={messages}
                   followOutput="auto"
-                  // ref={virtuosoRef}
+               
                   rangeChanged={(range) => {
                     const isAtTop =
                       range.startIndex <= firstItemIndexRef.current + 2;
@@ -857,33 +852,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
                 />
               </div>
             )}
-            {/* {uploadFile && (
-              <div className="">
-                {" "}
-               {fileType==="pdf" &&  <iframe className="h-screen w-screen" src={URL.createObjectURL(uploadFile)}></iframe>
-               }
-                {fileType==="docx" &&  <iframe
-  src={`https://view.officeapps.live.com/op/embed.aspx?src=${URL.createObjectURL(uploadFile)}`}
-  width="100%"
-  height="500px">
-</iframe>
-               }
-                <XMarkIcon
-                  className="h-8 w-8 absolute cursor-pointer top-6 right-6 text-white"
-                  onClick={() => {
-                    setMediaSendModal(false);
-                    setUploadedVideo(null);
-                  }}
-                />
-                <PaperAirplaneIcon
-                  className=" w-8 h-8 absolute  bottom-6 right-6 text-white cursor-pointer"
-                  onClick={() => {
-                    uploadCloudinary(selectedUser, uploadVideo);
-                    setMediaSendModal(false);
-                  }}
-                />
-              </div>
-            )} */}
+        
           </div>
         </div>
       )}

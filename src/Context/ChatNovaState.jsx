@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import ChatNovaContext from "./ChatNovaContext";
 
 import axios from "axios";
@@ -96,7 +96,7 @@ setIsSearchLoading(false)
     }
   };
   // function to search users from database to chat with search query
-  const serchUser = async (searchValue) => {
+  const searchUser =useCallback(async (searchValue) => {
     try {
       setIsSearchLoading(true)
       const res = await api.get(`/users/search?search=${searchValue}`);
@@ -121,7 +121,7 @@ setIsSearchLoading(false)
     
       
     }
-  };
+  },[])
 
   //function to serach the users with whom logged in user have chatted
   const chattedUsers = async (page) => {
@@ -236,6 +236,7 @@ const useUser = ()=>{
     },
       staleTime: 5000,
 refetchOnWindowFocus: false,
+enabled:!!Me
 
   })
 }
@@ -386,7 +387,8 @@ return res.data.group
     queryKey:["groups"],
     queryFn:getAllGroups,
     staleTime:5000,
-    refetchOnWindowFocus:false
+    refetchOnWindowFocus:false,
+    enabled:!!Me
   })
  }
 const {data:allGroup,isLoading:isAllGroupLoading}=useGroups()
@@ -617,7 +619,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
    
         uploadCloudinary,
         capitalizeFirstLetter,
-        serchUser,
+        searchUser,
         sendMessages,
         setConversationId,
         dataBaseUsers,

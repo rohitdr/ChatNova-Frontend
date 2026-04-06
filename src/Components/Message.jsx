@@ -101,35 +101,27 @@ const handleReactionClick=(e)=>{
 
 }
 
-const messageStatus = (message,id)=>{
+const messageStatus = (message, id) => {
+  if (activeGroupChat) {
+    const deliveredCount = message.deliveredTo?.length || 0;
+    const seenCount = message.seenBy?.length || 0;
 
-  if(activeGroupChat){
-    if(message.deliveredTo?.length===0 && message.seenBy?.length ===0){
-      return "sent"
-    }
-  if(message.deliveredTo?.length>=1 && message.seenBy?.length ===0){
-    return "delivered"
+    if (deliveredCount === 0 && seenCount === 0) return "sent";
+    if (deliveredCount >= 1 && seenCount === 0) return "delivered";
+    if (seenCount >= 1) return "seen";
+
+    return "sent"; 
+  } else {
+    const delivered = message.deliveredTo?.some(
+      (d) => d.user.toString() === id
+    );
+    const seen = message.seenBy?.some((s) => s.user.toString() === id);
+
+    if (!delivered) return "sent"; 
+    if (!seen) return "delivered"; 
+    return "seen";
   }
-  if(message.seenBy?.length>=1){
-    return "seen"
-
-  }
-
-  }
-  else{
-const delivered = message.deliveredTo?.some((d)=>
- d.user.toString()=== id
-
-)
-const seen = message.seenBy?.some((d)=>
- d.user.toString()=== id
-
-)
-if(!delivered) return "sent"
-if(!seen) return "delivered"
-return "seen"
-  }
-}
+};
 
 const clickReplyIcon=()=>{
   let text;
@@ -280,7 +272,7 @@ let status = messageStatus(message,currentChatUserId)
     
    
         </div>{" "}
-        <div ref={reactionRef} className={`bg-white absolute rounded-3xl shadow-2xl -top-5 ${send?"right-10 lg:right-28":""}  p-2 ${display}`}>
+        <div ref={reactionRef} className={`bg-white absolute z-40 rounded-3xl shadow-2xl -top-5 ${send?"right-10 lg:right-28":""}  p-2 ${display}`}>
           { reactions.map((r)=>{
              return <span className=" cursor-pointer text-3xl " key={r} onClick={handleReactionClick}>{r}</span>
           })

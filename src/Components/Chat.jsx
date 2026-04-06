@@ -1,18 +1,15 @@
 import { useContext } from "react";
 import SideBar from "./SideBar";
 import Users from "./Users";
-
-
 import { Suspense,lazy } from "react";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
-  const Chatting = lazy(()=>import('./Chatting'));
-
+const Chatting = lazy(()=>import('./Chatting'));
 export default function Chat() {
 
   const context = useContext(ChatNovaContext);
-  const { activeChat } = context;
+  const { activeChat,conversationId } = context;
   const authcontext = useContext(AuthContext);
   const { isServer } = authcontext;
   if(isServer ===500) return (<NoServer></NoServer>)
@@ -33,7 +30,7 @@ export default function Chat() {
         className={` ${activeChat ? "block" : "hidden"} order-2 lg:block lg:flex-1`}
       >
         <Suspense fallback={null}>
-        <Chatting></Chatting></Suspense>
+        <Chatting key={conversationId}></Chatting></Suspense>
       </div>
     </div>
   );

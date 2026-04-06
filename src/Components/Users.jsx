@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import ChatNovaContext from "../Context/ChatNovaContext";
 const Profile = lazy(()=>import('./Profile'))
@@ -14,11 +14,12 @@ import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem"
 import { Virtuoso } from "react-virtuoso";
+import useDebounce from "./Hooks/Debouncer";
 
 export default function Users() {
   const context = useContext(ChatNovaContext);
   const {
-    serchUser,
+    searchUser,
     isSearchLoading,
   
     dataBaseUsers,
@@ -44,7 +45,7 @@ export default function Users() {
   const { activePage,Me } = authContext;
   const socketcontext = useContext(SocketContext);
   const {  socket } = socketcontext;
-  
+ 
   const [searchValue,setSearchValue]=useState("")
 
  
@@ -63,16 +64,18 @@ setSearchValue(value)
     
     }
   };
+ const debounceSearch = useDebounce(searchValue,400)
+const lastValue = useRef("");
 
 useEffect(() => {
-  const delay = setTimeout(() => {
-    if (searchValue.trim().length > 2) {
-      serchUser(searchValue);
-    }
-  }, 400); 
-
-  return () => clearTimeout(delay); 
-}, [searchValue]);
+  if (
+    debounceSearch.trim().length > 2 &&
+    debounceSearch !== lastValue.current
+  ) {
+    lastValue.current = debounceSearch;
+    searchUser(debounceSearch);
+  }
+}, [debounceSearch, searchUser]);
   const handleUserClick =useCallback(async(element) => {
   
    if (!socket) return;
@@ -101,7 +104,7 @@ setActiveChat(true);
   conversationId,Me?._id
   ]) 
   const handleDatabaseUserClick =useCallback(async(element) => {
-     if (!socket) return;
+  
 
     setActiveGroupChat(false);
   
@@ -109,10 +112,14 @@ setActiveChat(true);
     setSearchClick(true);
     setActiveChat(true);
 
-    await getConversationId(element._id)
+try {
+  await getConversationId(element._id)
+} catch (err) {
+  console.error(err)
+}
 
-  },[socket,
-  getConversationId,
+  },[
+  getConversationId
   ]
 ) 
 
@@ -146,6 +153,7 @@ setActiveChat(true);
 
   const NormalizedChattedUsers=useMemo(()=>chattedUsersList?.map((element)=>
     normalizeItem(element,"chat")
+
   ),[chattedUsersList,normalizeItem])
   const NormalizedDatabaseUsers=useMemo(()=>dataBaseUsers?.map((element)=>
     normalizeItem(element,"search")
@@ -190,7 +198,7 @@ setActiveChat(true);
   </>
 )}   
            
-            {console.log(chattedUsersList)}
+         
             {!isUsersListLoading && searchClick ?
             <div className="h-full">
             <Virtuoso

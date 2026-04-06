@@ -25,7 +25,7 @@ import ChatNovaContext from "../Context/ChatNovaContext";
 export default function CreateGroup() {
   const [editMenu,setEditMenu]=useState(false)
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,setCurrentGroup,dataBaseUsers,createGroup,conversationId,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,searchUser,setCurrentGroup,dataBaseUsers,createGroup,conversationId,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
   const { user, isServer,showAlert,setActivePage } = authContext;
   const [groupImage, setGroupImage] = useState(null);
@@ -60,7 +60,7 @@ export default function CreateGroup() {
     } else {
       setAddUser(true);
       setSearchingAddUser(true)
-      serchUser(value);
+      searchUser(value);
     }
   };
 

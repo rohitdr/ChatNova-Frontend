@@ -8,7 +8,7 @@ export default function SocketState(props) {
   const context = useContext(AuthContext);
   const {  Me } = context;
 useEffect(() => {
-  if (!Me) return
+  if (!Me?._id) return
 
   const newSocket = io(import.meta.env.VITE_SOCKET, {
     transports: ["websocket"],
@@ -21,6 +21,9 @@ useEffect(() => {
   newSocket.on("getOnlineUsers", (users) => {
     setOnlineUser(users)
   })
+  newSocket.on("connect_error", (err) => {
+  console.log("Connect error:", err.message);
+});
 
   setSocket(newSocket)
 
@@ -28,7 +31,7 @@ useEffect(() => {
     newSocket.off("getOnlineUsers")   
     newSocket.disconnect()            
   }
-}, [Me])
+}, [Me?._id])
   return (
     <SocketContext.Provider value={{ onlineUsers, socket }}>
       {props.children}

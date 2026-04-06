@@ -20,9 +20,9 @@ import ChatNovaContext from "../Context/ChatNovaContext";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function GroupInfo() {
-  const [editMenu,setEditMenu]=useState(false)
+
   const context = useContext(ChatNovaContext)
-  const{currentGroup,serchUser,addMember,isAdmin,isGroup,deleteGroup,LeaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,searchUser,addMember,isAdmin,isGroup,deleteGroup,LeaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
   const { updatePassword, isServer,showAlert ,updateUser,Me} = authContext;
   const [groupSettingsImage, setGroupSettingsImage] = useState(null);
@@ -55,7 +55,7 @@ const queryclient = useQueryClient();
     } else {
       setAddUser(true);
       setSearchingAddUser(true)
-      serchUser(value);
+      searchUser(value);
     }
   };
 
