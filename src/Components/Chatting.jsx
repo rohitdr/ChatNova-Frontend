@@ -577,7 +577,7 @@ queryclient.setQueryData(["messages",conversationId],(oldData)=>{
     <>  
       {currentChatUserId || activeGroupChat ? (
         <div className={`h-[100svh] md:h-screen bg-white`}>
-          <div className="flex h-full flex-col justify-between">
+          <div className="flex h-full flex-col ">
             {!selectedUserLoading  || messages.length!==0 ? (
               <div
                 className="shrink-0 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 
@@ -652,7 +652,7 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               <ChatHeaderSkeleton></ChatHeaderSkeleton>
             )}
             <div
-              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0  ${isLoading && " overflow-y-auto "} `}
+              className={` px-3 sm:px-6  scrollbar-hide flex-1 min-h-0  overflow-hidden`}
             >  
               { !isLoading || messages.length!==0 ? (
                 <Virtuoso
@@ -702,38 +702,40 @@ bg-white/80 backdrop-blur-md border-b shadow-sm"
               )}
             </div>
 
-            <div className="shrink-0 flex flex-col xs:p-2 md:p-4 sticky   bg-white border">
+            <div className="shrink-0 flex flex-col xs:p-2 md:p-4    bg-white border">
            
              <div className="bottom-0 flex justify-between shrink-0">
-              <div className="w-full relative">
-               {replyMessage !== null && (
-  <div  className={`w-full  shadow-md pl-3 pr-2 py-1 text-md  bg-[#f1f3f7] rounded-sm border-l-4  flex justify-between items-center `} >
-    
-    <div className="truncate text-gray-600">
-      {replyMessage.text} 
-    </div>
+          <div className="w-full relative flex flex-col justify-center">
 
-    <XMarkIcon
-      onClick={() => setReplyMessage(null)}
-      className="w-4 h-4 cursor-pointer text-gray-400 hover:text-black"
-    />
-    
-  </div>
-)}
-                <input
-                  type="text"
-                  onChange={(e) => {
-                    handleTyping();
-                    handleStopTyping();
-                    setSendingMessage(e.target.value);
-                  }}
-                  className={`bg-[#E6EBF5] rounded-lg shadow-sm outline-none ${replyMessage===null?"h-full":"h-8 md:h-12"} w-full pl-2 `}
-                  placeholder={` Enter Message here ...`}
-                  value={sendingMessage}
-                  name="sendmessageinput"
-                  id="sendmessageinput"
-                />
-              </div>
+  {/* Reply Preview (FLOATING — no layout shift) */}
+  {replyMessage && (
+    <div className="absolute bottom-full left-0 w-full mb-1 bg-[#f1f3f7] border-l-4 shadow-md flex justify-between items-center px-2 py-1 rounded-sm">
+      
+      <div className="truncate text-gray-600 text-sm">
+        {replyMessage.text}
+      </div>
+
+      <XMarkIcon
+        onClick={() => setReplyMessage(null)}
+        className="w-4 h-4 cursor-pointer text-gray-400 hover:text-black"
+      />
+    </div>
+  )}
+
+  {/* Input */}
+  <input
+    type="text"
+    onChange={(e) => {
+      handleTyping();
+      handleStopTyping();
+      setSendingMessage(e.target.value);
+    }}
+    className="h-10 md:h-12 w-full bg-[#E6EBF5] rounded-lg shadow-sm outline-none px-3"
+    placeholder="Enter message here..."
+    value={sendingMessage || ""}
+  />
+
+</div>
               <div className=" flex justify-between items-center">
                 <div
                   className="p-2.5 px-1 sm:px-2.5  "
