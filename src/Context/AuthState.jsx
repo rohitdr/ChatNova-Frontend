@@ -13,7 +13,7 @@ export default function AuthState(props) {
   const Navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(0);
-  const refress_token = localStorage.getItem("refress_token");
+  const refreshToken = localStorage.getItem("refreshToken");
   const [activePage, setActivePage] = useState(0);
   const [alert, setAlert] = useState(null);
   const [loadingUser,setLoadingUser]=useState(false)
@@ -28,7 +28,7 @@ export default function AuthState(props) {
   };
   useEffect(()=>{
 const init=async()=>{
-const token = localStorage.getItem('access_token')
+const token = localStorage.getItem('accessToken')
 if(!token){
   setAuthReady(true)
   return
@@ -57,8 +57,8 @@ try{
         username: username,
       });
     
-        localStorage.setItem("access_token",response.data.access_token)
-      localStorage.setItem("refress_token", response.data.refress_token);
+        localStorage.setItem("accessToken",response.data.accessToken)
+      localStorage.setItem("refreshToken", response.data.refreshToken);
 
       showAlert("Success", "You have been logged in successfully !");
      
@@ -157,12 +157,12 @@ try{
           {},
           {
             headers: {
-              Authorization: `Bearer ${refress_token}`,
+              Authorization: `Bearer ${refreshToken}`,
             },
           },
         );
     
-        localStorage.setItem("access_token",refressRes.data.access_token)
+        localStorage.setItem("accessToken",refressRes.data.accessToken)
     
     } catch (error) {
      const status = error.response?.status;
@@ -186,8 +186,8 @@ try{
       setProgress(50);
 
     
-        localStorage.setItem("access_token",response.data.access_token)
-      localStorage.setItem("refress_token", response.data.refress_token);
+        localStorage.setItem("accessToken",response.data.accessToken)
+      localStorage.setItem("refreshToken", response.data.refreshToken);
     
       queryClient.invalidateQueries(["Me"])
       Navigate("/");
@@ -297,8 +297,8 @@ try{
      
       if (response.status === 200) {
           queryClient.clear()
-        localStorage.removeItem("refress_token");
-        localStorage.removeItem("access_token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
  
       
         showAlert("Success", "You have been logged out successfully !");
@@ -352,7 +352,7 @@ try{
   };
 
   useEffect(() => {
-    if (!refress_token) {
+    if (!refreshToken) {
       Navigate("/login");
     } else {
       Notification.requestPermission().then(async (permission) => {
@@ -365,7 +365,7 @@ try{
         }
       });
     }
-  }, [refress_token]);
+  }, [refreshToken]);
   return (
     <AuthContext.Provider
       value={{
@@ -387,7 +387,7 @@ try{
         progress,
         setProgress,
         login,
-        refress_token,
+        refreshToken,
         loadingUser,
         setLoadingUser,
         setLoadingMessages,
