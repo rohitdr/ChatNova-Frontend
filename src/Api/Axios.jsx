@@ -34,8 +34,12 @@ api.interceptors.response.use(
           },
         );
      
-          localStorage.setItem("accessToken",refressRes.data.accessToken)
-        return api(originalRequest);
+         localStorage.setItem("accessToken", refressRes.data.accessToken);
+
+originalRequest.headers.Authorization = `Bearer ${refressRes.data.accessToken}`;
+
+return api(originalRequest);
+      
       } catch(error) {
         console.log(error)
         localStorage.clear()

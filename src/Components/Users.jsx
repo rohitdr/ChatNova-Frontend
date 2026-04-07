@@ -9,8 +9,6 @@ const Group = lazy(()=>import('./Group'))
 import AuthContext from "../Context/AuthContext";
 import SocketContext from "../Context/SocketContext";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
-
-
 import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem"
 import { Virtuoso } from "react-virtuoso";
@@ -85,9 +83,6 @@ useEffect(() => {
     }
      socket.emit("join_group",element.ConversationId)
      socket.emit("mark_seen",{conversationId:element.ConversationId,userId:Me._id})
-
-
-
 
 setActiveGroupChat(false);
 setCurrentChatUserId(element.user._id);

@@ -13,7 +13,7 @@ export default function AuthState(props) {
   const Navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(0);
-  const refreshToken = localStorage.getItem("refreshToken");
+
   const [activePage, setActivePage] = useState(0);
   const [alert, setAlert] = useState(null);
   const [loadingUser,setLoadingUser]=useState(false)
@@ -28,17 +28,17 @@ export default function AuthState(props) {
   };
   useEffect(()=>{
 const init=async()=>{
-const token = localStorage.getItem('accessToken')
+const token = localStorage.getItem('refreshToken')
 if(!token){
   setAuthReady(true)
   return
 }
 try{
-
  await refreshSession()
 }catch(error)
 {
   console.log("Refress Failed")
+  localStorage.clear()
 }finally{
   setAuthReady(true)
 }
@@ -157,7 +157,7 @@ try{
           {},
           {
             headers: {
-              Authorization: `Bearer ${refreshToken}`,
+              Authorization: `Bearer ${localStorage.getItem("refreshToken")}`,
             },
           },
         );
@@ -165,12 +165,8 @@ try{
         localStorage.setItem("accessToken",refressRes.data.accessToken)
     
     } catch (error) {
-     const status = error.response?.status;
-    if(status ===500){
-    
-   setIsServer(500)
-
-    }
+   
+    localStorage.clear();
     
       
    
@@ -352,6 +348,7 @@ try{
   };
 
   useEffect(() => {
+    const refreshToken=localStorage.getItem("refreshToken");
     if (!refreshToken) {
       Navigate("/login");
     } else {
@@ -365,7 +362,7 @@ try{
         }
       });
     }
-  }, [refreshToken]);
+  }, []);
   return (
     <AuthContext.Provider
       value={{
@@ -387,7 +384,7 @@ try{
         progress,
         setProgress,
         login,
-        refreshToken,
+        
         loadingUser,
         setLoadingUser,
         setLoadingMessages,

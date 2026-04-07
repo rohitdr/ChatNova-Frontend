@@ -62,7 +62,7 @@ setIsSearchLoading(false)
   firstItemIndexRef.current = 10000000
 
 }, [Me?.id])
- let Navigate = useNavigate()
+
 
   const queryClient = useQueryClient()
 
