@@ -1,43 +1,64 @@
 import {
   EnvelopeIcon,
   LockClosedIcon,
-  ExclamationCircleIcon,
+
 } from "@heroicons/react/24/outline";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
 
 export default function Login() {
-  const context = useContext(AuthContext);
-
-  const { login, isServer ,showAlert} = context;
-  const [Emailerror, setEmailerror] = useState(false);
-  const [passworderror, setPasswordError] = useState(false);
-  const [data, setData] = useState({ loginEmail: "", loginPassword: "" });
- const onChangeHandler = (e) => {
-  const { name, value } = e.target;
-
-  const updatedData = { ...data, [name]: value };
-  setData(updatedData);
 
 
-  setEmailerror(updatedData.loginEmail.length < 5);
-  setPasswordError(updatedData.loginPassword.length < 7);
+  const { login, isServerDown ,showAlert,Me} =  useContext(AuthContext);
+ useEffect(()=>{
+ if (Me) {
+    navigate("/", { replace: true });
+  }
+ },[Me])
+  const [formData, setFormData] = useState({ email: "", password: "" });
+ const onChangeHandler = ({target:{name,value}}) => {
+
+
+  setFormData(prev=>({...prev,[name]:value}));
+
 };
-  const submitHandler =  (e) => {
+  const emailRegex = /^\S+@\S+\.\S+$/;
+ const validate = () => {
+  if(!formData.email.trim()){
+  return "Email cannot be empty";
+}
+
+  if (!emailRegex.test(formData.email.trim())) {
+    return "Invalid email format";
+  }
+  if (!formData.password) {
+  return "Password cannot be empty";
+}
+  if (formData.password.length < 8) {
+    return "Password must be at least 8 characters";
+  }
+ 
+  return null;
+};
+const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.length>=8 
+
+  const handleSubmit =  (e) => {
     e.preventDefault();
-    if (!Emailerror && !passworderror) {
+   const error = validate()
+   if(error){
+    showAlert("Warning",error)
+    return
+   }
   
-      login(data.loginEmail, data.loginPassword);
+      login(formData.email.trim(), formData.password);
   
-    }
-    else{
-      showAlert("Error","Enter the full Deatils and then submit")
-    }
+    
+   
   };
-return isServer === 500 ? (
+return isServerDown  ? (
   <NoServer />
 ) : (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4">
@@ -52,11 +73,11 @@ return isServer === 500 ? (
         Welcome back 👋
       </p>
 
-      <form onSubmit={submitHandler} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
 
         {/* Email */}
         <div>
-          <label className="text-sm text-gray-600">Email</label>
+          <label className="text-sm text-gray-600" htmlFor="login-email">Email</label>
           <div className={`flex items-center mt-1 rounded-lg border 
           border-gray-300
             focus-within:ring-2 focus-within:ring-indigo-400`}>
@@ -65,22 +86,24 @@ return isServer === 500 ? (
 
             <input
               type="email"
-              name="loginEmail"
+              id="login-email"
+              required
+              name="email"
+              aria-label="email"
               placeholder="Enter your email"
               onChange={onChangeHandler}
+              value={formData.email}
               className="w-full h-11 outline-none bg-transparent"
             />
 
-            {Emailerror && (
-              <ExclamationCircleIcon className="w-5 h-5 mr-3 text-red-500" />
-            )}
+           
           </div>
         </div>
 
         {/* Password */}
         <div>
           <div className="flex justify-between">
-            <label className="text-sm text-gray-600">Password</label>
+            <label className="text-sm text-gray-600" htmlFor="login-password">Password</label>
             <Link to="/forgetpassword" className="text-sm text-indigo-500 hover:underline">
               Forgot?
             </Link>
@@ -94,24 +117,27 @@ return isServer === 500 ? (
 
             <input
               type="password"
-              name="loginPassword"
+              name="password"
+              required
+              id="login-password"
+              aria-label="password"
+              value={formData.password}
               placeholder="Enter your password"
               onChange={onChangeHandler}
               className="w-full h-11 outline-none bg-transparent"
             />
 
-            {passworderror && (
-              <ExclamationCircleIcon className="w-5 h-5 mr-3 text-red-500" />
-            )}
+           
           </div>
         </div>
 
         {/* Button */}
         <button
+        disabled={!isFormValid}
           type="submit"
-          className={`w-full h-11 rounded-lg font-medium transition-all duration-200 
+          className="w-full h-11 rounded-lg font-medium transition-all duration-200 
          
-            bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]`}
+            bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 disabled:active:scale-100"
         >
           Sign in
         </button>

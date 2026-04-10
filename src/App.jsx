@@ -1,10 +1,10 @@
-import { useContext, useState,useEffect } from "react";
+import { useContext} from "react";
 
 import "./App.css";
 import "./index.css";
 import SignUp from "./Components/SignUp";
 import Login from "./Components/Login";
-import Chat from "./Components/Chat";
+import ChatPage from "./Components/ChatPage";
 import { Routes, Route } from "react-router-dom";
 import LoadingBar from "react-top-loading-bar";
 
@@ -13,9 +13,10 @@ import AuthContext from "./Context/AuthContext";
 
 import { Suspense,lazy } from "react";
 import AppLoader from "./Components/AppLoader";
-import { divide } from "firebase/firestore/pipelines";
+import ProtectedRoute from "./Components/ProtectedRoute";
+
   const ForgetPassword = lazy(()=>import("./Components/ForgetPassword"))
-  const AdditonalDeatils=lazy(()=> import("./Components/AdditonalDeatils"))
+  const AdditionalDetails=lazy(()=> import("./Components/AdditionalDetails"))
 
 function App() {
 
@@ -35,10 +36,10 @@ function App() {
 
       <Routes>
         <Route exact path="/login" element={<Login></Login>}></Route>
-        <Route exact path="/" element={<Chat></Chat>}></Route>
+        <Route exact path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}></Route>
         <Route exact path="/additionaldetails"  element={
       <Suspense fallback={<AppLoader />}>
-        <AdditonalDeatils />
+        <AdditionalDetails />
       </Suspense>
     }></Route>
         <Route exact path="/forgetpassword" element={

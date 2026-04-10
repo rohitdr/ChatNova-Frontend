@@ -1,43 +1,71 @@
 import { ArrowUpCircleIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 
 
 import { useNavigate } from "react-router-dom";
 
-export default function AdditonalDeatils() {
-  let Navigate = useNavigate();
-
-  const authContext = useContext(AuthContext);
-  const { updateUserImage, showAlert, updateUser } = authContext;
-  const [settingsImage, setSettingsImage] = useState(null);
-  const [data, setData] = useState({ signUpPhoneNumber: "", signUpName: "" });
-
-  const settingImagehandler = (e) => {
-    setSettingsImage(e.target.files[0]);
-  };
-  const onChangeHandler = (e) => {
-    setData({ ...data, [e.target.name]: e.target.value });
-  };
-  const handleUpdate = (e) => {
-    e.preventDefault();
-
-    if (data.signUpName.length < 3 || data.signUpName.length > 20) {
-      showAlert("Warning", "Name should be between length 3 to 20");
-    } else if (String(data.signUpPhoneNumber).trim().length !== 10) {
-      showAlert("Warning", "Phone number should be of length 10");
-    } else if (Object.keys(data).length === 0) {
-      showAlert("Warning", "Please Update anything to change the data");
-    } else {
-      updateUser({
-        name: data.signUpName,
-        phone_number: data.signUpPhoneNumber,
-      });
-
-      Navigate("/");
+export default function AdditionalDetails() {
+  const [previewUrl,setPreviewUrl]=useState(null)
+  useEffect(()=>{
+    if(!image) return 
+    const url = URL.createObjectURL(image)
+    setPreviewUrl(url)
+    return ()=>{
+      URL.revokeObjectURL(url)
     }
+  },[image])
+  const navigate = useNavigate();
+const InputRef = useRef(null)
+  const { updateUserImage, showAlert, updateUser } =  useContext(AuthContext);
+  const [image, setImage] = useState(null);
+  const [formData, setFormData] = useState({ phone_number: "", name: "" });
+
+
+  const handleImageChange = (e) => {
+   const file = e.target.files?.[0]
+   if(file) setImage(file)
+  };
+  const handleChange = ({target:{name,value}}) => {
+    setFormData(prev=>({ ...prev, [name]:value }));
   };
 
+const validateForm = () => {
+    const name = formData.name.trim();
+    const phone = formData.phone_number.trim();
+
+    if (name.length < 3 || name.length > 20) {
+     return "Name must be 3–20 characters"
+    
+    }
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      return "Enter a valid 10-digit phone number"
+   
+    }
+
+    return null;
+  };
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    const error = validateForm()
+    if(error){
+      showAlert("Warning",error)
+      return
+    }
+  
+      await updateUser({
+        name: formData.name.trim(),
+        phone_number: formData.phone_number.trim(),
+      })
+ if(image){
+ await  updateUserImage(image);
+ }
+      navigate("/");
+    }
+  
+const handleSkip=()=>{
+                          navigate("/");     
+}
   return (
     <div>
       <div className="fixed inset-0 bg-black/20 flex items-center justify-center ">
@@ -54,36 +82,31 @@ export default function AdditonalDeatils() {
             <div className="my-2 py-2 relative">
               <input
                 type="file"
+                  ref={InputRef}
                 id="settingsImage"
                 accept="image/*"
                 className="hidden"
-                onChange={settingImagehandler}
+                onChange={handleImageChange}
               />
-              {settingsImage ? (
+              {image ? (
                 <ArrowUpCircleIcon
                   className="w-7 h-7 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute "
-                  onClick={() => {
-                    updateUserImage(settingsImage);
-                    setSettingsImage(null);
+                  onClick={()=>{setImage(null);
+                    setPreviewUrl(null)
                   }}
                 ></ArrowUpCircleIcon>
               ) : (
                 <PencilIcon
+              
                   className="w-7 h-7 right-2 bg-white border border-black  p-1.5 text-blue-900  cursor-pointer rounded-full bottom-3 absolute "
-                  onClick={() => {
-                    document.getElementById("settingsImage").click();
-                  }}
+                  onClick={()=>InputRef.current.click()}
                 ></PencilIcon>
               )}
               <img
                 loading="lazy"
                 className="w-28  shadow h-28 rounded-full   border-2"
-                src={
-                  settingsImage
-                    ? URL.createObjectURL(settingsImage)
-                    : "https://res.cloudinary.com/do2twyxai/image/upload/v1773586565/oje7kknlxwfgylu9wwxh.jpg"
-                }
-                alt=""
+                src={previewUrl ||  "https://via.placeholder.com/150"}
+                alt="Profile"
               />
             </div>
           </div>
@@ -94,34 +117,36 @@ export default function AdditonalDeatils() {
 
             <>
               {" "}
-              <form onSubmit={handleUpdate}>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col mx-0.5  py-3 bg-[#FFFFFF]">
                   <div className="flex flex-col py-2 px-6">
                     {" "}
-                    <div className=" text-[#7A7F9A] ">Name</div>{" "}
+                    <label className=" text-[#7A7F9A] " htmlFor="additional-name">Name</label>{" "}
                     <div className="text-sm py-1 font-medium">
                       <input
                         className="outline-none bg-[#F9FAFA] h-8 p-1 w-full"
                         type="text"
-                        name="signUpName"
-                        value={data.signUpName}
-                        id="signUpName"
-                        onChange={onChangeHandler}
+                        id="additional-name"
+                        name="name"
+                        value={formData.name}
+                      
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col py-2 px-6">
                     {" "}
-                    <div className=" text-[#7A7F9A]">Phone Number</div>{" "}
+                    <label className=" text-[#7A7F9A]" htmlFor="additional-number">Phone Number</label>{" "}
                     <div className="text-sm py-1 font-medium">
                       <input
                         className="outline-none bg-[#F9FAFA] h-8 p-1 w-full"
                         type="tel"
-                        name="signUpPhoneNumber"
-                        value={data.signUpPhoneNumber}
-                        id="signUpPhoneNumber"
-                        onChange={onChangeHandler}
+                        name="phone_number"
+                        id="additional-number"
+                        value={formData.phone_number}
+                   
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -132,9 +157,7 @@ export default function AdditonalDeatils() {
                       <button
                         type="button"
                         className="shadow rounded p-2 w-16 text-white bg-yellow-500"
-                        onClick={() => {
-                          Navigate("/");
-                        }}
+                        onClick={handleSkip}
                       >
                         Skip
                       </button>

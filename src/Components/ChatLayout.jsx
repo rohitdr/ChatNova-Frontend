@@ -25,7 +25,7 @@ import MessageSkeleton from "./MessageSkeleton";
 import ChatHeaderSkeleton from "./ChatHeaderSkeleton";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function Chatting() {
+export default function ChatLayout() {
   const [sendingMessage, setSendingMessage] = useState(null);
 
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -33,7 +33,7 @@ export default function Chatting() {
   const [uploadFile, setUplaodFile] = useState(null);
   const Context = useContext(ChatNovaContext);
   const authContext = useContext(AuthContext);
-  const { user, isServer, activePage, showAlert, setActivePage,Me } =
+  const { user, activePage, showAlert, setActivePage,Me } =
     authContext;
   const [fileType, setFileType] = useState(null);
 
@@ -368,6 +368,7 @@ if (newMessage.conversationToSend?.type !== "group") return;
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
+      console.log(newMessage)
       if (
         (newMessage.conversationId === conversationId) 
       ) {

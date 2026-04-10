@@ -9,7 +9,7 @@ import { Socket } from "socket.io-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function AuthState(props) {
-  const [isServer, setIsServer] = useState(0);
+  const [isServerDown, setIsServerDown] = useState(false);
   const Navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(0);
@@ -67,7 +67,7 @@ try{
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
-         setIsServer(500)
+         setIsServerDown(true)
           setProgress(100);
        
       }
@@ -101,7 +101,7 @@ try{
         } catch (error) {
           const status = error.response?.status;
       if (status === 500) {
-         setIsServer(500)
+            setIsServerDown(true)
       
      
       }
@@ -130,7 +130,7 @@ try{
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
-         setIsServer(500)
+         setIsServerDown(true)
       
    
       }
@@ -186,13 +186,13 @@ try{
       localStorage.setItem("refreshToken", response.data.refreshToken);
     
       queryClient.invalidateQueries(["Me"])
-      Navigate("/");
+      Navigate("/",{replace:true});
       showAlert("Success", "You have been logged in successfully !");
       setProgress(100);
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
-          setIsServer(500)
+             setIsServerDown(true)
         setProgress(100);
       
       }
@@ -219,7 +219,7 @@ try{
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
-           setIsServer(500)
+              setIsServerDown(true)
         setProgress(100);
       }
      
@@ -247,7 +247,7 @@ try{
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
-          setIsServer(500)
+             setIsServerDown(true)
           setProgress(100);
       
       }
@@ -275,7 +275,7 @@ try{
       const status = error.response?.status;
       if (status === 500) {
         setProgress(100);
-        setIsServer(500)
+         setIsServerDown(true)
       }
      
       else{
@@ -305,7 +305,7 @@ try{
     } catch (error) {
       const status = error.response?.status;
       if (status === 500) {
-          setIsServer(500)
+           setIsServerDown(true)
           setProgress(100);
       
       }
@@ -340,7 +340,7 @@ try{
      
       else{
       
-        setIsServer(500)
+          setIsServerDown(true)
           setProgress(100);
       
       }
@@ -370,8 +370,8 @@ try{
         user,
         updatePassword,
         updateUser,
-        isServer,
-        setIsServer,
+        isServerDown,
+        setIsServerDown,
         alert,
         showAlert,
         signUp,

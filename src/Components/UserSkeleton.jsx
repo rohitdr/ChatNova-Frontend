@@ -1,10 +1,4 @@
-/**
- * The UserSkeleton function returns a skeleton UI component for a user profile with placeholder
- * content.
- * @returns A React functional component named UserSkeleton is being returned. It renders a skeleton UI
- * for a user profile with placeholder elements for the user's avatar, name, and additional
- * information.
- */
+
 import React from "react";
 function UserSkeleton() {
   return (

@@ -16,7 +16,7 @@ export default function ForgetPassword() {
   });
 
   const authcontext = useContext(AuthContext);
-  const { forgetPassword, isServer,showAlert } = authcontext;
+  const { forgetPassword, isServerDown,showAlert } = authcontext;
   const onChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   
@@ -42,7 +42,7 @@ export default function ForgetPassword() {
   });
     }
   };
- return isServer === 500 ? (
+ return isServerDown? (
   <NoServer />
 ) : (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100  px-4">

@@ -27,7 +27,7 @@ export default function CreateGroup() {
   const context = useContext(ChatNovaContext)
   const{currentGroup,searchUser,setCurrentGroup,dataBaseUsers,createGroup,conversationId,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
-  const { user, isServer,showAlert,setActivePage } = authContext;
+  const { user, isServerDown,showAlert,setActivePage } = authContext;
   const [groupImage, setGroupImage] = useState(null);
   
  const socketcontext = useContext(SocketContext)
@@ -97,7 +97,7 @@ showAlert("Error","Group code should be more than 5 characters")
                 
 
   }
-  return isServer === 500 ? (
+  return isServerDown ? (
     <NoServer></NoServer>
   ) : (
     <div>

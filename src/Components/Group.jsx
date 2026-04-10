@@ -16,7 +16,7 @@ export default function Group() {
   const socketcontext=useContext(SocketContext)
   const {socket}=socketcontext
   const authcontext = useContext(AuthContext);
-  const { isServer,user,setActivePage,setLoadingMessages,Me } = authcontext;
+  const { isServerDown,user,setActivePage,setLoadingMessages,Me } = authcontext;
   const context = useContext(ChatNovaContext);
  
   const {
@@ -209,7 +209,7 @@ const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
   normalizeItem(element,"search")
 )
   
-  return isServer === 500 ? (
+  return isServerDown ? (
     <NoServer></NoServer>
   ) : (
     <>

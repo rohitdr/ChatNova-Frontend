@@ -15,7 +15,7 @@ const Message= React.memo((props) =>{
   const queryclient = useQueryClient();
   const { message, send } = props;
   const authContext = useContext(AuthContext);
-  const { user, isServer,Me } = authContext;
+  const { Me } = authContext;
   const context = useContext(ChatNovaContext);
   const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} = context;
   const [mediaView,setMediaView]=useState(false)

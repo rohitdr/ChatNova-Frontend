@@ -1,18 +1,21 @@
-import React, { useContext } from "react"
+import React, { useContext, useMemo } from "react"
 
 import AuthContext from "../Context/AuthContext"
 
 
-function TypingIndicator({typingUser}) {
-    const authcontext = useContext(AuthContext)
-    const {Me} = authcontext
-    const filterusers = typingUser.filter(t=>t.user!==Me._id)
-    if(filterusers.length===0) return null
-    const names = filterusers.map(t=>t.name).join(' , ')
+function TypingIndicator({typingUsers=[]}) {
+    const {Me} = useContext(AuthContext)
+  
+  const activeTypers = useMemo(() => {
+    if (!Me?._id) return [];
+    return typingUsers.filter(user => user.user !== Me._id);
+  }, [typingUsers, Me?._id]);
+    if(activeTypers.length===0) return null
+    const names = activeTypers.map(user=>user.name).join(' , ')
 
   return  (
    <div
-      className={` w-full flex   relative ml-2 `}
+      className=" w-full flex   relative ml-2"
     >
       <div className=" flex flex-col justify-end  max-w-[15%] ">
        
@@ -25,7 +28,7 @@ function TypingIndicator({typingUser}) {
         
          <div
           className={`flex text-xs pt-0.5 justify-start my-2`}
-        > {names}
+        > <span>{names} is typing</span>
                  <span className='dot rounded-full bg-[#9ca3af] h-2 w-2 my-1  mx-1'></span>
             <span className='dot  rounded-full bg-[#9ca3af] h-2 w-2 my-1 mx-1' ></span>
             <span className='dot  rounded-full bg-[#9ca3af] h-2 w-2 my-1 mx-1'></span>

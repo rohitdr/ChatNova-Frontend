@@ -11,10 +11,10 @@ import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 export default function Profile() {
   const authContext = useContext(AuthContext);
-  const { Me, isServer } = authContext;
+  const { Me, isServerDown } = authContext;
   const { capitalizeFirstLetter } = useContext(ChatNovaContext);
 
-  return isServer === 500 ? (
+  return isServerDown ? (
     <NoServer />
   ) : (
     <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide">

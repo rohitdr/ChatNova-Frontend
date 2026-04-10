@@ -24,7 +24,7 @@ export default function GroupInfo() {
   const context = useContext(ChatNovaContext)
   const{currentGroup,searchUser,addMember,isAdmin,isGroup,deleteGroup,LeaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
   const authContext = useContext(AuthContext);
-  const { updatePassword, isServer,showAlert ,updateUser,Me} = authContext;
+  const { updatePassword, isServerDown,showAlert ,updateUser,Me} = authContext;
   const [groupSettingsImage, setGroupSettingsImage] = useState(null);
   const [data,setData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
   const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
@@ -159,7 +159,7 @@ sendMessageToQueryUser(tempmessage)
   setAddUser(false);
       setSearchingAddUser(false)
   }
-  return isServer === 500 ? (
+  return isServerDown  ? (
     <NoServer></NoServer>
   ) : (
     <div>

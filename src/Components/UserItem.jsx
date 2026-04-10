@@ -14,7 +14,7 @@ const UserItem = React.memo(
 
     const {image,lastMessage,name,element,unreadCount} =user
     const preload = useCallback(() => {
-      import("./Chatting");
+      import("./ChatLayout");
     },[]);
     const handleClick = ()=>{
  handleUserClick(element);

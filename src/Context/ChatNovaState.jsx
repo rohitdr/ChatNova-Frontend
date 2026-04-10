@@ -10,7 +10,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-quer
 
 export default function ChatNovaState(props) {
   const authContext = useContext(AuthContext);
-  const { setProgress,setIsServer,showAlert,setLoadingUser,Me,setActivePage } = authContext;
+  const { setProgress,setIsServerDown,showAlert,setLoadingUser,Me,setActivePage } = authContext;
 const {socket} =useContext(SocketContext) 
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
 
@@ -90,7 +90,8 @@ setIsSearchLoading(false)
       const status = error.response?.status;
     if(status ===500){
     
-      setIsServer(500)
+         setIsServerDown(true)
+
       }
     
     }
@@ -111,7 +112,7 @@ setIsSearchLoading(false)
      const status = error.response?.status;
 
       if (status === 500) {
-         setIsServer(500)
+          setIsServerDown(true)
       
    
       }
@@ -143,7 +144,7 @@ setIsSearchLoading(false)
      setLoadingUser(false)
       if(status ===500){
      
-        setIsServer(500)
+         setIsServerDown(true)
      
       }
       throw  error
@@ -170,7 +171,7 @@ setIsSearchLoading(false)
       }
       else{
    
-        setIsServer(500)
+          setIsServerDown(true)
      
       }
     }
@@ -197,7 +198,7 @@ setIsSearchLoading(false)
     } catch (error) {
       const status = error.response?.status;
     if(status ===500){
-      setIsServer(500)
+         setIsServerDown(true)
   
       }
      throw error; 
@@ -269,7 +270,7 @@ const useSelectedUser=(id)=>{
      const status = error.response?.status;
     if(status ===500){
     
-      setIsServer(500)
+        setIsServerDown(true)
       }
     }
   };
@@ -285,7 +286,7 @@ const useSelectedUser=(id)=>{
      const status = error.response?.status;
     if(status ===500){
    
-          setIsServer(500)
+        setIsServerDown(true)
       }
     }
   };
@@ -333,7 +334,7 @@ const useSelectedUser=(id)=>{
      const status = error.response?.status;
     if(status ===500){
        setLoadingGroups(false)
-          setIsServer(500)
+            setIsServerDown(true)
       }
       throw error
     }
@@ -357,7 +358,7 @@ return res.data.group
     } catch (error) {
      const status = error.response?.status;
    if (status === 500) {
-          setIsServer(500)
+           setIsServerDown(true)
    
       }
       throw error
@@ -417,7 +418,7 @@ const {data:allGroup,isLoading:isAllGroupLoading}=useGroups()
      
       else{
        console.log(error.message)
-        setIsServer(500)
+          setIsServerDown(true)
           setProgress(100);
       
       }
@@ -445,7 +446,7 @@ const addMember =async(userId)=>{
       }
       else{
        
-        setIsServer(500)
+     setIsServerDown(true)
      
       }
     
@@ -474,7 +475,7 @@ const removeMember =async(userId,tempId)=>{
       }
       else{
        
-        setIsServer(500)
+         setIsServerDown(true)
      
       }
     
@@ -498,7 +499,7 @@ const LeaveGroup =async()=>{
       }
       else{
        
-        setIsServer(500)
+          setIsServerDown(true)
      
       }
     
@@ -522,7 +523,7 @@ const deleteGroup =async()=>{
       }
       else{
        
-        setIsServer(500)
+         setIsServerDown(true)
      
       }
     
@@ -564,7 +565,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
       }
       else{
        
-        setIsServer(500)
+           setIsServerDown(true)
       setProgress(100);
       }
     

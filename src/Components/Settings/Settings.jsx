@@ -11,12 +11,13 @@ import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext"
 import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
+import ProfileCard from "./ProfileCard";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
   const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
   const authContext = useContext(AuthContext);
-  const { Me, updateUserImage,updatePassword, isServerDown,showAlert ,updateUser} = authContext;
+  const { Me, updateUserImage,updatePassword, isServer,showAlert ,updateUser} = authContext;
   const [settingsImage, setSettingsImage] = useState(null);
   const [formData,setFormData]=useState({phone_number:Me?.phone_number,email:Me?.email,name:Me?.name,username:Me?.username})
   const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
@@ -114,7 +115,7 @@ e.preventDefault()
    setPasswordData({oldPassword:"",newPassword:"",confirmPassword:""})
     }
   }
-  return isServerDown  ? (
+  return isServer === 500 ? (
     <NoServer></NoServer>
   ) : (
   <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide">
@@ -125,54 +126,16 @@ e.preventDefault()
   </div>
 
   {/* Profile Card */}
-  <div className="mx-4 bg-white rounded-2xl shadow-sm p-6 flex flex-col items-center">
-    
-    <div className="relative">
-      <input
-        type="file"
-        id="settingsImage"
-        accept="image/*"
-        className="hidden"
-        onChange={settingImagehandler}
-      />
-
-      {/* Avatar */}
-      <img
-        loading="lazy"
-        className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
-        src={
-          settingsImage
-            ? URL.createObjectURL(settingsImage)
-            : Me?.image?.url
-        }
-        alt=""
-      />
-
-
-      {settingsImage ? (
-        <ArrowUpIcon
-          className="w-8 h-8 p-1.5 bg-blue-600 text-white rounded-full shadow absolute bottom-1 right-1 cursor-pointer hover:bg-blue-700 transition"
-          onClick={() => {
-            updateUserImage(settingsImage);
-            setSettingsImage(null);
-          }}
-        />
-      ) : (
-        <PencilIcon
-          className="w-8 h-8 p-1.5 bg-white border shadow rounded-full absolute bottom-1 right-1 cursor-pointer hover:bg-gray-100 transition"
-          onClick={() => {
-            document.getElementById("settingsImage").click();
-          }}
-        />
-      )}
-    </div>
-
-    <p className="mt-4 text-lg font-semibold text-gray-800">
-      {capitalizeFirstLetter(Me?.name)}
-    </p>
-
-    <p className="text-sm text-gray-500">@{Me?.username}</p>
-  </div>
+<ProfileCard
+  user={Me}
+  image={settingsImage}
+  onImageChange={(file) => setSettingsImage(file)}
+  onUpload={() => {
+    updateUserImage(settingsImage);
+    setSettingsImage(null);
+  }}
+  formatName={capitalizeFirstLetter}
+/>
 
   {/* Bio */}
   <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-sm text-gray-600 leading-relaxed">

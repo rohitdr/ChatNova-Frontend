@@ -8,7 +8,6 @@ import {
 import AuthContext from "../Context/AuthContext";
 
 export default function Alert(props) {
-
   const type = props?.alert?.type;
   const message = props?.alert?.message;
 
@@ -21,12 +20,12 @@ export default function Alert(props) {
     const timer = setTimeout(() => {
       setLeaving(true);
     }, 3000);
-    const remvoe = setTimeout(() => {
+    const remove = setTimeout(() => {
       setAlert(null);
     }, 3500);
     return () => {
       clearTimeout(timer);
-      clearTimeout(remvoe);
+      clearTimeout(remove);
     };
   }, [alert]);
  if (!alert) return null;
