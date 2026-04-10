@@ -5,12 +5,12 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
 
 export default function Login() {
-
+const navigate = useNavigate()
 
   const { login, isServerDown ,showAlert,Me} =  useContext(AuthContext);
  useEffect(()=>{
