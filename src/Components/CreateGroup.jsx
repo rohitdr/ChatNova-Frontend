@@ -1,54 +1,59 @@
 import {
-  ArrowUpCircleIcon,
+
   CheckIcon,
-  EllipsisVerticalIcon,
-  LockClosedIcon,
+
   MagnifyingGlassIcon,
   MinusIcon,
   PencilIcon,
   PlusIcon,
-  TicketIcon,
-  TrashIcon,
-  UserCircleIcon,
+
   UserGroupIcon,
-  UserMinusIcon,
-  UserPlusIcon,
-  XMarkIcon,
+
 } from "@heroicons/react/24/solid";
-import SocketContext from '../Context/SocketContext'
-import { useContext, useEffect, useState } from "react";
+
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
+import UserItem from "./UserItem";
 
 export default function CreateGroup() {
-  const [editMenu,setEditMenu]=useState(false)
-  const context = useContext(ChatNovaContext)
-  const{currentGroup,searchUser,setCurrentGroup,dataBaseUsers,createGroup,conversationId,chattedUsersList,capitalizeFirstLetter}=context
-  const authContext = useContext(AuthContext);
-  const { user, isServerDown,showAlert,setActivePage } = authContext;
+
+ 
+  const{searchUser,dataBaseUsers,createGroup,chattedUsersList,capitalizeFirstLetter}= useContext(ChatNovaContext)
+
+  const {  isServerDown,showAlert,setActivePage } =  useContext(AuthContext);;
   const [groupImage, setGroupImage] = useState(null);
   
- const socketcontext = useContext(SocketContext)
+
  const [addUser,setAddUser] = useState(false)
  const [searchingAddUser,setSearchingAddUser]=useState(false)
 
  const [selectedUsers,setSelectedUsers]=useState([])
- const [groupData,setGroupData]=useState({groupName:"",groupCode:""})
+ const [formData,setFormData]=useState({name:"",code:""})
+const [preview , setPreview]=useState(null)
+let pencilIconRef = useRef(null)
+let imageRef =useRef(null)
+ useEffect(()=>{
+if(!groupImage) return
+const url = URL.createObjectURL(groupImage)
+setPreview(url)
+return ()=> URL.revokeObjectURL(url)
+ },[groupImage])
 
- 
 
- const {socket}=socketcontext
-  const groupImagehandler = (e) => {
-    if(e.target.files[0].size >10000000){
-      showAlert("Error","Image size should be less than 10mb")
-    }
-    else{
- setGroupImage(e.target.files[0]);
-    }
-   
-  };
+ const groupImagehandler = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (file.size > 10 * 1024 * 1024) {
+    showAlert("Error", "Image size should be less than 10mb");
+    return;
+  }
+
+  setGroupImage(file);
+};
 
   const onChangeSearchAddUser = (e) => {
     let value = e.target.value;
@@ -64,39 +69,95 @@ export default function CreateGroup() {
     }
   };
 
- const onInputChange=(e)=>{
- setGroupData({...groupData,[e.target.name]:e.target.value})
+ const handleChange=({target:{name,value}})=>{
+ setFormData((prev)=> ({...prev,[name]:value}))
  }
  
  
 
+const validate = () => {
+  if (!groupImage) return "Select a group image";
+  if (formData.name.trim().length < 5) return "Group name must be ≥ 5 chars";
+  if (formData.code.trim().length < 5) return "Invite code must be ≥ 5 chars";
+  if (!selectedUsers.length) return "Select at least 1 user";
+};
 
 
 
+  const handleCreateGroup=()=>{
 
-  const CreateGroupHandler=()=>{
-if(!groupImage){
-    showAlert("Error","Select a image for the group ")
-}
-   else if(groupData.groupName.length<5){
-    showAlert("Error","Group name should be more than 5 characters")
+ const error = validate();
+ if(error){
+  showAlert("Error",error)
+  return
+ } 
 
-   }
-   else if(groupData.groupCode.length<5){
-showAlert("Error","Group code should be more than 5 characters")
-   }
-   else if(selectedUsers.length===0){
-    showAlert("Error","Please select at least one user")
-   }
-   else{
-  
-    createGroup(selectedUsers,groupData.groupName,groupData.groupCode,groupImage)
-    setGroupImage(null);
-    setActivePage(2)
-   }
-                
+    createGroup(selectedUsers,formData.name,formData.code,groupImage)
+    setGroupImage(null)
+     setFormData({ name: "", code: "" });
+   setSelectedUsers([]);
+setPreview(null);
 
   }
+  const isSelected =(id)=>{
+  return selectedUsers.some(p=>
+                p.user ===id
+              )
+  }
+const handleAddMember = (id) => {
+
+
+
+  setSelectedUsers(prev => {
+    if (prev.some(p => p.user === id)) return prev;
+
+    return [...prev, { user: id, role: "member" }];
+  });
+};
+  const handleRemoveMember =(id)=>{
+    setSelectedUsers(prev=>
+                      {
+                        const filtered = prev.filter(p=>
+                            p.user !==id
+                        )
+                        return filtered
+                      }
+                       
+                      )
+  }
+    const normalizeItem = useCallback((element,type)=>{
+      if(type==="chat"){
+           return{
+            element,
+            name:element.user?.name,
+            image:element.user?.image?.url,
+            lastMessage:element.lastMessage,
+             _id:element.user._id,
+             unreadCount:element.unreadCount
+           }
+           
+          }
+          if(type==="search"){
+          return{
+             element,
+           name:element.name,
+           image:element.image?.url,
+           lastMessage:null,
+           _id:element._id,
+           unreadCount:element.unreadCount
+          }
+          }
+      
+      
+    },[])
+  
+    const NormalizedChattedUsers=useMemo(()=>chattedUsersList?.map((element)=>
+      normalizeItem(element,"chat")
+
+    ),[chattedUsersList,normalizeItem])
+      const NormalizedDatabaseUsers=useMemo(()=>dataBaseUsers?.map((element)=>
+    normalizeItem(element,"search")
+  ),[dataBaseUsers,normalizeItem])
   return isServerDown ? (
     <NoServer></NoServer>
   ) : (
@@ -104,14 +165,15 @@ showAlert("Error","Group code should be more than 5 characters")
     { <div className="flex h-screen flex-col bg-[#F5F7FB] overflow-y-auto scrollbar-hide">
       <div className="flex justify-between m-2 p-2 mt-0">
         <div>
-          {" "}
-          <h2 className="text-2xl pt-2 font-medium">Create Group</h2>{" "}
+      
+          <h2 className="text-2xl pt-2 font-medium">Create Group</h2>
         </div>
       </div>
       <div className="bg-white mx-3  rounded-2xl shadow">
       <div className="flex flex-col items-center justify-center my-2  ">
         <div className="my-2 py-2 relative">
           <input
+           ref={imageRef}
             type="file"
             id="GroupImage"
             accept="image/*"
@@ -120,39 +182,37 @@ showAlert("Error","Group code should be more than 5 characters")
           />
          
             <PencilIcon
+            
               className={`w-9 h-9 right-2 bg-white border border-black  p-1.5 text-blue-900  cursor-pointer rounded-full bottom-3 absolute `}
               onClick={() => {
-                document.getElementById("GroupImage").click();
+               imageRef.current.click()
               }}
             ></PencilIcon>
           
           <img
+         
           loading="lazy"
           onClick={() => {
-                document.getElementById("GroupImage").click();
+                imageRef.current.click()
               }}
             className="w-28  shadow-md h-28 rounded-full border-white   border-4"
-            src={
-              groupImage
-                ? URL.createObjectURL(groupImage)
-                : ".././public/group-of-friends-sketch-vector-43422085.avif"
-            }
-            alt=""
+            src={preview || ".././public/group-of-friends-sketch-vector-43422085.avif"}
+            alt="Group Image"
           />
         </div>
        <form className="w-full px-6 pb-4 flex flex-col gap-4">
 
-  {/* Group Name */}
+
   <div className="flex flex-col">
-    <label className="text-sm text-gray-500 mb-1">
+    <label className="text-sm text-gray-500 mb-1" htmlFor="group-name">
       Group Name
     </label>
     <input
       type="text"
-      onChange={onInputChange}
-      name="groupName"
-      value={groupData.groupName}
-      id="groupName"
+      onChange={handleChange}
+      name="name"
+      value={formData.name}
+      id="group-name"
       placeholder="Enter group name..."
       className="px-4 py-2 rounded-xl border border-gray-300 bg-[#F9FAFA] 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 
@@ -160,17 +220,17 @@ showAlert("Error","Group code should be more than 5 characters")
     />
   </div>
 
-  {/* Invite Code */}
+ 
   <div className="flex flex-col">
-    <label className="text-sm text-gray-500 mb-1">
+    <label className="text-sm text-gray-500 mb-1" htmlFor="group-code">
       Invite Code
     </label>
     <input
       type="text"
-      name="groupCode"
-           onChange={onInputChange}
-           value={groupData.groupCode}
-      id="groupCode"
+      name="code"
+           onChange={handleChange}
+           value={formData.code}
+      id="group-code"
       placeholder="Enter invite code..."
       className="px-4 py-2 rounded-xl border border-gray-300 bg-[#F9FAFA] 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 
@@ -182,14 +242,14 @@ showAlert("Error","Group code should be more than 5 characters")
       </div>
       </div>
     
-        { !addUser? <div className="flex flex-col mx-3 py-2 mt-4 mb-4 bg-white rounded-xl shadow">
+        { !addUser? <div className="flex flex-col mx-3 py-2 mt-4 mb-4  rounded-xl ">
         <div className="flex justify-between ">
         <div className="flex font-medium  pt-2 pb-1 mx-2">
-          {" "}
+          
           <UserGroupIcon className="w-6 font-medium mt-0.5  mx-2 h-6 text-black" />
           <div className=" text-xl">Add Members</div></div>
         <div className="flex font-medium  pt-2 pb-1">
-          {" "}
+      
       
           <MagnifyingGlassIcon onClick={()=>{setAddUser(true)}} className={`w-5 font-medium mt-1.5  mx-2 h-5 text-blue-500 cursor-pointer`} />
          
@@ -197,55 +257,12 @@ showAlert("Error","Group code should be more than 5 characters")
           
           </div>
           <div className="">
-       {chattedUsersList &&
-              chattedUsersList.length !== 0 && chattedUsersList.map((element) => {
-                const participentExists=selectedUsers.some(p=>
-                p.user === element.user._id
-              )
+       {NormalizedChattedUsers &&
+              NormalizedChattedUsers?.length !== 0 && NormalizedChattedUsers?.map((element) => {
+                
                 return (
-                  
-                  <div
-                  key={element.user._id}
-                   
-                    className={`flex mx-4  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2 ${participentExists
-                      ? "bg-blue-50 border border-blue-400 scale-[1.01]"
-                      : "hover:bg-gray-100 border border-transparent"}`}
-                  >
-                    
-                    <div className="flex-shrink-0">
-                       
-                        <img
-                        loading="lazy"
-                          className="w-10 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.user.image.url}
-                          alt=""
-                        />
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)}
-                        </p>
-                    
-                       
-                       
-                      </div>
-                     
-                    </div>
-                     <div className="flex flex-shrink-0 items-center">
-                      {!participentExists ?<PlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
-                        [...prev,{user:element.user._id,role:"member"}]
-                      )}}/>:<><CheckIcon className={`w-5 font-medium mx-2  h-5 text-blue-500 cursor-pointer `}></CheckIcon><MinusIcon className={`w-5 font-medium  mx-2  h-5 text-red-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
-                      {
-                        const filtered = prev.filter(p=>
-                            p.user !==element.user._id
-                        )
-                        return filtered
-                      }
-                       
-                      )}}/></>}
-                    </div>
-                  </div>
+                  <UserItem user={element} key={element._id}  isSelected={isSelected(element._id)} onAdd={handleAddMember} onRemove={handleRemoveMember}  showActions={true} mode="select"></UserItem>
+               
                 );
               })} </div>
             
@@ -271,55 +288,13 @@ showAlert("Error","Group code should be more than 5 characters")
           <div className="flex pt-2 flex-col pb-10  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
            
             <div className="">
-             
-                {searchingAddUser && dataBaseUsers &&
-              dataBaseUsers.length !== 0 && dataBaseUsers.map((element) => {
-                const participentExists=selectedUsers.some(p=>
-                p.user === element._id
-              )
+                {searchingAddUser && NormalizedDatabaseUsers &&
+              NormalizedDatabaseUsers?.length !== 0 && NormalizedDatabaseUsers?.map((element) => {
+            
             
                 return (
-                  <div
-                  key={element._id}
-                   
-                    className={`flex mx-2  cursor-pointer rounded-2xl mt-2  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2 ${participentExists
-                      ? "bg-blue-50 border border-blue-400 scale-[1.01]"
-                      : "hover:bg-gray-100 border border-transparent"}`}
-                  >
-                    
-                    <div className="flex-shrink-0">
-                       
-                        <img
-                          className="w-10 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.image.url}
-                          alt=""
-                        />
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.name)}
-                        </p>
-                    
-                       
-                       
-                      </div>
-                     
-                    </div>
-                     <div className="flex flex-shrink-0 items-center">
-                      {!participentExists ?<PlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
-                        [...prev,{user:element._id,role:"member"}]
-                      )}}/>:<><CheckIcon className={`w-5 font-medium mx-2  h-5 text-blue-500 cursor-pointer `}></CheckIcon><MinusIcon className={`w-5 font-medium  mx-2  h-5 text-red-500 cursor-pointer `} onClick={()=>{setSelectedUsers(prev=>
-                      {
-                        const filtered = prev.filter(p=>
-                            p.user !==element._id
-                        )
-                        return filtered
-                      }
-                       
-                      )}}/></>}
-                    </div>
-                  </div>
+                                <UserItem user={element} key={element._id}  isSelected={isSelected(element._id)} onAdd={handleAddMember} onRemove={handleRemoveMember}  showActions={true} mode="select"></UserItem>
+
                
                 );
               })}
@@ -328,8 +303,8 @@ showAlert("Error","Group code should be more than 5 characters")
           </div>
         </div>}
      <button
-     disabled={selectedUsers.length===0}
-     onClick={CreateGroupHandler}
+     disabled={!selectedUsers.length}
+     onClick={handleCreateGroup}
      className={`mx-3 flex justify-center items-center gap-2 mb-20 py-3 px-4 rounded-2xl font-semibold text-white shadow-md transition-all duration-200${selectedUsers.length ===0 ?"cursor-not-allowed bg-gray-400":" bg-gradient-to-r from-blue-500 to-indigo-600 hover:scale-[1.02] hover:shadow-lg active:scale-95"}`}
      >
       <UserGroupIcon className="w-5 h-5"></UserGroupIcon>

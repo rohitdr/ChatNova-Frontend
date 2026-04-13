@@ -12,7 +12,7 @@ import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem"
 import { Virtuoso } from "react-virtuoso";
-import useDebounce from "./Hooks/Debouncer";
+import useDebounce from "./Hooks/Debouncer.jsx";
 
 export default function Users() {
   const context = useContext(ChatNovaContext);

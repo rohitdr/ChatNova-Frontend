@@ -24,6 +24,7 @@ import TypingIndicator from "./TypingIndicator";
 import MessageSkeleton from "./MessageSkeleton";
 import ChatHeaderSkeleton from "./ChatHeaderSkeleton";
 import { useQueryClient } from "@tanstack/react-query";
+import useMessage from "./Hooks/useMessage";
 
 export default function ChatLayout() {
   const [sendingMessage, setSendingMessage] = useState(null);
@@ -42,7 +43,7 @@ export default function ChatLayout() {
   const [isTyping, setIsTyping] = useState(false);
 
   const {
-    useMessage,
+  
     useSelectedUser,
 setReplyMessage,
 
@@ -58,7 +59,7 @@ setReplyMessage,
 useSelectedGroup,
   isGroup,
     chattedUsers,
-
+getmessages,
     sendMessages,
     isInitailLoadRef,
     capitalizeFirstLetter,
@@ -71,7 +72,8 @@ selectedGroupLoading,
     activeChat,
    
   } = Context;
-  const {data,isLoading,fetchNextPage}=useMessage(conversationId) 
+  
+  const {data,isLoading,fetchNextPage}=useMessage(conversationId,getmessages) 
   const messages = data?.pages.flatMap(page=>page.message).reverse()||[]
 const totalCount = data?.pages.reduce((acc, page) => acc + page.message.length, 0) || 0;
 const queryclient = useQueryClient();

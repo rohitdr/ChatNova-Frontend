@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import  { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
 import {
   MagnifyingGlassIcon,
-  MagnifyingGlassCircleIcon,
-  EllipsisVerticalIcon,
+
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import ChatNovaContext from "../Context/ChatNovaContext";
@@ -13,65 +12,47 @@ import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem";
 
 export default function Group() {
-  const socketcontext=useContext(SocketContext)
-  const {socket}=socketcontext
-  const authcontext = useContext(AuthContext);
-  const { isServerDown,user,setActivePage,setLoadingMessages,Me } = authcontext;
-  const context = useContext(ChatNovaContext);
  
+  const {socket}= useContext(SocketContext)
+  const { isServerDown,setActivePage,Me } =   useContext(AuthContext);
   const {
-    chattedUsersList,
     setIsGroup,
-    activeChat,
-    capitalizeFirstLetter,
-    getAllGroups,
+  
     allGroup,
     isAllGroupLoading,
     setActiveChat,
    queryClient,
-    getConversationId,
-    serchGroup,
     setConversationId,
     conversationId,
-    activeGroupChat,
-    getGroupById,
-    getmessages,
     setActiveGroupChat,
-    setAllgroups,
-    loadingGroups,
-    setLoadingGroups
+  
     
-  } = context;
-  const [filteredGroups,setFilteredGroups]=useState(allGroup)
+  } = useContext(ChatNovaContext);
+  const [filteredGroups,setFilteredGroups]=useState([])
   const [searchClick, setSearchClick] = useState(true);
-  const onChangeHandler = (e) => {
-    let value = e.target.value;
-
-    if (value.length === 0) {
+  const handleChange = ({target:{value}}) => {
+    if (value.trim().length === 0) {
       setSearchClick(true);
     } else {
       setSearchClick(false);
-    let groups = allGroup.filter((grp)=>grp.name.toString().includes(value.toString()))
-  setFilteredGroups(groups)
+    let filteredgroups = allGroup?.filter((grp)=>grp.name.toString().includes(value.toString())) || []
+  setFilteredGroups(filteredgroups)
     }
   };
  
 
-  const handleGroupClick = async(element) => {
-  
+  const handleGroupClick = useCallback((element) => {
     if(!socket) return
     if(conversationId) {
       socket.emit("leave_group",conversationId)
     }
-
-     
      socket.emit("join_group",element._id)
-     socket.emit("mark_seen",{conversationId:element._id,userId:Me._id})
+     socket.emit("mark_seen",{conversationId:element._id,userId:Me?._id})
      setConversationId(element._id)
      setActiveGroupChat(true);
      setActiveChat(true);
       setIsGroup(true)
-  };
+  },[socket,conversationId,Me?._id]);
 
   useEffect(()=>{
     if (!socket) return
@@ -82,101 +63,91 @@ export default function Group() {
           return [newGroup,...filterd]
       })
 
+    queryClient.invalidateQueries(["groups"]);
+
      
     }
-    socket.on("group_created",groupHandler)
-   return ()=>{
-    socket.off("group_created",groupHandler)
-   }
-  },[socket])
-  useEffect(()=>{
-    if (!socket) return
     const groupLeaveHandler =({groupId})=>{
       queryClient.setQueryData(["groups"],(oldData)=>{
        if(!oldData) return oldData
         const filterd =oldData.filter((group)=>group._id !== groupId)
           return [...filterd]
       })
-
+      
+    queryClient.invalidateQueries(["groups"]);
      
     }
-    socket.on("group_leaved",groupLeaveHandler)
-   return ()=>{
-    socket.off("group_leaved",groupLeaveHandler)
-   }
-  },[socket])
-  useEffect(()=>{
-    if (!socket) return
-    const addedHandler =({groupId,conversationToSend})=>{
+      const addedHandler =({groupId,conversationToSend})=>{
       queryClient.setQueryData(["groups"],(oldData)=>{
        if(!oldData) return [conversationId]
         const filterd =oldData.filter((group)=>group._id !== groupId)
           return [conversationToSend,...filterd]
       })
+     
+    queryClient.invalidateQueries(["groups"]);
 
      
     }
-    socket.on("added_to_group",addedHandler)
-   return ()=>{
-    socket.off("added_to_group",addedHandler)
-   }
-  },[socket])
-  useEffect(()=>{
-    if (!socket) return
-    const removedHandler =({groupId})=>{
+     const removedHandler =({groupId})=>{
       queryClient.setQueryData(["groups"],(oldData)=>{
        if(!oldData) return oldData
         const filterd =oldData.filter((group)=>group._id !== groupId)
           return [...filterd]
       })
+      
+    queryClient.invalidateQueries(["groups"]);
+
      if(conversationId === groupId){
   
     queryClient.removeQueries({ queryKey: ['Group',conversationId] });
       setActivePage(2)
       setActiveGroupChat(false)
       setConversationId(null)
-      activeChat(null)
+      setActiveChat(false)
      }
      
     }
-    socket.on("removed_from_group",removedHandler)
-   return ()=>{
-    socket.off("removed_from_group",removedHandler)
-   }
-  },[socket])
-  useEffect(()=>{
-    if (!socket) return
-    const groupDeleteHandler =({groupId})=>{
+      const groupDeleteHandler =({groupId})=>{
       queryClient.setQueryData(["groups"],(oldData)=>{
        if(!oldData) return oldData
         const filterd =oldData.filter((group)=>group._id !== groupId)
           return [...filterd]
       })
+      
+    queryClient.invalidateQueries(["groups"]);
+
      if(conversationId === groupId){
   
     queryClient.removeQueries({ queryKey: ['Group',conversationId] });
       setActivePage(2)
       setActiveGroupChat(false)
       setConversationId(null)
-      activeChat(false)
+      setActiveChat(false)
      }
      
     }
-    socket.on("group_deleted",groupDeleteHandler)
+     socket.on("group_deleted",groupDeleteHandler)
+      socket.on("group_leaved",groupLeaveHandler)
+    socket.on("group_created",groupHandler)
+     socket.on("added_to_group",addedHandler)
+       socket.on("removed_from_group",removedHandler)
    return ()=>{
-    socket.off("group_deleted",groupDeleteHandler)
+    socket.off("group_created",groupHandler)
+     socket.off("group_leaved",groupLeaveHandler)
+      socket.off("added_to_group",addedHandler)
+        socket.off("removed_from_group",removedHandler)
+          socket.off("group_deleted",groupDeleteHandler)
    }
-  },[socket])
+  },[socket,conversationId,queryClient])
+ 
+ 
 
-
-  
-
-  const normalizeItem = (element,type)=>{
+  const normalizeItem =useCallback((element,type)=>{
     
-    const participant = element.participents.find(
+    const participant = element.participents?.find(
   (p) => p.user.toString() === Me._id
 );
-console.log(participant?.unreadCount)
+
     if(type==="chat"){
          return{
           element,
@@ -200,15 +171,17 @@ console.log(participant?.unreadCount)
         }
     
     
-  }
-const allNormailizedGroups=allGroup?.map((element)=>
-  // console.log(element)
-  normalizeItem(element,"chat")
-)
-const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
+  },[Me?._id])
+const allNormalizedGroups= useMemo(()=>{return allGroup?.map((element)=>
+
+   normalizeItem(element,"chat")
+)},[normalizeItem,allGroup])
+const filteredNormalizedGroups=useMemo( ()=>{return filteredGroups?.map((element)=>
   normalizeItem(element,"search")
-)
-  
+)},[normalizeItem,filteredGroups])
+const handleCreateGroupClick=()=>{
+  setActivePage(5)
+}
   return isServerDown ? (
     <NoServer></NoServer>
   ) : (
@@ -218,7 +191,7 @@ const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
           <div className="m-2 p-2 xs:p-0 text-3xl  font-medium">Groups</div>
           <div className="pt-2">
             {" "}
-            <PlusIcon className="w-6 h-6 sha mx-2 text-blue-700 cursor-pointer"  onClick={()=>{setActivePage(5)}}/>
+            <PlusIcon className="w-6 h-6 sha mx-2 text-blue-700 cursor-pointer"  onClick={handleCreateGroupClick}/>
           </div>
         </div>
 
@@ -227,7 +200,7 @@ const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
           <input
             type="search"
             className="w-full  outline-none pl-2"
-            onChange={onChangeHandler}
+            onChange={handleChange}
             placeholder="Search messages or users"
             name="usersearch"
             id="usersearch"
@@ -236,19 +209,19 @@ const allNormailizedfilteredGroups=filteredGroups?.map((element)=>
 
         <div className="flex pt-2 flex-col mb-14 lg:mb-0 p-2 px-4 overflow-y-auto scrollbar-hide">
           {!searchClick &&
-            allNormailizedfilteredGroups &&
-            allNormailizedfilteredGroups.length !== 0 &&
-            allNormailizedfilteredGroups.map((element) => {
+            filteredNormalizedGroups &&
+            filteredNormalizedGroups.length !== 0 &&
+            filteredNormalizedGroups.map((element) => {
               return (
           
               <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem>
               );
             })}
-          {!isAllGroupLoading ? searchClick && allNormailizedGroups && allNormailizedGroups.length !== 0 && (
-            allNormailizedGroups.map((element) => {
+          {!isAllGroupLoading ? searchClick && allNormalizedGroups && allNormalizedGroups.length !== 0 && (
+            allNormalizedGroups.map((element) => {
               return ( 
-                <div className="h-[72px]">
-                 <UserItem key={element._id} user={element}  handleUserClick={handleGroupClick}></UserItem></div>
+                <div className="h-[72px]" key={element._id}>
+                 <UserItem  user={element}  handleUserClick={handleGroupClick}></UserItem></div>
               );
             })
           ):[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }

@@ -2,9 +2,7 @@ import { useContext, useEffect, useRef, useState }   from "react";
 import React from "react";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
-import NoServer from "./NoServer";
 import {
-
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "@tanstack/react-query";

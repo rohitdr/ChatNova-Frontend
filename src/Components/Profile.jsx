@@ -1,19 +1,21 @@
 import {
-  ArrowUpIcon,
-  ChevronUpIcon,
-  EllipsisVerticalIcon,
+
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import AuthContext from "../Context/AuthContext";
-
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 export default function Profile() {
-  const authContext = useContext(AuthContext);
-  const { Me, isServerDown } = authContext;
+  const { Me, isServerDown } =  useContext(AuthContext);
   const { capitalizeFirstLetter } = useContext(ChatNovaContext);
-
+const aboutItem =useMemo(()=>[
+  {id:1,name:"Name",value:Me?.name},
+  {id:2,name:"Email",value:Me?.email},
+  {id:3,name:"Username",value:Me?.username},
+  {id:4,name:"Phone Number",value:Me?.phone_number},
+ 
+],[Me])
   return isServerDown ? (
     <NoServer />
   ) : (
@@ -31,26 +33,23 @@ export default function Profile() {
         <div className="relative">
           <img
             className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
-            src={Me?.image?.url}
-            alt=""
+            src={Me?.image?.url ||"https://via.placeholder.com/150"}
+            alt="User"
             loading="lazy"
           />
         </div>
 
         <p className="mt-4 text-lg font-semibold text-gray-800">
-          {capitalizeFirstLetter(Me?.name)}
+          {capitalizeFirstLetter(Me?.name||"")}
         </p>
 
         <p className="text-sm text-gray-500">@{Me?.username}</p>
       </div>
 
     
-      <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-sm text-gray-600 ">
-        Hey! I love connecting with new people and having meaningful
-        conversations. Feel free to drop a message anytime!
-      </div>
+   
 
-      {/* About Section */}
+   
       <div className="mx-4 mt-4 mb-10 pb-10">
         <div className="flex items-center mb-3 px-1">
           <UserCircleIcon className="w-5 h-5 text-gray-700 mr-2" />
@@ -58,34 +57,14 @@ export default function Profile() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm divide-y">
-
-          <div className="p-4 hover:bg-gray-50 transition">
-            <p className="text-xs text-gray-500">Name</p>
+        {aboutItem.map(({id,name,value})=>(  <div key={id} className="p-4 hover:bg-gray-50 transition">
+            <p className="text-xs text-gray-500">{name}</p>
             <p className="text-sm font-medium text-gray-800 mt-1">
-              {Me?.name}
+              {value || "Not Provided"}
             </p>
-          </div>
-
-          <div className="p-4 hover:bg-gray-50 transition">
-            <p className="text-xs text-gray-500">Email</p>
-            <p className="text-sm font-medium text-gray-800 mt-1">
-              {Me?.email}
-            </p>
-          </div>
-
-          <div className="p-4 hover:bg-gray-50 transition">
-            <p className="text-xs text-gray-500">Username</p>
-            <p className="text-sm font-medium text-gray-800 mt-1">
-              {Me?.username}
-            </p>
-          </div>
-
-          <div className="p-4 hover:bg-gray-50 transition">
-            <p className="text-xs text-gray-500">Phone</p>
-            <p className="text-sm font-medium text-gray-800 mt-1">
-              {Me?.phone_number}
-            </p>
-          </div>
+          </div>))}
+        
+        
 
         </div>
       </div>

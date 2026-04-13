@@ -23,13 +23,13 @@ export default function MessageSkeleton({ send }) {
               : "bg-gray-200 rounded-bl-none"
           }`}
         >
-          {/* Message lines */}
+       
           <div className="flex flex-col gap-2">
             <div className="h-3 w-32 rounded shimmer"></div>
             <div className="h-3 w-24 rounded shimmer"></div>
           </div>
 
-          {/* Time */}
+     
           <div className="flex justify-end mt-2">
             <div className="h-2 w-10 rounded shimmer"></div>
           </div>

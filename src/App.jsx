@@ -14,6 +14,7 @@ import AuthContext from "./Context/AuthContext";
 import { Suspense,lazy } from "react";
 import AppLoader from "./Components/AppLoader";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import PublicRoute from "./Components/PublicRoute";
 
   const ForgetPassword = lazy(()=>import("./Components/ForgetPassword"))
   const AdditionalDetails=lazy(()=> import("./Components/AdditionalDetails"))
@@ -35,7 +36,7 @@ function App() {
       />
 
       <Routes>
-        <Route exact path="/login" element={<Login></Login>}></Route>
+        <Route exact path="/login" element={<PublicRoute><Login></Login></PublicRoute> }></Route>
         <Route exact path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}></Route>
         <Route exact path="/additionaldetails"  element={
       <Suspense fallback={<AppLoader />}>

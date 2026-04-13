@@ -1,40 +1,46 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import SocketContext from "./SocketContext";
 import { io } from "socket.io-client";
 import AuthContext from "./AuthContext";
-export default function SocketState(props) {
-  const [socket, setSocket] = useState(null);
-  const [onlineUsers, setOnlineUser] = useState(null);
-  const context = useContext(AuthContext);
-  const {  Me } = context;
-useEffect(() => {
-  if (!Me?._id) return
 
-  const newSocket = io(import.meta.env.VITE_SOCKET, {
-    transports: ["websocket"],
-    query: {
-      userId: Me?._id,
-    },
-    withCredentials: true,
-  })
+export default function SocketState({ children }) {
+  const socketRef = useRef(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const { Me } = useContext(AuthContext);
 
-  newSocket.on("getOnlineUsers", (users) => {
-    setOnlineUser(users)
-  })
-  newSocket.on("connect_error", (err) => {
-  console.log("Connect error:", err.message);
-});
+  useEffect(() => {
+    if (!Me?._id) return;
 
-  setSocket(newSocket)
+    const socket = io(import.meta.env.VITE_SOCKET, {
+      transports: ["websocket"],
+      query: { userId: Me._id },
+      withCredentials: true,
+    });
 
-  return () => {
-    newSocket.off("getOnlineUsers")   
-    newSocket.disconnect()            
-  }
-}, [Me?._id])
+    socketRef.current = socket;
+
+    socket.on("getOnlineUsers", (users) => {
+      setOnlineUsers(users);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err.message);
+    });
+
+    return () => {
+      socket.off("getOnlineUsers");
+      socket.disconnect();
+    };
+  }, [Me?._id]);
+
   return (
-    <SocketContext.Provider value={{ onlineUsers, socket }}>
-      {props.children}
+    <SocketContext.Provider
+      value={{
+        socket: socketRef.current,
+        onlineUsers,
+      }}
+    >
+      {children}
     </SocketContext.Provider>
   );
 }

@@ -1,31 +1,88 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
 import api from "../Api/Axios.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { getToken } from "firebase/messaging";
-import { messaging } from "../Firebase/firebase.cjs";
-import { Socket } from "socket.io-client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {  useQueryClient } from "@tanstack/react-query";
+import { useMe } from "../Components/Hooks/UseMe.jsx";
+import initFCM from "../Components/notification.jsx";
+import { forgetPasswordApi, getLoggedUserApi, loginApi, logoutApi, signUpApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
+import { uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 
 export default function AuthState(props) {
   const [isServerDown, setIsServerDown] = useState(false);
-  const Navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
   const [progress, setProgress] = useState(0);
 
   const [activePage, setActivePage] = useState(0);
   const [alert, setAlert] = useState(null);
-  const [loadingUser,setLoadingUser]=useState(false)
-  const [loadingMessages,setLoadingMessages] =useState(true)
+
+
   const queryClient = useQueryClient()
   const [authReady,setAuthReady]=useState(false)
-  const showAlert = (type, message) => {
+  const showAlert =useCallback((type, message) => {
     setAlert({
       type: type,
       message: message,
     });
-  };
+  },[])
+
+const handleError =(error)=>{
+  if(!error.response){
+    showAlert("Error","Network error. Please check your connection")
+    return
+    
+  }
+  const status = error.response?.status;
+   if(status>=500){
+    setIsServerDown(true)
+    
+   }
+   else if(status === 401 || status === 403){
+   showAlert("Error","Session expired. Please Login again")
+
+   }
+   else if(status >=400){
+    showAlert("Error",error.response?.data?.message || "Something went wrong")
+  
+
+   }
+   else{
+    showAlert("Error","Unexpected error occurred")
+
+   }
+}
+
+const runWithProgress =async(fn,show=true)=>{
+  try{
+    if(show)
+      {
+        setProgress(30)
+         setTimeout(() => setProgress(40), 200);
+      setTimeout(() => setProgress(70), 400);
+
+      }
+      return await fn()
+
+  }
+
+  finally{ 
+  if(show){
+
+    setProgress(100)
+      setTimeout(() => setProgress(0), 300);
+  }
+  }
+
+}
+
+
+
+
+
+
+
   useEffect(()=>{
 const init=async()=>{
 const token = localStorage.getItem('refreshToken')
@@ -49,111 +106,50 @@ try{
   },[])
   // route to signup
   const signUp = async (email, password, username) => {
-    setProgress(30);
+  
     try {
-      const response = await api.post("/auth/createUser", {
+      await runWithProgress(async ()=>{
+        const data={
         email: email,
         password: password,
         username: username,
-      });
+      }
+const response = await signUpApi(data)
     
         localStorage.setItem("accessToken",response.data.accessToken)
       localStorage.setItem("refreshToken", response.data.refreshToken);
 
       showAlert("Success", "You have been logged in successfully !");
      
-      Navigate("/additionaldetails");
-      setProgress(100);
+      navigate("/additionaldetails");
+  
+      }) 
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-         setIsServerDown(true)
-          setProgress(100);
-       
-      }
-    
-      else{
-      showAlert("Error", error.response.data.message);
-        setProgress(100);
-       
-      }
-    
+      handleError(error)
     
     }
   };
-  // Register service worker and get FCM token
-  async function initFCM() {
+ 
+
+  const getLoggedUser = async () => {
     try {
-      const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js",
-      );
-
-      const currentToken = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_VAPIEDKEY, // from Firebase console
-        serviceWorkerRegistration: registration,
-      });
-
-      if (currentToken) {
-        try {
-          const res = await api.post("/auth/deviceToken", {
-            deviceToken: currentToken,
-          });
-        } catch (error) {
-          const status = error.response?.status;
-      if (status === 500) {
-            setIsServerDown(true)
-      
-     
-      }
-     
-      else{
-         showAlert("Error", error.response.data.message);
-      
-      }
-        }
-      } else {
-        console.log(
-          "No registration token available. Request permission to generate one.",
-        );
-      }
-    } catch (err) {
-      console.error("FCM registration error:", err);
-    }
-  }
-
-  const refreshUser = async () => {
-    try {
-      const res = await api.get("/auth/getUser");
-   
-  
+      const res = await getLoggedUserApi()
       return res.data.user
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-         setIsServerDown(true)
-      
-   
-      }
-     
+
+     throw error
      
     }
   };
 
 
-  const useMe=()=>{
-    return useQuery({
-      queryKey:["Me"],
-      queryFn:refreshUser,
-      staleTime:5000,
-      // refetchOnWindowFocus:true,
-    enabled:authReady
-    })
-  }
-  const {data:Me}=useMe()
+  const {data:Me,isLoading:isMeLoading}=useMe(getLoggedUser,authReady)
+
+ 
 
   const refreshSession = async () => {
     try {
-       const refressRes = await axios.post(`${import.meta.env.VITE_API}/auth/refresh`,
+       const response = await axios.post(`${import.meta.env.VITE_API}/auth/refresh`,
           {},
           {
             headers: {
@@ -162,11 +158,12 @@ try{
           },
         );
     
-        localStorage.setItem("accessToken",refressRes.data.accessToken)
+        localStorage.setItem("accessToken",response.data.accessToken)
     
     } catch (error) {
    
     localStorage.clear();
+    throw error
     
       
    
@@ -175,199 +172,145 @@ try{
 
   const login = async (email, password) => {
     try {
-      setProgress(30);
+  await runWithProgress(async()=>{
+    const data ={ email, password }
+ const response = await loginApi(data)
 
-      const response = await api.post("/auth/login", { email, password });
 
-      setProgress(50);
 
     
         localStorage.setItem("accessToken",response.data.accessToken)
       localStorage.setItem("refreshToken", response.data.refreshToken);
-    
+      await initFCM()
       queryClient.invalidateQueries(["Me"])
-      Navigate("/",{replace:true});
+      navigate("/",{replace:true});
       showAlert("Success", "You have been logged in successfully !");
-      setProgress(100);
+  
+  })
+
+     
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-             setIsServerDown(true)
-        setProgress(100);
-      
-      }
-      else{
-       
-        showAlert("Error", error.response.data.message);
-        setProgress(100);
-      }
+       handleError(error)
 
     }
   };
 /// update password when user is login
   const updatePassword = async (oldPassword,newPassword) => {
     try {
+  await runWithProgress(async()=>{
+    const data ={oldPassword,newPassword}
+      const response = await updatePasswordApi(data)
   
-      setProgress(30);
-      const response = await api.put("/auth/updatePassword",{oldPassword,newPassword});
-      setProgress(50);
       if (response.status === 200) {
-        refreshUser()
+     queryClient.invalidateQueries(["Me"])
         showAlert("Success", "You Password has been updated");
-        setProgress(100);
+     
       }
+  })
+    
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-              setIsServerDown(true)
-        setProgress(100);
-      }
-     
-      else{
-        showAlert("Error", error.response.data.message);
-     
-     
-          setProgress(100);
-      }
+       handleError(error)
     }
   };
 /// update password when user is not login
   const forgetPassword = async (email,password,username) => {
     try {
 
-      setProgress(30);
-      const response = await api.put("/auth/forgetPassword",{email:email,password:password,username:username});
-      setProgress(50);
+  await runWithProgress(async()=>{
+    const data={email:email,password:password,username:username}
+const response = await forgetPasswordApi(data)
+    
       if (response.status === 200) {
-        refreshUser()
+        
         showAlert("Success", "You Password has been changed successfully");
-        setProgress(100);
-        Navigate('/login')
-      }
+    
+        navigate('/login')
+    }})
+      
+      
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-             setIsServerDown(true)
-          setProgress(100);
-      
-      }
-     
-      else{
-          showAlert("Error", error.response.data.message);
-        setProgress(100);
-      
-      }
+      handleError(error)
     }
   };
   /// update user information
   const updateUser = async (data) => {
     try {
-  
-      setProgress(30);
-      const response = await api.post("/auth/update",data);
-      setProgress(50);
+    await runWithProgress(async()=>{
+
+      const response = await updateUserApi(data)
+    
       if (response.status === 200) {
-        refreshUser()
+       queryClient.invalidateQueries(["Me"])
         showAlert("Success", "You information has been updated");
-        setProgress(100);
+       
       }
+    })
+  
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-        setProgress(100);
-         setIsServerDown(true)
-      }
-     
-      else{
-         showAlert("Error", error.response.data.message);
-      
-          setProgress(100);
-      }
+       handleError(error)
     }
   };
   const logout = async () => {
     try {
-      setProgress(30);
-      const response = await api.post("/auth/logout");
-      setProgress(50);
+   
+await logoutApi()
+   
      
-      if (response.status === 200) {
-          queryClient.clear()
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("accessToken");
+     
+    } catch (error) {
+      console.log("Logout API failed")
+        }
+        finally{
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("accessToken");
+          queryClient.removeQueries()
  
       
         showAlert("Success", "You have been logged out successfully !");
-        Navigate("/login");
-        setProgress(100);
-      }
-      
-    } catch (error) {
-      const status = error.response?.status;
-      if (status === 500) {
-           setIsServerDown(true)
-          setProgress(100);
-      
-      }
-    }
+        navigate("/login");
+        }
   };
 
   const updateUserImage = async (file) => {
     try {
-        setProgress(30);
-      const formdata = new FormData();
+  await runWithProgress(async()=>{
+const formdata = new FormData();
       formdata.append("file", file);
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
-        formdata,
-      );
-        setProgress(60);
+      const res = await uploadCloudinaryApi(formdata);
+    
       let image = {
         publicId: res.data.public_id,
         url: res.data.secure_url,
       };
-      const responseUpdate = await api.post("/auth/update", { image });
-  
-    
-        setProgress(100);
+      const data = { image }
+     await updateUserApi(data)
+       queryClient.invalidateQueries(["Me"])
+  })
+   
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
-        setProgress(100);
-      }
-     
-      else{
-      
-          setIsServerDown(true)
-          setProgress(100);
-      
-      }
+       handleError(error)
     }
   };
 
-  useEffect(() => {
-    const refreshToken=localStorage.getItem("refreshToken");
-    if (!refreshToken) {
-      Navigate("/login");
-    } else {
-      Notification.requestPermission().then(async (permission) => {
-        if (permission === "granted") {
-          initFCM();
-        } else if (Notification.permission === "default") {
-          await Notification.requestPermission();
-        } else {
-          console.log("Notification permission denied plese enable it ");
-        }
-      });
-    }
-  }, []);
+
+    // else {
+    //   Notification.requestPermission().then(async (permission) => {
+    //     if (permission === "granted") {
+    //       initFCM();
+    //     } else if (Notification.permission === "default") {
+    //       await Notification.requestPermission();
+    //     } else {
+    //       console.log("Notification permission denied plese enable it ");
+    //     }
+    //   });
+    // }
+
   return (
     <AuthContext.Provider
       value={{
         Me,
-        user,
+     authReady,
         updatePassword,
         updateUser,
         isServerDown,
@@ -380,18 +323,15 @@ try{
         setActivePage,
         logout,
         forgetPassword,
-        setUser,
+isMeLoading,
         progress,
         setProgress,
         login,
-        
-        loadingUser,
-        setLoadingUser,
-        setLoadingMessages,
-        loadingMessages
+handleError
       }}
     >
       {props.children}
     </AuthContext.Provider>
   );
 }
+

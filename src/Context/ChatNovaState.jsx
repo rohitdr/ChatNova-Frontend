@@ -1,19 +1,28 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import ChatNovaContext from "./ChatNovaContext";
 
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import api from "../Api/Axios.jsx";
+
+
+
 import AuthContext from "./AuthContext.jsx";
 import SocketContext from "./SocketContext.jsx";
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import useUsers from "../Components/Hooks/useUsers.jsx";
+import useSelectedUser from "../Components/Hooks/useSelectedUser.jsx";
+import useSelectedGroup from "../Components/Hooks/useSelectedGroup.jsx";
+import useGroups from "../Components/Hooks/useGroups.jsx";
+import {  getAllGroupsApi, getConversationIdApi, getGroupByIdApi, uploadGroupImageApi } from "../Api/GroupApi.jsx";
+import { chattedUsersApi, getCurrentChattingUserApi, searchUserApi } from "../Api/UsersApi.jsx";
+import { useSendMessage } from "../Components/Hooks/UseSendMessage.jsx";
+import { getMessagesApi, sendMediaApi, uploadCloudinaryApi } from "../Api/MessageApi.jsx";
+import { useGroupMutation } from "../Components/Hooks/UseGroupMutation.jsx";
 
 export default function ChatNovaState(props) {
-  const authContext = useContext(AuthContext);
-  const { setProgress,setIsServerDown,showAlert,setLoadingUser,Me,setActivePage } = authContext;
+
+  const { setProgress,Me,setActivePage,handleError } =  useContext(AuthContext);
 const {socket} =useContext(SocketContext) 
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
-
+ 
 
   const [currentChatUserId, setCurrentChatUserId] = useState(null);
 
@@ -22,7 +31,7 @@ const {socket} =useContext(SocketContext)
 const [conversationId,setConversationId]=useState(null)
 const [isSearchLoading,setIsSearchLoading]=useState(false)
   const [page,setpage]=useState(2)
-  const [hasMore,setHasMore]=useState(true)
+
   const [activeGroupChat,setActiveGroupChat]=useState(false)
   const [currentGroup,setCurrentGroup]=useState(null)
  const hasMoreRef = useRef(true)
@@ -35,6 +44,7 @@ const [currentUserLoading,setCurrentUserLoading]=useState(false)
  const [isAdmin,setIsAdmin]=useState(false)
  const [replyMessage,setReplyMessage]=useState(null)
  const [isGroup,setIsGroup]=useState(false)
+ const sendMessageMutation = useSendMessage(handleError);
 useEffect(() => {
 setIsGroup(false)
 setIsAdmin(false)
@@ -48,7 +58,7 @@ setIsSearchLoading(false)
   setConversationId(null)
 
   setpage(2)
-  setHasMore(true)
+
   setActiveGroupChat(false)
   setCurrentGroup(null)
   setLoadingGroups(false)
@@ -63,16 +73,47 @@ setIsSearchLoading(false)
 
 }, [Me?.id])
 
-
+ const {addMemberMutation,
+        createGroupMutation,
+        leaveGroupMutation,
+        deleteGroupMutation,
+        removeMemberMutation} =useGroupMutation(handleError)
+       const isLeavingGroup = leaveGroupMutation.isPending;
+       const isDeletingGroup = deleteGroupMutation.isPending;
   const queryClient = useQueryClient()
+    useEffect(()=>{
+ setReplyMessage(null)
+  },[conversationId])
 
+  const runWithProgress =(mutation,data,onSuccess)=>{
+    mutation.mutate(data,
+     {
+    onMutate: () => {
+      setProgress(30);
+      setTimeout(() => {
+        setProgress(50);
+      },200 );
+      setTimeout(() => {
+        setProgress(70);
+      }, 400);
+    },
+    onSuccess: () => {
+      setProgress(100);
+      setTimeout(() => {
+        setProgress(0);
+      }, 300);
+      onSuccess?.();
+    },
+    onError: () => setProgress(0)
+  });
+    
+  }
   /// function to get User whom with logged in user has chats
 
   /// function to get the coversation id between the current chatter and logged in user
   const getConversationId = async (id) => {
     try {
-   
-      const res = await api.get(`/messages/conversationId/${id}`);
+      const res = await getConversationIdApi(id)
       if (res.status === 200) {
           
      if(!socket) return
@@ -87,12 +128,7 @@ setIsSearchLoading(false)
        
       }
     } catch (error) {
-      const status = error.response?.status;
-    if(status ===500){
-    
-         setIsServerDown(true)
-
-      }
+     handleError(error)
     
     }
   };
@@ -100,7 +136,7 @@ setIsSearchLoading(false)
   const searchUser =useCallback(async (searchValue) => {
     try {
       setIsSearchLoading(true)
-      const res = await api.get(`/users/search?search=${searchValue}`);
+      const res = await searchUserApi(searchValue)
       if (res.status === 200) {
         setDataBaseUsers(res.data.users);
         setTimeout(() => {
@@ -109,13 +145,8 @@ setIsSearchLoading(false)
     
       }
     } catch (error) {
-     const status = error.response?.status;
 
-      if (status === 500) {
-          setIsServerDown(true)
-      
-   
-      }
+handleError(error)
         setTimeout(() => {
            setIsSearchLoading(false)
         }, 1000);
@@ -128,7 +159,7 @@ setIsSearchLoading(false)
   const chattedUsers = async (page) => {
     try {
      let limit =15
-      const res = await api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
+      const res =await chattedUsersApi(limit,page)
       if (res.status === 200) {
     
      
@@ -140,154 +171,65 @@ setIsSearchLoading(false)
 
       }
     } catch (error) {
-       const status = error.response?.status;
-     setLoadingUser(false)
-      if(status ===500){
-     
-         setIsServerDown(true)
-     
-      }
+      handleError(error)
       throw  error
     }
   };
  
 
   // function to get current chatting user
-  const getCureentChattingUser = async (id) => {
+  const getCurrentChattingUser = async (id) => {
     try {
    
-      const res = await api.get(`/users/getUser/${id}`);
+      const res = await getCurrentChattingUserApi(id)
   
 
     return  res.data.user
     
     
     } catch (error) {
-    const status = error.response?.status;
-
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
-
-      }
-      else{
-   
-          setIsServerDown(true)
-     
-      }
+      handleError(error)
+   throw error
     }
   };
 
   const getmessages = async (id,cursor) => {
     try {
-    let url = `/messages/recieveMessage/${id}`
-    if(cursor){
-      url +=`?cursor=${cursor}`
-    }
-      const res = await api.get(url);
+   
+      const res = await getMessagesApi(id,cursor)
       if (res.status === 200) {
       
         return  {
   message: res.data.message,
   nextCursor:res.data.nextCursor
 };
-    
-   
-     
-  
       }
     } catch (error) {
-      const status = error.response?.status;
-    if(status ===500){
-         setIsServerDown(true)
-  
-      }
+      handleError(error)
      throw error; 
     }
   };
 
 
-const useMessage =(id)=>{
-return useInfiniteQuery({
-  queryKey:["messages",id],
-  queryFn:({ pageParam, queryKey }) => {
-      const [, id] = queryKey; 
-      return getmessages(id,pageParam);
-    },
-  getNextPageParam:(lastPage)=>lastPage.nextCursor,
-  staleTime: 5000,
-refetchOnWindowFocus: false,
-enabled:!!conversationId,
-  keepPreviousData:false
-})
-}
 
-const useUser = ()=>{
-  return useInfiniteQuery({
-    queryKey:["users"],
-    queryFn:({pageParam=1})=>{ return chattedUsers(pageParam)},
-    getNextPageParam:(lastPage)=>{
-      if(lastPage.hasMore){
-       return lastPage.page+1
-      }
-      return undefined
-    },
-      staleTime: 5000,
-refetchOnWindowFocus: false,
-enabled:!!Me
 
-  })
-}
-const {data:usersList,isLoading:isUsersListLoading,fetchNextPage:userListFetchNextPage}=useUser()
+
+const {data:usersList,isLoading:isUsersListLoading,fetchNextPage:userListFetchNextPage}=useUsers(chattedUsers,Me)
 const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
-const useSelectedUser=(id)=>{
-  return useQuery({
-    queryKey:["user",id],
-    queryFn:({queryKey }) => {
-      const [, id] = queryKey; 
-      return getCureentChattingUser( id);
-    },
-    staleTime:5000,
-    enabled:!!id,
-    refetchOnWindowFocus:false,
-     keepPreviousData:false
-  })
-}
 
-   const {data:selectedUser,isLoading:selectedUserLoading}=useSelectedUser(currentChatUserId);
-
-
-
-
-
-
-
+   const {data:selectedUser,isLoading:selectedUserLoading}=useSelectedUser(currentChatUserId,getCurrentChattingUser);
 
 //sendmessagee do it 
   const sendMessages = async (message) => {
-    try {
-      const res = await api.post(`/messages/sendMessage`,message);
-    } catch (error) {
-     const status = error.response?.status;
-    if(status ===500){
-    
-        setIsServerDown(true)
-      }
-    }
+   sendMessageMutation.mutate(message)
   };
 
 
-  useEffect(()=>{
- setReplyMessage(null)
-  },[conversationId])
   const sendMedia = async (id, message) => {
     try {
-      const res = await api.post(`/messages/sendFile/${id}`, message);
+      await sendMediaApi(id,message)
     } catch (error) {
-     const status = error.response?.status;
-    if(status ===500){
-   
-        setIsServerDown(true)
-      }
+     handleError(error)
     }
   };
 
@@ -298,10 +240,7 @@ const useSelectedUser=(id)=>{
       const formdata = new FormData();
       formdata.append("file", file);
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
-        formdata,
-      );
+      const res = await uploadCloudinaryApi(formdata)
       setProgress(30);
    
       const message = {
@@ -318,7 +257,7 @@ const useSelectedUser=(id)=>{
       sendMedia(id, message);
       setProgress(100);
     } catch (error) {
-    console.log(error.message)
+   handleError(error)
       setProgress(100);
     }
   };
@@ -326,16 +265,12 @@ const useSelectedUser=(id)=>{
   const getAllGroups =async()=>{
  try {
 
-      const res = await api.get(`/groups/allgroups?page=1&limit=20`);
+      const res = await getAllGroupsApi()
    
    return res.data.groups
     } catch (error) {
   
-     const status = error.response?.status;
-    if(status ===500){
-       setLoadingGroups(false)
-            setIsServerDown(true)
-      }
+     handleError(error)
       throw error
     }
   }
@@ -343,118 +278,64 @@ const useSelectedUser=(id)=>{
   //function to get group by id
   const getGroupById=async(id)=>{
      try {
-      const res = await api.get(`/groups/getGroupById/${id}`);
-    
-      
+      const res = await getGroupByIdApi(id)
  const isAdminUser = res.data.group.participents?.some(
   (p) => p.user._id === Me._id && p.role === "admin"
 );
-
-
 setIsAdmin(isAdminUser);
 
 return res.data.group
 
     } catch (error) {
-     const status = error.response?.status;
-   if (status === 500) {
-           setIsServerDown(true)
-   
-      }
+     handleError(error)
       throw error
     
     }
   }
-  const useSelectedGroup=(id,isGroup)=>{
-      return useQuery({
-        queryKey:["Group",id],
-        queryFn:({queryKey})=>{
-          const [,id]=queryKey
-          return getGroupById(id)
-        },
-        staleTime:5000,
-        enabled:!!id && isGroup===true,
-        refetchOnWindowFocus:false
-      })
-    }
- const {data:selectedGroup, isLoading:selectedGroupLoading}=useSelectedGroup(conversationId,isGroup)
  
- const useGroups =()=>{
-  return useQuery({
-    queryKey:["groups"],
-    queryFn:getAllGroups,
-    staleTime:5000,
-    refetchOnWindowFocus:false,
-    enabled:!!Me
-  })
- }
-const {data:allGroup,isLoading:isAllGroupLoading}=useGroups()
+ const {data:selectedGroup, isLoading:selectedGroupLoading}=useSelectedGroup(conversationId,isGroup,getGroupById)
+ 
+
+const {data:allGroup,isLoading:isAllGroupLoading}=useGroups(getAllGroups,Me)
     const updateGroupImage = async (file) => {
     try {
         setProgress(30);
       const formdata = new FormData();
       formdata.append("file", file);
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
-        formdata,
-      );
+      const res = await uploadCloudinaryApi(formdata)
         setProgress(60);
       let image = {
         publicId: res.data.public_id,
         url: res.data.secure_url,
        
       }; 
-      const responseUpdate = await api.put("/groups/groupUpdate", {image,groupId:conversationId });
+      await uploadGroupImageApi(image,conversationId)
   
     
         setProgress(100);
     } catch (error) {
-      const status = error.response?.status;
-      if (status === 404) {
-        showAlert("Error", error.response.data.message);
-        setProgress(100);
-      }
-     
-      else{
-       console.log(error.message)
-          setIsServerDown(true)
-          setProgress(100);
-      
-      }
+     handleError(error)
     }
   };
 //// function to add member from group
-const addMember =async(userId)=>{
-    try {
+const addMember =(userId)=>{
+    
       const data = {
        groupId:conversationId,
        participents:[{
         user:userId,
         role:"member"
        }]
-      }
-     
-      const res = await api.post(`/groups/addMember`,data);
-    
-     
-    } catch (error) {
-     const status = error.response?.status;
-   if (status === 404) {
-        showAlert("Error", error.response.data.message);
+      }  
+      runWithProgress(addMemberMutation,data)
    
-      }
-      else{
-       
-     setIsServerDown(true)
-     
-      }
+
     
-    }
 }
 //// function to remove member from group
-const removeMember =async(userId,tempId)=>{
-    try {
+const removeMember =(userId,tempId)=>{
+
    
       const data = {
        groupId:conversationId,
@@ -463,71 +344,36 @@ const removeMember =async(userId,tempId)=>{
        }],
        tempId
       }
-     
-      const res = await api.post(`/groups/removeMember`,data);
+     runWithProgress(removeMemberMutation,data)
     
     
-    } catch (error) {
-     const status = error.response?.status;
-   if (status === 404) {
-        showAlert("Error", error.response.data.message);
-   
-      }
-      else{
-       
-         setIsServerDown(true)
-     
-      }
-    
-    }
+  
 }
-const LeaveGroup =async()=>{
-    try {
+const leaveGroup =()=>{
+  if(isLeavingGroup) return
       const data = {
        groupId:conversationId,
       }
-     
-      const res = await api.patch(`/groups/leaveGroup`,data);
-    setActiveGroupChat(false);
-    setConversationId(null)
-    setActivePage(2)
-    } catch (error) {
-     const status = error.response?.status;
-   if (status === 404) {
-        showAlert("Error", error.response.data.message);
-   
-      }
-      else{
-       
-          setIsServerDown(true)
-     
-      }
-    
-    }
+     runWithProgress(leaveGroupMutation,data,() => {
+      setActiveGroupChat(false);
+      setConversationId(null);
+      setActivePage(2);
+    })
+ 
+  
+  
 }
-const deleteGroup =async()=>{
-    try {
+const deleteGroup =()=>{
+  if(isDeletingGroup) return
       const data = {
        groupId:conversationId,
       }
-   
-      const res = await api.delete(`/groups/delete`,{data});
-    setActiveGroupChat(false);
+   runWithProgress(deleteGroupMutation,data,()=>{  setActiveGroupChat(false);
     setConversationId(null)
-    setActivePage(2)
-    } catch (error) {
-     const status = error.response?.status;
-   if (status === 404) {
-        showAlert("Error", error.response.data.message);
-   
-      }
-      else{
-       
-         setIsServerDown(true)
-     
-      }
-    
-    }
+    setActivePage(2)})
+  
+  
+  
 }
 const createGroup =async(participents,name,inviteCode,file)=>{
     try {
@@ -536,10 +382,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         const formdata = new FormData();
       formdata.append("file", file);
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_DATABASE_NAME}/auto/upload`,
-        formdata,
-      );
+      const res = await uploadCloudinaryApi(formdata)
         setProgress(40);
       let image = {
         publicId: res.data.public_id,
@@ -554,20 +397,11 @@ const createGroup =async(participents,name,inviteCode,file)=>{
 
       }
        setProgress(70);
-      const response = await api.post(`/groups/createGroup`,data);
+    createGroupMutation.mutate(data,{onSuccess:()=>{ setActivePage(2)}})
     
          setProgress(100);
     } catch (error) {
-     const status = error.response?.status;
-   if (status === 404) {
-        showAlert("Error", error.response.data.message);
-    setProgress(100);
-      }
-      else{
-       
-           setIsServerDown(true)
-      setProgress(100);
-      }
+    handleError(error)
     
     }
 }
@@ -585,6 +419,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
   return (
     <ChatNovaContext.Provider
       value={{
+        isDeletingGroup,
         getGroupById,
         useSelectedGroup,
         createGroup,
@@ -599,11 +434,10 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         replyMessage,
         allGroup,
         setReplyMessage,
-     useUser,
+   
      selectedUser,
      selectedUserLoading,
-       useMessage,
-     
+
         isAllGroupLoading,
    updateGroupImage,
         conversationId,
@@ -613,7 +447,6 @@ const createGroup =async(participents,name,inviteCode,file)=>{
     firstItemIndexRef,
         activeChat,
         setActiveChat,
-   
         uploadCloudinary,
         capitalizeFirstLetter,
         searchUser,
@@ -623,10 +456,11 @@ const createGroup =async(participents,name,inviteCode,file)=>{
      isGroup,setIsGroup,
         getmessages,
       isInitailLoadRef,
-      setHasMore,
+      
       getConversationId,
       setpage,
-        getCureentChattingUser,
+      isLeavingGroup,
+        getCurrentChattingUser,
         setDataBaseUsers,
         setCurrentChatUserId,
         currentChatUserId,
@@ -638,7 +472,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         queryClient,
     
         isAdmin,
-    LeaveGroup,
+    leaveGroup,
         loadingGroups,selectedGroup,
         selectedGroupLoading
       }}

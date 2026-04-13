@@ -1,20 +1,15 @@
 import {
   ArrowUpCircleIcon,
-  EllipsisVerticalIcon,
-  LockClosedIcon,
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  UserCircleIcon,
   UserGroupIcon,
   UserMinusIcon,
   UserPlusIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/solid";
 import SocketContext from '../Context/SocketContext'
 import { useContext, useEffect, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
-
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,7 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function GroupInfo() {
 
   const context = useContext(ChatNovaContext)
-  const{currentGroup,searchUser,addMember,isAdmin,isGroup,deleteGroup,LeaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter}=context
+  const{currentGroup,searchUser,addMember,isAdmin,isGroup,deleteGroup,leaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter,isDeletingGroup,isLeavingGroup}=context
   const authContext = useContext(AuthContext);
   const { updatePassword, isServerDown,showAlert ,updateUser,Me} = authContext;
   const [groupSettingsImage, setGroupSettingsImage] = useState(null);
@@ -159,6 +154,10 @@ sendMessageToQueryUser(tempmessage)
   setAddUser(false);
       setSearchingAddUser(false)
   }
+  const handleLeaveGroup=()=>{
+    if(isDeletingGroup || isLeavingGroup) return
+    isAdmin?deleteGroup():leaveGroup()
+  }
   return isServerDown  ? (
     <NoServer></NoServer>
   ) : (
@@ -271,15 +270,15 @@ sendMessageToQueryUser(tempmessage)
                 );
               })} </div>
                  <div
-                onClick={()=>{isAdmin?deleteGroup():LeaveGroup()}}
-                
-                    className="flex    border-2  cursor-pointer rounded-2xl mt-8 bg-white  hover:bg-[#E6EBF5]    xs:p-2"
+                onClick={handleLeaveGroup}
+              
+                    className={`flex     border-2  cursor-pointer rounded-2xl mt-8 bg-white  hover:bg-[#E6EBF5]    xs:p-2 ${(isDeletingGroup || isLeavingGroup)&&"bg-[#e0e0e0]  "} `}
                   >
                     
                   
-                    <div className="flex flex-col w-full justify-between py-2" >
+                    <div className={`flex flex-col w-full justify-between py-2 ${(isDeletingGroup || isLeavingGroup)&&"cursor-not-allowed"}`} >
                       <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-red-500">
+                        <p className={`font-small text-xs  xs:text-sm text-red-500  ${(isDeletingGroup || isLeavingGroup)&&"text-[#a0a0a0]"} `}>
                   {isAdmin?"Delete Group":"Exit Group"}
                         </p>
                     
@@ -289,8 +288,8 @@ sendMessageToQueryUser(tempmessage)
                    
                      
                     </div>
-                    <div className="flex items-center">
-                      <TrashIcon className="w-5 font-medium   h-5 text-red-500 cursor-pointer" />
+                    <div className={`flex items-center ${(isDeletingGroup || isLeavingGroup)&&" cursor-not-allowed"}`}>
+                      <TrashIcon className={`w-5 font-medium   h-5 text-red-500   ${(isDeletingGroup || isLeavingGroup)&&"text-[#a0a0a0] "} `} />
                     </div>
                   </div>
 
