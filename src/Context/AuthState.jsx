@@ -5,7 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {  useQueryClient } from "@tanstack/react-query";
 import { useMe } from "../Components/Hooks/UseMe.jsx";
-import initFCM from "../Components/notification.jsx";
+import initFCM from "../Components/Notification.jsx";
 import { forgetPasswordApi, getLoggedUserApi, loginApi, logoutApi, signUpApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
 import { uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 

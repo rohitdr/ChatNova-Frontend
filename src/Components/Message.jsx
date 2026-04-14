@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState }   from "react";
+import { useCallback, useContext, useEffect, useRef, useState }   from "react";
 import React from "react";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
@@ -8,28 +8,31 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import SocketContext from "../Context/SocketContext";
 import { ArrowUturnLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
+ const REACTIONS =["👍", "❤️", "😂", "😮", "😢", "👏"]
 const Message= React.memo((props) =>{
   const [replyIcon,setReplyIcon]=useState("hidden")
   const queryclient = useQueryClient();
   const { message, send } = props;
-  const authContext = useContext(AuthContext);
-  const { Me } = authContext;
-  const context = useContext(ChatNovaContext);
-  const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} = context;
+ 
+  const { Me } =  useContext(AuthContext);
+
+  const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} =  useContext(ChatNovaContext);
   const [mediaView,setMediaView]=useState(false)
-  const reactions =["👍", "❤️", "😂", "😮", "😢", "👏"]
+ 
  const [display,setDisplay]=useState("hidden")
  const reactionRef = useRef(null)
  const ignoreClick = useRef(false);
- const socketcontext  =useContext(SocketContext) 
- const {socket}=socketcontext
+useEffect(() => {
+  return () => clearTimeout(presstimer.current);
+}, []);
+ const {socket}=useContext(SocketContext) 
  useEffect(()=>{
    const handleOutsideClick =(e)=>{
     if(ignoreClick.current){
       ignoreClick.current =false
       return
     }
-     if(reactionRef.current && !reactionRef.current.contains(e.target)){
+     if(reactionRef.current && !reactionRef.current?.contains(e.target)){
       setDisplay("hidden")
      }
    }
@@ -39,65 +42,74 @@ const Message= React.memo((props) =>{
    }
  },[])
  const presstimer = useRef(null)
-const handleReactionClick=(e)=>{
-      if(!socket) return
+const handleReactionClick = useCallback((e) => {
+  if (!socket) return;
 
-      queryclient.setQueryData(["messages",conversationId],(oldData)=>{
-      if(!oldData) return oldData
-      const newPages = oldData.pages.map((page)=>{
-          const updatedMessage = page.message.map((msg)=>
-         { let updatedReaction;
-          if(msg._id!==message._id) {return msg}
-          const reaction = message.reaction || []
-          const existing = reaction.filter((r)=>{
-           r.user === Me._id
-          }
-       )
-        if(existing){
-          if(existing.emoji === e.target.innerHTML){
-           updatedReaction = reaction.filter((r)=>
-            r.user !==Me._id
-          )
+  const emoji = e.currentTarget.textContent;
+
+  queryclient.setQueryData(["messages", conversationId], (oldData) => {
+    if (!oldData) return oldData;
+
+    const newPages = oldData.pages.map((page) => {
+      const updatedMessage = page.message.map((msg) => {
+    
+        if (msg._id !== message._id) return msg;
+
+        const reaction = msg.reaction || [];
+        let updatedReaction;
+
+        const existing = reaction.find((r) => r.user === Me._id);
+
+        if (existing) {
+          if (existing.emoji === emoji) {
+           
+            updatedReaction = reaction.filter((r) => r.user !== Me._id);
+          } else {
           
+            updatedReaction = reaction.map((r) =>
+              r.user === Me._id ? { ...r, emoji } : r
+            );
           }
-          else{
-             updatedReaction = reaction.map((r)=>
-             r.user ===Me._id?{...r,emoji:e.target.value}:r
-            )
-          }
+        } else {
          
-            
-          }else{
-            updatedReaction =[...reaction,{user:user_id , emoji:e.target.innerHTML}]
-          }
-          return {
-            ...msg,
-            reaction:updatedReaction
-          }
+          updatedReaction = [...reaction, { user: Me._id, emoji }];
         }
-          )
-          return {
+
+        return {
+          ...msg,
+          reaction: updatedReaction,
+        };
+      });
+
+      return {
         ...page,
         message: updatedMessage,
       };
-      })
-        return {
+    });
+
+    return {
       ...oldData,
       pages: newPages,
     };
-     })
-    
-      socket.emit("send_reaction",{
-        messageId:message._id,
-        conversationId:conversationId,
-        emoji:e.target.innerHTML,
-        userId:Me._id
+  });
 
-      })
-     
-         setDisplay("hidden")
+ 
+  socket.emit("send_reaction", {
+    messageId: message._id,
+    conversationId,
+    emoji,
+    userId: Me._id,
+  });
 
-}
+  setDisplay("hidden");
+}, [
+  socket,
+  conversationId,
+  Me._id,
+  message._id,
+  message.reaction,
+  queryclient,
+]);
 
 const messageStatus = (message, id) => {
   if (activeGroupChat) {
@@ -129,7 +141,7 @@ const clickReplyIcon=()=>{
 if(message.type === "image"){
      text ="image" && "📷 Photo"
   }
-  if(message.type === "vide"){
+  if(message.type === "video"){
      text ="video" && "🎥 Video"
   }
   setReplyMessage({
@@ -144,8 +156,10 @@ if(message.type === "image"){
 const onMouseEnterMessage=()=>{
   setReplyIcon("flex")
 }
+const timeoutRef = useRef(null)
 const onMouseLeaveMessage=()=>{
-  setTimeout(() => {
+  clearTimeout(timeoutRef.current)
+ timeoutRef.current= setTimeout(() => {
      setReplyIcon("hidden")
   }, 2000);
  
@@ -202,11 +216,11 @@ let status = messageStatus(message,currentChatUserId)
 )}
           <div className="">
           {message.type === "text" && message.text}
-{message.type === "image" && message.media.url.split('.').pop().toLowerCase() !== "pdf" && (
+{message.type === "image" && message.media?.url?.split('.').pop().toLowerCase() !== "pdf" && (
   <div className="relative group">
     <img
       loading="lazy"
-      src={message.media.url}
+      src={message.media?.url}
       onClick={() => setMediaView(true)}
       className="
         max-w-[180px] sm:max-w-[220px] lg:max-w-[260px]
@@ -220,7 +234,7 @@ let status = messageStatus(message,currentChatUserId)
       alt="chat-img"
     />
 
-    {/* Optional overlay on hover */}
+ 
     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition"></div>
   </div>
 )}
@@ -239,7 +253,7 @@ let status = messageStatus(message,currentChatUserId)
       loop
       controls
     >
-      <source src={message.media.url} type="video/mp4" />
+      <source src={message.media?.url} type="video/mp4" />
     </video>
   </div>
 )}</div>
@@ -271,7 +285,7 @@ let status = messageStatus(message,currentChatUserId)
    
         </div>{" "}
         <div ref={reactionRef} className={`bg-white absolute z-40 rounded-3xl shadow-2xl -top-5 ${send?"right-10 lg:right-28":""}  p-2 ${display}`}>
-          { reactions.map((r)=>{
+          { REACTIONS.map((r)=>{
              return <span className=" cursor-pointer text-3xl " key={r} onClick={handleReactionClick}>{r}</span>
           })
             
@@ -279,8 +293,8 @@ let status = messageStatus(message,currentChatUserId)
       </div>
     
      {message.reaction &&  <div  className={` absolute rounded-3xl shadow-2xl bottom-0  ${send?"right-9":"left-9"}  `}>
-          {message.reaction.map(element => {
-             return <span key={element.user}>{element.emoji}</span> 
+          {message.reaction?.map(element => {
+             return <span key={element.user+element.emoji}>{element.emoji}</span> 
           })}</div>}
           <div className={`${replyIcon} items-center px-4 `} > 
 <div className="rounded-full bg-black/10 shadow-xl p-2" onClick={clickReplyIcon}>
@@ -315,7 +329,7 @@ let status = messageStatus(message,currentChatUserId)
                 <img
                 loading="lazy"
                   className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl"
-               src={message.media.url}
+               src={message.media?.url}
                 />
                 <XMarkIcon
                   className="h-8 w-8 absolute cursor-pointer top-6 right-6 text-white"
