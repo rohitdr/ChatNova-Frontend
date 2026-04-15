@@ -203,8 +203,11 @@ const response = await signUpApi(data)
   
       if (response.status === 200) {
      queryClient.invalidateQueries(["Me"])
-        showAlert("Success", "You Password has been updated");
-     
+       showAlert("Success", "You Password has been updated");
+       setTimeout(async() => {
+           await logout()
+       }, 500);
+  
       }
   })
     
@@ -294,17 +297,7 @@ const formdata = new FormData();
   };
 
 
-    // else {
-    //   Notification.requestPermission().then(async (permission) => {
-    //     if (permission === "granted") {
-    //       initFCM();
-    //     } else if (Notification.permission === "default") {
-    //       await Notification.requestPermission();
-    //     } else {
-    //       console.log("Notification permission denied plese enable it ");
-    //     }
-    //   });
-    // }
+  
 
   return (
     <AuthContext.Provider

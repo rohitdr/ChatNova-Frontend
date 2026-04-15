@@ -8,41 +8,51 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/solid";
 import SocketContext from '../Context/SocketContext'
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import { useQueryClient } from "@tanstack/react-query";
+import UserItem from "./UserItem";
+import useDebounce from "./Hooks/Debouncer";
+import UserSkeleton from "./UserSkeleton";
 
 export default function GroupInfo() {
 
-  const context = useContext(ChatNovaContext)
-  const{currentGroup,searchUser,addMember,isAdmin,isGroup,deleteGroup,leaveGroup,queryClient,activeGroupChat,selectedGroup,setCurrentGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter,isDeletingGroup,isLeavingGroup}=context
-  const authContext = useContext(AuthContext);
-  const { updatePassword, isServerDown,showAlert ,updateUser,Me} = authContext;
-  const [groupSettingsImage, setGroupSettingsImage] = useState(null);
-  const [data,setData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
-  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
- const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
- const socketcontext = useContext(SocketContext)
+
+  const{searchUser,addMember,isAdmin,isGroup,deleteGroup,leaveGroup,queryClient,selectedGroup,dataBaseUsers,removeMember,conversationId,updateGroupImage,chattedUsersList,capitalizeFirstLetter,isDeletingGroup,isLeavingGroup,isSearchLoading}=useContext(ChatNovaContext)
+  const [searchValue,setSearchValue]=useState("")
+  const {  isServerDown,Me} =  useContext(AuthContext);
+  const [image, setImage] = useState(null);
+const [preview,setPreview]=useState(null)
+const imageRef =useRef(null)
+  const {socket}= useContext(SocketContext)
  const [addUser,setAddUser] = useState(false)
  const [searchingAddUser,setSearchingAddUser]=useState(false)
  const conversationIdRef=useRef(conversationId)
 const queryclient = useQueryClient();
-
- 
-
- const {socket}=socketcontext
-  const settingImagehandler = (e) => {
-    setGroupSettingsImage(e.target.files[0]);
-    e.target.files=""
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if(!file) return
+    setImage(file);
   };
-  const onChangeHandler=(e)=>{
-    setData({...data,[e.target.name]:e.target.value})
+    useEffect(()=>{
+    if(!image) return
+    const url = URL.createObjectURL(image)
+    setPreview(url)
+    return ()=> URL.revokeObjectURL(url)
+  },[image])
+
+  const handleUploadImage =()=>{
+
+                updateGroupImage(image);
+                setImage(null);
+          setPreview(null)
   }
+
   const onChangeSearchAddUser = (e) => {
     let value = e.target.value;
-
+setSearchValue(value)
     if (value.length === 0) {
       setAddUser(false);
       setSearchingAddUser(false)
@@ -50,14 +60,20 @@ const queryclient = useQueryClient();
     } else {
       setAddUser(true);
       setSearchingAddUser(true)
-      searchUser(value);
+    
     }
   };
-
-
- 
-
-
+   const debounceSearch = useDebounce(searchValue,400)
+  const lastValue = useRef("");
+  useEffect(() => {
+  if (
+    debounceSearch.trim().length > 2 &&
+    debounceSearch !== lastValue.current
+  ) {
+    lastValue.current = debounceSearch;
+    searchUser(debounceSearch);
+  }
+}, [debounceSearch, searchUser]);
  useEffect(() => {
   conversationIdRef.current = conversationId;
 }, [conversationId]);
@@ -89,6 +105,7 @@ const queryclient = useQueryClient();
       })
       
     }
+     queryClient.invalidateQueries(["Group",conversationId])
     }
 
     const MemberHandler =({groupId,participents})=>{
@@ -99,10 +116,9 @@ const queryclient = useQueryClient();
          if(!oldData) return oldData
         return { ...oldData,participents}}
         )
-        
-    
-     
+
        }
+       queryClient.invalidateQueries(["Group",conversationId])
     }
    
     socket.on("member_added",MemberHandler)
@@ -113,59 +129,109 @@ const queryclient = useQueryClient();
       socket.off("member_added",MemberHandler)
       socket.off("remove_member",MemberHandler)
    }
-  },[socket,isGroup])
+  },[socket,isGroup,queryClient,conversationId])
 
     const sendMessageToQueryUser=(message)=>{
 queryclient.setQueryData(["messages",conversationId],(oldData)=>{
  if(!oldData) return oldData
  const newPages = [...oldData.pages]
-  newPages[0].message.push(message)
+ newPages[0] = {
+  ...newPages[0],
+  message: [message, ...newPages[0].message],
+};
   return {...oldData,pages:newPages}
 })
   }
-  const removeMemberhandler=(element)=>{
-  const tempmessage = {
+  const createSystemMessage =useCallback((name,messageType)=>{
+return {
         _id: Date.now(),
         type: "system",
-        text: `Admin removed ${element.name}`,
+        text: `Admin ${messageType} ${name}`,
         createdAt: Date.now(),
          senderId: {
-          _id: Me._id,
+          _id: Me?._id,
          
         },
       };
-sendMessageToQueryUser(tempmessage)
-    removeMember(element._id,tempmessage._id)
-  }
-  const addMemberhandler=(element)=>{
+  },[Me?._id])
+  const removeMemberhandler=useCallback((id,name)=>{
  
-  const tempmessage = {
-        _id: Date.now(),
-        type: "system",
-        text: `Admin added ${element.name}`,
-        createdAt: Date.now(),
-         senderId: {
-          _id: Me._id,
-         
-        },
-      };
+  const tempmessage = createSystemMessage(name,"removed")
+sendMessageToQueryUser(tempmessage)
+    removeMember(id,tempmessage._id)
+  },[removeMember,createSystemMessage])
+  const addMemberhandler=useCallback((id,name)=>{
+  const tempmessage = createSystemMessage(name,"added")
   sendMessageToQueryUser(tempmessage)
-    addMember(element._id,tempmessage._id)
+    addMember(id,tempmessage._id)
   setAddUser(false);
       setSearchingAddUser(false)
-  }
+  },[addMember,createSystemMessage])
   const handleLeaveGroup=()=>{
     if(isDeletingGroup || isLeavingGroup) return
     isAdmin?deleteGroup():leaveGroup()
   }
+
+   const normalizeItem = useCallback((element,type)=>{
+        if(type==="chat"){
+             return{
+              element,
+              name:element.user?.name,
+              image:element.user?.image?.url,
+         
+               _id:element.user._id,
+           
+             }
+             
+            }
+            if(type==="search"){
+            return{
+               element,
+             name:element.name,
+             image:element.image?.url,
+        
+             _id:element._id,
+         
+            }
+            }
+        
+        
+      },[])
+      
+  
+        
+const NormalizedSelectedGroup=useMemo(()=>{
+if(!selectedGroup) return
+  return selectedGroup.participents?.map((element)=>
+  
+        normalizeItem(element,"chat")
+
+
+  
+      )},[selectedGroup,normalizeItem])
+     const NormalizedChattedUsers=useMemo(()=>chattedUsersList?.map((element)=>
+    normalizeItem(element,"chat")
+
+  ),[chattedUsersList,normalizeItem])
+    
+   
+        const NormalizedDatabaseUsers=useMemo(()=>dataBaseUsers?.map((element)=>
+      normalizeItem(element,"search")
+    ),[dataBaseUsers,normalizeItem])
+    const isSelectedUser=useMemo(()=>(id)=>{
+return selectedGroup?.participents?.some(p=>
+                p.user._id === id
+                )
+    },[selectedGroup])
   return isServerDown  ? (
     <NoServer></NoServer>
   ) : (
     <div>
+    
     {!addUser &&  <div className="flex h-screen flex-col bg-[#F5F7FB] overflow-y-auto scrollbar-hide">
       <div className="flex justify-between m-2 p-2 mt-0">
         <div>
-          {" "}
+        
           <h2 className="text-2xl pt-2 font-medium">Group Info</h2>{" "}
         </div>
       </div>
@@ -173,56 +239,47 @@ sendMessageToQueryUser(tempmessage)
       <div className="flex flex-col items-center justify-center my-2  ">
         <div className="my-2 py-2 relative">
           <input
+          ref={imageRef}
             type="file"
             id="groupSettingsImage"
             accept="image/*"
             className="hidden"
-            onChange={settingImagehandler}
+            onChange={handleImageChange}
           />
-          {groupSettingsImage ? (
+          {image ? (
             <ArrowUpCircleIcon
               className={`w-9 h-9 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute ${!isAdmin && "hidden"}`}
-              onClick={() => {
-             
-                updateGroupImage(groupSettingsImage);
-                setGroupSettingsImage(null);
-              }}
+              onClick={handleUploadImage}
             ></ArrowUpCircleIcon>
           ) : (
             <PencilIcon
               className={`w-9 h-9 right-2 bg-white border border-black  p-1.5 text-blue-900 ${!isAdmin && "hidden"}  cursor-pointer rounded-full bottom-3 absolute `}
               onClick={() => {
-                document.getElementById("groupSettingsImage").click();
+                imageRef.current.click();
               }}
             ></PencilIcon>
           )}
           <img
           loading="lazy"
             className="w-28  shadow-md h-28 rounded-full border-white   border-4"
-            src={
-              groupSettingsImage
-                ? URL.createObjectURL(groupSettingsImage)
-                : selectedGroup?.avtar.url
+            src={preview || selectedGroup?.avtar.url
             }
-            alt=""
+            alt="Group Image"
           />
         </div>
         <p className=" font-medium">{capitalizeFirstLetter(selectedGroup?.name)}</p>
       
       </div>
-      <div className=" mt-2 mb-4 mx-6 px-2 text-sm text-[#8E949D]   ">
-        Hey! I love connecting with new people and having meaningful conversations.
-
-      </div></div>
+     </div>
     
           <div className="flex flex-col mx-3 mt-4 mb-20 ">
         <div className="flex justify-between ">
         <div className="flex font-medium  pt-2 pb-1">
-          {" "}
+      
           <UserGroupIcon className="w-6 font-medium mt-0.5  mx-2 h-6 text-black" />
           <div className=" text-xl">{selectedGroup?.participents?.length} Members</div></div>
         <div className="flex font-medium  pt-2 pb-1">
-          {" "}
+     
       
           <UserPlusIcon onClick={()=>{setAddUser(true)}} className={`w-5 font-medium mt-1.5 ${!isAdmin && "hidden"} mx-2 h-5 text-blue-500 cursor-pointer`} />
          
@@ -230,43 +287,11 @@ sendMessageToQueryUser(tempmessage)
           
           </div>
           <div className="">
-         { selectedGroup && selectedGroup?.participents?.map((element) => {
+         { NormalizedSelectedGroup && NormalizedSelectedGroup?.map((element) => {
              
                 return (
-                  
-                  <div
-                  key={element.user._id}
-                   
-                    className="flex   border-2   cursor-pointer rounded-2xl mt-1 bg-white  hover:bg-[#E6EBF5] p-0   xs:p-2"
-                  >
-                    
-                    <div className="">
-                       
-                        <img
-                        loading="lazy"
-                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.user.image.url}
-                          alt=""
-                        />
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)} {element.user._id === Me._id && "(You)"}
-                        </p>
-                    
-                       
-                       
-                      </div>
-                     {element.role=="admin" && <div className="text-xs px-2 text-blue-400">
-                        Admin
-                      </div>}
-                     
-                    </div>
-                    <div className="flex items-center">
-                      <UserMinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer ${!isAdmin&& "hidden"}`} onClick={()=>{removeMemberhandler(element.user)}}/>
-                    </div>
-                  </div>
+                     <UserItem user={element} key={element._id}     onRemove={removeMemberhandler}   mode="groupRemove"></UserItem>
+                
                 );
               })} </div>
                  <div
@@ -316,87 +341,26 @@ sendMessageToQueryUser(tempmessage)
           <div className="flex pt-2 flex-col pb-10  sm:p-2 sm:px-4 overflow-y-auto scrollbar-hide">
            
             <div className="">
-                {!searchingAddUser && chattedUsersList &&
-              chattedUsersList.length !== 0 && chattedUsersList.map((element) => {
-                const exist =selectedGroup.participents.some(p=>
-                p.user._id === element.user._id
-                )
+                {!searchingAddUser && NormalizedChattedUsers &&
+              NormalizedChattedUsers.length !== 0 && NormalizedChattedUsers.map((element) => {
+                const exist =isSelectedUser(element._id)
                if(exist) return null
                 return (
-                  
-                  <div
-                  key={element.user._id}
-                   
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                  >
-                    
-                    <div className="">
-                       
-                        <img
-                        loading="lazy"
-                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.user.image.url}
-                          alt=""
-                        />
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.user.name)}
-                        </p>
-                    
-                       
-                       
-                      </div>
-                     
-                    </div>
-                     <div className="flex items-center">
-                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer" onClick={()=>{addMemberhandler(element.user)}}/>
-                    </div>
-                  </div>
+                     <UserItem user={element} key={element._id} onAdd={addMemberhandler}   mode="groupAdd"></UserItem>
+                 
+
                 );
               })}
-                {searchingAddUser && dataBaseUsers &&
-              dataBaseUsers.length !== 0 && dataBaseUsers.map((element) => {
-                const exist =selectedGroup.participents.some(p=>
-                p.user._id === element._id
-              
-                )
+                {searchingAddUser && !isSearchLoading && NormalizedDatabaseUsers &&
+              NormalizedDatabaseUsers.length !== 0 && NormalizedDatabaseUsers.map((element) => {
+                const exist =isSelectedUser(element._id)
                if(exist) return null
                 return (
-                  
-                  <div
-                  key={element._id}
-                   
-                    className="flex shadow  border-2   cursor-pointer rounded-2xl mt-2 bg-white  hover:bg-[#E6EBF5] p-0 pt-1  xs:p-2"
-                  >
-                    
-                    <div className="">
-                       
-                        <img
-                        loading="lazy"
-                          className="w-12 mt-1 h-10 rounded-full border-white border-2"
-                          src={element.image.url}
-                          alt=""
-                        />
-                      </div>
-                    <div className="flex flex-col w-full justify-between py-1">
-                      <div className="flex  flex-1 justify-between items-center pl-2 ">
-                        <p className="font-small text-xs  xs:text-sm text-black">
-                          {capitalizeFirstLetter(element.name)}
-                        </p>
-                    
-                       
-                       
-                      </div>
-                     
-                    </div>
-                     <div className="flex items-center">
-                      <UserPlusIcon className="w-5 font-medium   h-5 text-blue-500 cursor-pointer"onClick={()=>{addMemberhandler(element)}} />
-                    </div>
-                  </div>
+                       <UserItem user={element} key={element._id} onAdd={addMemberhandler}   mode="groupAdd"></UserItem>
+               
                 );
               })}
+              {(isSearchLoading )&&[...Array(10)].map((_,i)=><UserSkeleton key ={i} send={i%2===0}></UserSkeleton>) }
 
         </div>
           </div>

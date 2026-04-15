@@ -87,6 +87,7 @@ const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.le
 
             <input
               type="email"
+              autoComplete="email"
               name="email"
                id="forget-email"
               placeholder="Enter your email"
@@ -108,6 +109,7 @@ const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.le
               type="text"
               id="forget-username"
               name="username"
+              autoComplete="username"
               placeholder="Enter your username"
               value={formData.username}
               onChange={handlerChange}
@@ -126,6 +128,7 @@ const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.le
             <input
               type="password"
               name="password"
+              autoComplete="new-password"
               id="forget-password"
               placeholder="Enter new password"
               value={formData.password}

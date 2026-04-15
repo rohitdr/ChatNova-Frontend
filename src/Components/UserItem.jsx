@@ -4,7 +4,9 @@
  */
 import React, { useCallback, useContext } from "react";
 import ChatNovaContext from "../Context/ChatNovaContext";
-import { PlusIcon, MinusIcon, CheckIcon } from "@heroicons/react/24/solid";
+
+import { PlusIcon, MinusIcon, CheckIcon,UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import AuthContext from "../Context/AuthContext";
 
 const UserItem = React.memo(
   ({
@@ -20,7 +22,7 @@ const UserItem = React.memo(
 
     const {image,lastMessage,name,element,unreadCount} =user
     const preload = useCallback(() => {
-      import("./ChatLayout");
+      import("./ChatLayout/ChatLayout");
     },[]);
     const handleClick = ()=>{
       if(mode === "chat"){
@@ -28,7 +30,8 @@ const UserItem = React.memo(
         handleUserClick(element);
       }
     }
-    const {capitalizeFirstLetter} = useContext(ChatNovaContext)
+    const {capitalizeFirstLetter,isAdmin} = useContext(ChatNovaContext)
+    const {Me}=useContext(AuthContext)
     const time = lastMessage?.createdAt
   ? new Date(lastMessage.createdAt).toLocaleTimeString([], {
       hour: "2-digit",
@@ -61,9 +64,9 @@ const UserItem = React.memo(
         <div className="flex flex-col w-full justify-between py-1">
           <div className="flex  flex-1 justify-between items-center pl-2 ">
             <p className="font-small text-xs  xs:text-sm text-black">
-              {capitalizeFirstLetter(name)}
+              {capitalizeFirstLetter(name)} { mode==="groupRemove"&& user._id === Me._id && "(You)"}
             </p>
-
+             
             { mode ==="chat" &&lastMessage && (
               <p className=" pt-1 text-[10px] xs:text-xs text-gray-400 flex col">
                 { time}
@@ -71,6 +74,9 @@ const UserItem = React.memo(
               </p>
             )}
           </div>
+           { mode==="groupRemove" &&element.role==="admin" && <div className="text-xs px-2 text-blue-400">
+                    Admin
+               </div>}
           <div className="flex justify-between">
             
           { mode === "chat" &&lastMessage && (
@@ -96,7 +102,7 @@ const UserItem = React.memo(
               />
             ) : (
               <>
-                <CheckIcon className="w-5 h-5 text-blue-500" />
+               {<CheckIcon className="w-5 h-5 text-blue-500" />}
                 <MinusIcon
                   className="w-5 h-5 text-red-500"
                   onClick={(e) => {
@@ -107,7 +113,20 @@ const UserItem = React.memo(
               </>
             )}
           </div>
-        )} </div>
+        )}
+        {mode==="groupRemove"&& Me._id !== user._id && <div className=" flex flex-col justify-center">
+
+       <UserMinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer ${!isAdmin&& "hidden"}`}
+         onClick={(e)=>{  e.stopPropagation(); onRemove?.(user._id,name)}}
+         />
+        </div>}
+        {mode==="groupAdd"&& Me._id !== user._id && <div className=" flex flex-col justify-center">
+
+       <UserPlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer`}
+         onClick={(e)=>{  e.stopPropagation(); onAdd?.(user._id,name)}}
+         />
+        </div>}
+          </div>
 
    
     );

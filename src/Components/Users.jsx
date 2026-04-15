@@ -142,8 +142,7 @@ try {
          unreadCount:element.unreadCount
         }
         }
-    
-    
+
   },[])
 
   const NormalizedChattedUsers=useMemo(()=>chattedUsersList?.map((element)=>

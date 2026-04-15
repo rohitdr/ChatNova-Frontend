@@ -44,8 +44,11 @@ const error = validate()
    if (error) {
     return showAlert("Warning", error);
   }
- 
+
+
    signUp(formData.email.trim(), formData.password, formData.username.trim());
+
+
     
   };
 return isServerDown ? (
@@ -76,6 +79,7 @@ return isServerDown ? (
               type="email"
               name="email"
               id="signup-email"
+              autoComplete="email"
               required
               value={formData.email}
               aria-label="Email"
@@ -97,6 +101,7 @@ return isServerDown ? (
               type="text"
               id="signup-username"
               required
+              autoComplete="username"
               aria-label="UserName"
               value={formData.username}
               name="username"
@@ -118,6 +123,7 @@ return isServerDown ? (
               type="password"
               id="signup-password"
               required
+              autoComplete="new-password"
               aria-label="Password"
               value={formData.password}
               name="password"

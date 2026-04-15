@@ -22,10 +22,10 @@ import PublicRoute from "./Components/PublicRoute";
 function App() {
 
 
-  const context = useContext(AuthContext);
-  const { progress, setProgress } = context;
-  const authcontext = useContext(AuthContext);
-  const { alert } = authcontext;
+
+  const { progress, setProgress,alert } =  useContext(AuthContext);;
+
+
   return (
     <>
       {alert && <Alert alert={alert}></Alert>}
@@ -36,18 +36,24 @@ function App() {
       />
 
       <Routes>
-        <Route exact path="/login" element={<PublicRoute><Login></Login></PublicRoute> }></Route>
-        <Route exact path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}></Route>
-        <Route exact path="/additionaldetails"  element={
+        <Route  path="/login" element={<PublicRoute><Login/></PublicRoute> }></Route>
+        <Route  path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}></Route>
+        <Route  path="/additionaldetails"  element={
       <Suspense fallback={<AppLoader />}>
-        <AdditionalDetails />
+       <ProtectedRoute> <AdditionalDetails /></ProtectedRoute>
       </Suspense>
     }></Route>
         <Route exact path="/forgetpassword" element={
-          <Suspense fallback={     <div><AppLoader></AppLoader></div>  }><ForgetPassword></ForgetPassword>  </Suspense>
+          <Suspense fallback={     <div><AppLoader></AppLoader></div>  }>
+            <PublicRoute>  <ForgetPassword/></PublicRoute>
+          
+             </Suspense>
           }></Route>
       
-        <Route exact path="/SignUp" element={<SignUp></SignUp>}></Route>
+        <Route exact path="/SignUp" element={
+          <PublicRoute>  <SignUp/></PublicRoute>
+        
+          }></Route>
       </Routes>
     
     </>

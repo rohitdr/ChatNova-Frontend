@@ -5,7 +5,8 @@ import { Suspense,lazy } from "react";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
-const ChatLayout = lazy(()=>import('./ChatLayout'));
+
+const ChatLayout = lazy(()=>import("./ChatLayout/ChatLayout"));
 export default function ChatPage() {
 
   const { activeChat,conversationId } = useContext(ChatNovaContext);

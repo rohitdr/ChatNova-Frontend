@@ -22,6 +22,7 @@ const Message= React.memo((props) =>{
  const [display,setDisplay]=useState("hidden")
  const reactionRef = useRef(null)
  const ignoreClick = useRef(false);
+ const presstimer = useRef(null)
 useEffect(() => {
   return () => clearTimeout(presstimer.current);
 }, []);
@@ -41,7 +42,7 @@ useEffect(() => {
     document.removeEventListener("click",handleOutsideClick)
    }
  },[])
- const presstimer = useRef(null)
+ 
 const handleReactionClick = useCallback((e) => {
   if (!socket) return;
 
@@ -107,7 +108,7 @@ const handleReactionClick = useCallback((e) => {
   conversationId,
   Me._id,
   message._id,
-  message.reaction,
+
   queryclient,
 ]);
 

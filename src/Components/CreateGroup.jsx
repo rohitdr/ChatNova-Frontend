@@ -106,8 +106,6 @@ setPreview(null);
   }
 const handleAddMember = (id) => {
 
-
-
   setSelectedUsers(prev => {
     if (prev.some(p => p.user === id)) return prev;
 
@@ -211,6 +209,7 @@ const handleAddMember = (id) => {
       type="text"
       onChange={handleChange}
       name="name"
+      autoComplete="name"
       value={formData.name}
       id="group-name"
       placeholder="Enter group name..."

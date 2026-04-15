@@ -5,7 +5,7 @@ import {
   UserCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
 
 import ChatNovaContext from "../Context/ChatNovaContext"
@@ -15,66 +15,105 @@ export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
   const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
-  const authContext = useContext(AuthContext);
-  const { Me, updateUserImage,updatePassword, isServerDown,showAlert ,updateUser} = authContext;
+const imageRef =useRef(null)
+  const { Me, updateUserImage,updatePassword, isServerDown,showAlert ,updateUser} = useContext(AuthContext);
   const [settingsImage, setSettingsImage] = useState(null);
-  const [formData,setFormData]=useState({phone_number:Me?.phone_number,email:Me?.email,name:Me?.name,username:Me?.username})
-  const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})
+  const [formData,setFormData]=useState(null)
+  const [originaldata,setOriginalData]=useState(null)
  const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
-
-  const settingImagehandler = (e) => {
-    setSettingsImage(e.target.files[0]);
+const [preview,setPreview]=useState(null)
+  useEffect(()=>{
+      if (Me) {
+    const initial = {
+      phone_number: Me.phone_number,
+      email: Me.email,
+      name: Me.name,
+      username: Me.username,
+    };
+    setFormData(initial);
+    setOriginalData(initial);
+  }
+  },[Me])
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0]
+    if(!file) return
+    setSettingsImage(file);
   };
-  const onChangeHandler=({target:{name,value}})=>{
+
+  useEffect(()=>{
+    if(!settingsImage) return
+    const url = URL.createObjectURL(settingsImage)
+    setPreview(url)
+    return ()=> URL.revokeObjectURL(url)
+  },[settingsImage])
+ const handleImageUpdate=()=>{
+            updateUserImage(settingsImage);
+            setSettingsImage(null);
+            setPreview(null)
+         
+ }
+  const handleChange=({target:{name,value}})=>{
     setFormData(prev=>({...prev,[name]:value}))
   }
-  const handleUpdate=(e)=>{
-    let updatedfiled={}
-    const argu ={}
-    Object.keys(formData).forEach((key)=>{
-      if(formData[key] !== originaldata[key]){
-        updatedfiled[key]=data[key]
-      }
-    })
-    e.preventDefault()
+  
+   const emailRegex = /^\S+@\S+\.\S+$/;
 
-    if(formData.settingsName.length<3 || formData.settingsName.length>20 ){
-      showAlert("Warning","Name should be between length 3 to 20")
-    }
-    else if(formData.settingsUsername.length<8 ||formData.settingsUsername.length>12){
-      showAlert("Warning","Username should be between length 8 to 12")
-    }
-    else if(String(formData.settingsPhoneNumber).trim().length !==10){
-     showAlert("Warning","Phone number should be of length 10")
-    }
-    else if(Object.keys(updatedfiled).length===0){
-         showAlert("Warning","Please Update anything to change the data")
-    }
-    else{
-   if(updatedfiled.settingsName){
-     argu.name=updatedfiled.settingsName
-   }
-   if(updatedfiled.settingsEmail){
-     argu.email=updatedfiled.settingsEmail
-   }
-   if(updatedfiled.settingsUsername){
-     argu.username=updatedfiled.settingsUsername
-   }
-   if(updatedfiled.settingsPhoneNumber){
-     argu.phone_number=updatedfiled.settingsPhoneNumber
-   }
-updateUser(argu)
-setEditMenu(false)
-updatedfiled={}
+const validate = () => {
+  if(!formData || !originaldata) return   { error: "Data not ready" };
+  const updatedFields = {};
+  const payload = {};
 
+  Object.keys(formData).forEach((key) => {
+    if (formData[key] !== originaldata[key]) {
+      updatedFields[key] = formData[key];
     }
+  });
 
+  if (!emailRegex.test(formData.email)) {
+    return { error: "Please Enter a Valid Email" };
+  }
 
+  if (formData.name.trim().length < 3 || formData.name.trim().length > 20) {
+    return { error: "Name should be between length 3 to 20" };
+  }
 
+  if (formData.username.trim().length < 8 || formData.username.trim().length > 12) {
+    return { error: "Username should be between length 8 to 12" };
+  }
+
+  if (String(formData.phone_number).trim().length !== 10) {
+    return { error: "Phone number should be of length 10" };
+  }
+
+  if (!Object.keys(updatedFields).length) {
+    return { error: "Please update something" };
   }
 
 
- 
+  if (updatedFields.name) payload.name = updatedFields.name;
+  if (updatedFields.email) payload.email = updatedFields.email;
+  if (updatedFields.username) payload.username = updatedFields.username;
+  if (updatedFields.phone_number) payload.phone_number = updatedFields.phone_number;
+
+  return { payload };
+};
+
+const handleUpdate = (e) => {
+  e.preventDefault();
+
+  const { error, payload } = validate();
+
+  if (error) {
+    showAlert("Error", error);
+    return;
+  }
+
+  updateUser(payload);
+  setEditMenu(false);
+  setOriginalData(formData);
+};
+
+ const isChanged =formData && originaldata && JSON.stringify(formData) !== JSON.stringify(originaldata) 
   useEffect(()=>{
     if(!socket) return
     const handleSocket=(userToSend)=>{
@@ -83,7 +122,7 @@ updatedfiled={}
     
  queryClient.setQueryData(["Me"],(oldData)=>{
   if(!oldData) return
-    return [...oldData,...userToSend]
+    return {...oldData,...userToSend}
 
   })
 
@@ -93,26 +132,38 @@ updatedfiled={}
  return ()=>{
   socket.off("updateUser",handleSocket)
  }
-  },[socket])
-  const onPasswordChangeHandler=(e)=>{
-     setPasswordData({...passwordData,[e.target.name]:e.target.value})
+  },[socket,queryClient])
+
+  const handlePasswordChange=({target:{name,value}})=>{
+     setPasswordData(prev=>({...prev,[name]:value}))
   }
+  const validatePassword=()=>{
+ if(passwordData.oldPassword.length<8 || passwordData.newPassword.length<8 || passwordData.confirmPassword.length<8  ){
+      return "Password should be of length 8"
+    }
+  if(passwordData.confirmPassword !== passwordData.newPassword){
+        return "New password and confirm password must be same"
+    }
+    if(passwordData.oldPassword === passwordData.newPassword){
+        return "New password and old password must not be same"
+    }
+    return null
+  }
+  const isValidPassword =
+  passwordData.oldPassword.length >= 8 &&
+  passwordData.newPassword.length >= 8 &&
+  passwordData.confirmPassword === passwordData.newPassword;
   const handlePasswordUpdate=(e)=>{
 e.preventDefault()
- if(passwordData.oldPassword.length<8 || passwordData.newPassword.length<8 || passwordData.confirmPassword.length<8  ){
-      showAlert("Warning","Password should be of length 8")
-    }
-    else if(passwordData.confirmPassword !== passwordData.newPassword){
-         showAlert("Warning","New password and confirm password must be same")
-    }
-    else if(passwordData.oldPassword === passwordData.newPassword){
-         showAlert("Warning","New password and old password must not be same")
-    }
-    else{
-      // console.log(passwordData.oldPassword,passwordData.newPassword)
+ const error = validatePassword()
+ if(error){
+  showAlert("Error",error)
+  return
+ }
+  
   updatePassword(passwordData.oldPassword,passwordData.newPassword)
    setPasswordData({oldPassword:"",newPassword:"",confirmPassword:""})
-    }
+    
   }
   return isServerDown  ? (
     <NoServer></NoServer>
@@ -124,44 +175,38 @@ e.preventDefault()
     <h2 className="text-2xl font-semibold text-gray-800">My Profile</h2>
   </div>
 
-  {/* Profile Card */}
+
   <div className="mx-4 bg-white rounded-2xl shadow-sm p-6 flex flex-col items-center">
     
     <div className="relative">
       <input
+      ref={imageRef}
         type="file"
         id="settingsImage"
         accept="image/*"
         className="hidden"
-        onChange={settingImagehandler}
+        onChange={handleImageChange}
       />
 
-      {/* Avatar */}
+    
       <img
         loading="lazy"
         className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
-        src={
-          settingsImage
-            ? URL.createObjectURL(settingsImage)
-            : Me?.image?.url
-        }
-        alt=""
+        src={preview|| Me?.image?.url}
+        alt="User"
       />
 
 
       {settingsImage ? (
         <ArrowUpIcon
           className="w-8 h-8 p-1.5 bg-blue-600 text-white rounded-full shadow absolute bottom-1 right-1 cursor-pointer hover:bg-blue-700 transition"
-          onClick={() => {
-            updateUserImage(settingsImage);
-            setSettingsImage(null);
-          }}
+          onClick={handleImageUpdate}
         />
       ) : (
         <PencilIcon
           className="w-8 h-8 p-1.5 bg-white border shadow rounded-full absolute bottom-1 right-1 cursor-pointer hover:bg-gray-100 transition"
           onClick={() => {
-            document.getElementById("settingsImage").click();
+            imageRef.current.click()
           }}
         />
       )}
@@ -174,13 +219,9 @@ e.preventDefault()
     <p className="text-sm text-gray-500">@{Me?.username}</p>
   </div>
 
-  {/* Bio */}
-  <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-sm text-gray-600 leading-relaxed">
-    Hey! I love connecting with new people and having meaningful conversations.
-    Feel free to drop a message anytime!
-  </div>
+  
 
-  {/* About Section */}
+
   <div className="mx-4 mt-4">
     <div className="flex justify-between items-center mb-2">
       <div className="flex items-center">
@@ -225,24 +266,27 @@ e.preventDefault()
       <form onSubmit={handleUpdate} className="bg-white rounded-2xl shadow-sm p-4 space-y-4">
 
         {[
-          { name: "settingsName", type: "text" },
-          { name: "settingsEmail", type: "email" },
-          { name: "settingsUsername", type: "text" },
-          { name: "settingsPhoneNumber", type: "tel" },
+          { name: "name", type: "text"},
+          { name: "email", type: "email" },
+          { name: "username", type: "text"},
+          { name: "phone_number", type: "tel" },
         ].map((field, i) => (
           <input
             key={i}
+    
             type={field.type}
             name={field.name}
-            value={data[field.name]}
-            onChange={onChangeHandler}
-            placeholder={field.name.replace("settings", "")}
+            value={formData[field.name]}
+            onChange={handleChange}
+            placeholder={`Enter ${field.name}`}
             className="w-full px-3 py-2 rounded-lg bg-gray-100 focus:bg-white border border-transparent focus:border-blue-500 outline-none transition"
           />
         ))}
 
         <div className="flex justify-end">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+          <button
+          disabled={!isChanged}
+           className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-50">
             Update
           </button>
         </div>
@@ -262,8 +306,9 @@ e.preventDefault()
       <input
         type="password"
         name="oldPassword"
+        autoComplete="current-password"
         value={passwordData.oldPassword}
-        onChange={onPasswordChangeHandler}
+        onChange={handlePasswordChange}
         placeholder="Old Password"
         className="input-modern"
       />
@@ -271,8 +316,9 @@ e.preventDefault()
       <input
         type="password"
         name="newPassword"
+        autoComplete="new-password"
         value={passwordData.newPassword}
-        onChange={onPasswordChangeHandler}
+        onChange={handlePasswordChange}
         placeholder="New Password"
         className="input-modern"
       />
@@ -280,14 +326,17 @@ e.preventDefault()
       <input
         type="password"
         name="confirmPassword"
+        autoComplete="new-password"
         value={passwordData.confirmPassword}
-        onChange={onPasswordChangeHandler}
+        onChange={handlePasswordChange}
         placeholder="Confirm Password"
         className="input-modern"
       />
 
       <div className="flex justify-end">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+        <button
+        disabled={!isValidPassword}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-50">
           Update
         </button>
       </div>

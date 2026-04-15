@@ -88,6 +88,7 @@ return isServerDown  ? (
               type="email"
               id="login-email"
               required
+              autoComplete="email"
               name="email"
               aria-label="email"
               placeholder="Enter your email"
@@ -119,6 +120,7 @@ return isServerDown  ? (
               type="password"
               name="password"
               required
+              autoComplete="current-password"
               id="login-password"
               aria-label="password"
               value={formData.password}
