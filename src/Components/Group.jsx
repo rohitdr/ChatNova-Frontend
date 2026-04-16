@@ -57,6 +57,7 @@ export default function Group() {
   useEffect(()=>{
     if (!socket) return
     const groupHandler =(newGroup)=>{
+    
       queryClient.setQueryData(["groups"],(oldData)=>{
        if(!oldData) return oldData
         const filterd =oldData.filter((group)=>group._id !== newGroup._id)

@@ -8,14 +8,15 @@ export default function useTyping({ socket, Me, conversationId }) {
     if (!socket || !conversationId || !Me) return;
 
     if (!isTyping) {
+    
       setIsTyping(true);
       socket.emit("typing", {
         conversationId,
-        userId: Me._id,
-        name: Me.name,
+        userId: Me?._id,
+        name: Me?.name,
       });
     }
-  }, [socket, isTyping, conversationId, Me]);
+  }, [socket, conversationId, Me]);
 
   const handleStopTyping = useCallback(() => {
     if (!socket || !conversationId || !Me) return;

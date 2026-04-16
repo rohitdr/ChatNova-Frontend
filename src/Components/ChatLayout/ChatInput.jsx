@@ -12,7 +12,10 @@ export default function ChatInput(props) {
     const handleChange=(e)=>{
       
       handleTyping();
-      handleStopTyping();
+ 
+        handleStopTyping();
+  
+      
       setSendingMessage(e.target.value);
     }
     const handleKeyDown=(e)=>{

@@ -201,7 +201,8 @@ handleError(error)
       
         return  {
   message: res.data.message,
-  nextCursor:res.data.nextCursor
+  nextCursor:res.data.nextCursor,
+  totalCount:res.data.totalCount
 };
       }
     } catch (error) {
@@ -242,17 +243,14 @@ const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
       const res = await uploadCloudinaryApi(formdata)
       setProgress(30);
-   
       const message = {
         publicId: res.data.public_id,
-
         bytes: res.data.bytes,
         type: res.data.resource_type,
         url: res.data.secure_url,
         tempId:tempId
       };
-   
-    
+
       setProgress(60);
       sendMedia(id, message);
       setProgress(100);
@@ -319,14 +317,15 @@ const {data:allGroup,isLoading:isAllGroupLoading}=useGroups(getAllGroups,Me)
     }
   };
 //// function to add member from group
-const addMember =(userId)=>{
+const addMember =(userId,tempId)=>{
     
       const data = {
        groupId:conversationId,
        participents:[{
         user:userId,
         role:"member"
-       }]
+       }],
+       tempId
       }  
       runWithProgress(addMemberMutation,data)
    

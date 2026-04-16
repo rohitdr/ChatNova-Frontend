@@ -1,4 +1,4 @@
-import { useCallback,useEffect } from "react";
+import { useCallback,useEffect, useRef } from "react";
 
 export default function useSocket({
     socket,
@@ -9,6 +9,7 @@ export default function useSocket({
 
  
 }) {
+  const lastNewMessageRef= useRef(null)
      const updateGroupList =useCallback((newMessage)=>{
     if (newMessage.conversationToSend?.type !== "group") return;
      
@@ -22,7 +23,8 @@ export default function useSocket({
          
         },[queryclient])
         const updateUsersList = useCallback((newMessage, currentUserId, activeConversationId) => {
-       
+           if(lastNewMessageRef.current===newMessage._id) return
+           lastNewMessageRef.current =newMessage._id
         if (newMessage.conversationToSend?.type !== "private") return;
           queryclient.setQueryData(["users"], (oldData) => {
             if (!oldData) return oldData;
@@ -106,7 +108,7 @@ export default function useSocket({
          const updateMessageToQuerySocket = useCallback((newMessage) => {
           queryclient.setQueryData(["messages", conversationId], (oldData) => {
             if (!oldData) return oldData;
-        
+     
             let replaced = false;
         let alreadyExists=false
             const newPages = oldData.pages.map((page) => {
@@ -132,8 +134,9 @@ export default function useSocket({
               newPages[0] = {
                 ...newPages[0],
                 message: [
+                   newMessage,
                   ...newPages[0].message,
-                  newMessage,
+                 
                 ],
               };
             }
@@ -144,17 +147,8 @@ export default function useSocket({
             };
           });
         },[conversationId,queryclient])
-           const userTypingHandler=useCallback(({ userId, name })=>{
-   setTypingUser((prev) => {
-        if (prev.find((p) => p.user === userId)) {
-          return prev;
-        }
-        return [...prev, { user: userId, name }];
-      });
-      },[setTypingUser])
-    const userStopTypingHandler=useCallback(({ userId })=>{
-setTypingUser((prev) => prev.filter((p) => p.user !== userId));
-    },[setTypingUser])
+        
+   
    useEffect(() => {
     if (!socket) return;
     const handleReaction = ({ messageId, reaction }) => {
@@ -176,6 +170,7 @@ setTypingUser((prev) => prev.filter((p) => p.user !== userId));
      })
     };
       const deliverHandler = ({ messageId, deliveredTo }) => {
+    
      queryclient.setQueryData(["messages",conversationId],(oldData)=>{
       if(!oldData) return oldData
       const newPages = oldData.pages.map((page)=>{
@@ -200,10 +195,12 @@ setTypingUser((prev) => prev.filter((p) => p.user !== userId));
   
          queryclient.setQueryData(["messages",convId],(oldData)=>{
       if(!oldData) return oldData
+     
       const newPages = oldData.pages.map((page)=>{
           const updatedMessage = page.message.map((msg)=>{
          const alreadySeen = msg.seenBy.some((s)=>s.user.toString() === userId)
        if(msg.senderId.toString() !==userId && !alreadySeen){
+        
         return{
           ...msg,
           seenBy:[...msg.seenBy,{user:userId,seenAt}]
@@ -260,9 +257,22 @@ setTypingUser((prev) => prev.filter((p) => p.user !== userId));
 
     
     };
-   
+      const userTypingHandler=({ userId, name })=>{
+             
+   setTypingUser((prev) => {
+  
+        if (prev.find((p) => p.user === userId)) {
+        
+          return prev;
+        }
+        return [...prev, { user: userId, name }];
+      });
+    
+      }
+       const userStopTypingHandler=({ userId })=>{
+setTypingUser((prev) => prev.filter((p) => p.user !== userId));
+    }
      socket.on("user_stop_typing",userStopTypingHandler);
-
     socket.on("user_typing", userTypingHandler);
     socket.on("reaction_updated", handleReaction);
         socket.on("message_seen", seenHandler);
@@ -281,5 +291,5 @@ setTypingUser((prev) => prev.filter((p) => p.user !== userId));
   Me,
   updateMessageToQuerySocket,
   updateGroupList,
-  updateUsersList,]);
+  updateUsersList]);
 }

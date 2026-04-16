@@ -92,7 +92,12 @@ useEffect(() => {
 
 
 
-
+useEffect(()=>{
+   virtuosoRef.current?.scrollToIndex({
+      index: 100005,
+      behavior: "smooth",
+    });
+},[typingUser])
 
 
 
@@ -104,7 +109,6 @@ useEffect(() => {
   queryclient,
   Me,
   setTypingUser,
- virtuosoRef
  })
 
 
@@ -214,7 +218,9 @@ const {
   setActiveChat={setActiveChat}
   setActivePage={setActivePage}
   capitalizeFirstLetter={capitalizeFirstLetter}
-  formatLastSeen={formatLastSeen} ></ChatHeader>
+  formatLastSeen={formatLastSeen}
+  socket={socket}
+  conversationId={conversationId} ></ChatHeader>
 //           
             ) : (
               <ChatHeaderSkeleton></ChatHeaderSkeleton>

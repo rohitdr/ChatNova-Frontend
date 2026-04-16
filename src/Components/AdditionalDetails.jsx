@@ -7,7 +7,13 @@ import { useNavigate } from "react-router-dom";
 
 export default function AdditionalDetails() {
   const [previewUrl,setPreviewUrl]=useState(null)
-  useEffect(()=>{
+ 
+  const navigate = useNavigate();
+const InputRef = useRef(null)
+  const { updateUserImage, showAlert, updateUser } =  useContext(AuthContext);
+  const [image, setImage] = useState(null);
+  const [formData, setFormData] = useState({ phone_number: "", name: "" });
+ useEffect(()=>{
     if(!image) return 
     const url = URL.createObjectURL(image)
     setPreviewUrl(url)
@@ -15,12 +21,6 @@ export default function AdditionalDetails() {
       URL.revokeObjectURL(url)
     }
   },[image])
-  const navigate = useNavigate();
-const InputRef = useRef(null)
-  const { updateUserImage, showAlert, updateUser } =  useContext(AuthContext);
-  const [image, setImage] = useState(null);
-  const [formData, setFormData] = useState({ phone_number: "", name: "" });
-
 
   const handleImageChange = (e) => {
    const file = e.target.files?.[0]
@@ -52,15 +52,20 @@ const validateForm = () => {
       showAlert("Warning",error)
       return
     }
-  
+  try{
       await updateUser({
         name: formData.name.trim(),
         phone_number: formData.phone_number.trim(),
       })
  if(image){
  await  updateUserImage(image);
+  
  }
-      navigate("/");
+  navigate("/");
+  }catch(error){
+ showAlert("Error",error.message)
+ 
+  }
     }
   
 const handleSkip=()=>{
@@ -88,24 +93,17 @@ const handleSkip=()=>{
                 className="hidden"
                 onChange={handleImageChange}
               />
-              {image ? (
-                <ArrowUpCircleIcon
-                  className="w-7 h-7 right-2 bg-white shadow text-blue-900    cursor-pointer rounded-full bottom-3 absolute "
-                  onClick={()=>{setImage(null);
-                    setPreviewUrl(null)
-                  }}
-                ></ArrowUpCircleIcon>
-              ) : (
+             
                 <PencilIcon
               
                   className="w-7 h-7 right-2 bg-white border border-black  p-1.5 text-blue-900  cursor-pointer rounded-full bottom-3 absolute "
                   onClick={()=>InputRef.current.click()}
                 ></PencilIcon>
-              )}
+            
               <img
                 loading="lazy"
                 className="w-28  shadow h-28 rounded-full   border-2"
-                src={previewUrl ||  "https://via.placeholder.com/150"}
+                src={previewUrl ||  "https://res.cloudinary.com/do2twyxai/image/upload/v1776273704/n98hl5onavz8jcqx7npo.jpg"}
                 alt="Profile"
               />
             </div>

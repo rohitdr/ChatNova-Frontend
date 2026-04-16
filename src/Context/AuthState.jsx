@@ -183,8 +183,9 @@ const response = await signUpApi(data)
       localStorage.setItem("refreshToken", response.data.refreshToken);
       await initFCM()
       queryClient.invalidateQueries(["Me"])
+        showAlert("Success", "You have been logged in successfully !");
       navigate("/",{replace:true});
-      showAlert("Success", "You have been logged in successfully !");
+    
   
   })
 

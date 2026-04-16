@@ -123,12 +123,14 @@ const messageStatus = (message, id) => {
 
     return "sent"; 
   } else {
+
     const delivered = message.deliveredTo?.some(
       (d) => d.user.toString() === id
     );
+ 
     const seen = message.seenBy?.some((s) => s.user.toString() === id);
-
-    if (!delivered) return "sent"; 
+    
+    if (!delivered && !seen) return "sent"; 
     if (!seen) return "delivered"; 
     return "seen";
   }
@@ -166,6 +168,8 @@ const onMouseLeaveMessage=()=>{
  
 }
 let status = messageStatus(message,currentChatUserId)
+
+
   return(
    <> 
   {message.type !=="system" ?<div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}

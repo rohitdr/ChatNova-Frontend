@@ -25,7 +25,6 @@ function App() {
 
   const { progress, setProgress,alert } =  useContext(AuthContext);;
 
-
   return (
     <>
       {alert && <Alert alert={alert}></Alert>}

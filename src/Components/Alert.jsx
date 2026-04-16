@@ -57,8 +57,8 @@ return (
 
       {/* Content */}
       <div className="flex-1">
-        <p className="font-medium text-gray-800">{type}</p>
-        <p className="text-sm text-gray-600">{message}</p>
+        <p className="font-normal sm:font-medium text-gray-800">{type}</p>
+        <p className="text-xs sm:text-sm text-gray-600">{message}</p>
       </div>
 
       {/* Close */}

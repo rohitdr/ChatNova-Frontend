@@ -160,7 +160,6 @@ e.preventDefault()
   showAlert("Error",error)
   return
  }
-  
   updatePassword(passwordData.oldPassword,passwordData.newPassword)
    setPasswordData({oldPassword:"",newPassword:"",confirmPassword:""})
     
@@ -168,7 +167,7 @@ e.preventDefault()
   return isServerDown  ? (
     <NoServer></NoServer>
   ) : (
-  <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide">
+  <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide mb-20">
 
 
   <div className="flex justify-between items-center px-6 py-4">
