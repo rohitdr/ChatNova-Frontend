@@ -10,25 +10,24 @@ export default function SocketState({ children }) {
 
   useEffect(() => {
     if (!Me?._id) return;
-
     const socket = io(import.meta.env.VITE_SOCKET, {
-      transports: ["websocket"],
       query: { userId: Me._id },
       withCredentials: true,
     });
 
     socketRef.current = socket;
-
-    socket.on("getOnlineUsers", (users) => {
-      setOnlineUsers(users);
-    });
+ const handleOnlineUsers = (users) => {
+   
+    setOnlineUsers(users);
+  };
+    socket.on("getOnlineUsers", handleOnlineUsers);
 
     socket.on("connect_error", (err) => {
       console.error("Socket connection error:", err.message);
     });
 
     return () => {
-      socket.off("getOnlineUsers");
+      socket.off("getOnlineUsers",handleOnlineUsers);
       socket.disconnect();
     };
   }, [Me?._id]);

@@ -11,7 +11,8 @@ export default function ChatHeader({ selectedUser,
   capitalizeFirstLetter,
 formatLastSeen,
 socket,
-conversationId
+conversationId,
+setConversationId
 }) {
   const handleBack=()=>{
   
@@ -19,7 +20,9 @@ conversationId
 
  if(conversationId) {
       socket.emit("leave_group",conversationId)
+    
     }
+    setConversationId(null)
        setActiveChat(false)
   }
   const handleGroupClick=()=>{

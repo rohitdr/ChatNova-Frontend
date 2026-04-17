@@ -169,14 +169,23 @@ export default function useSocket({
     };
      })
     };
-      const deliverHandler = ({ messageId, deliveredTo }) => {
-    
-     queryclient.setQueryData(["messages",conversationId],(oldData)=>{
+  
+      const deliverHandler = ({  convId,userId, deliveredAt }) => {
+     console.log("runninjg")
+      queryclient.setQueryData(["messages",convId],(oldData)=>{
       if(!oldData) return oldData
+     
       const newPages = oldData.pages.map((page)=>{
-          const updatedMessage = page.message.map((msg)=>
-          msg._id === messageId ? { ...msg, deliveredTo: [...new Set([...msg.deliveredTo, ...deliveredTo])] } : msg,
-          )
+          const updatedMessage = page.message.map((msg)=>{
+         const alreadyDeliverd = msg.deliveredTo.some((d)=>d.user.toString() === userId)
+       if(msg.senderId.toString() !==userId && !alreadyDeliverd){
+        
+        return{
+          ...msg,
+          deliveredTo:[...msg.deliveredTo,{user:userId,deliveredAt}]
+        }
+       }
+        return msg})
           return {
         ...page,
         message: updatedMessage,

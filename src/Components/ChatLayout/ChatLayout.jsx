@@ -39,7 +39,7 @@ setReplyMessage,
     setActiveChat,
     uploadCloudinary,
     currentChatUserId,
- 
+ setConversationId,
 getmessages,
     sendMessages,
   
@@ -220,7 +220,8 @@ const {
   capitalizeFirstLetter={capitalizeFirstLetter}
   formatLastSeen={formatLastSeen}
   socket={socket}
-  conversationId={conversationId} ></ChatHeader>
+  conversationId={conversationId} 
+  setConversationId={setConversationId}></ChatHeader>
 //           
             ) : (
               <ChatHeaderSkeleton></ChatHeaderSkeleton>
