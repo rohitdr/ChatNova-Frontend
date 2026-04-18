@@ -108,7 +108,10 @@ npm install
 ```
 npm run dev
 ```
+## 🌐 Live Links
 
+- Frontend: https://chat-nova-frontend-4nna.vercel.app/ 
+- Backend API: https://chatnova-backend-1.onrender.com 
 
 ## 🔗 Backend Repository
 
