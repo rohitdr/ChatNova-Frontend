@@ -118,7 +118,7 @@ npm run dev
 
 ## 🎥 Demo
 
-[![Watch Demo](https://res.cloudinary.com/do2twyxai/image/upload/v1776421201/Screenshot_242_e87la4.png)](https://res.cloudinary.com/do2twyxai/video/upload/v1775322940/Untitled_89_1080p_zfl3yv.3gp)
+[![Watch Demo](https://res.cloudinary.com/do2twyxai/image/upload/v1776421201/Screenshot_242_e87la4.png)](https://youtu.be/UGOtACSJBls)
 
 ---
 
