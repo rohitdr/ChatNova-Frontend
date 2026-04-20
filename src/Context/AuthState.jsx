@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import {  useQueryClient } from "@tanstack/react-query";
 import { useMe } from "../Components/Hooks/UseMe.jsx";
 import initFCM from "../Components/Notification.jsx";
-import { forgetPasswordApi, getLoggedUserApi, loginApi, logoutApi, signUpApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
+import { forgetPasswordApi, getLoggedUserApi, loginApi, logoutApi, refreshApi, signUpApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
 import { uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 
 export default function AuthState(props) {
@@ -85,7 +85,7 @@ const runWithProgress =async(fn,show=true)=>{
 
   useEffect(()=>{
 const init=async()=>{
-const token = localStorage.getItem('refreshToken')
+const token = localStorage.getItem('accessToken')
 if(!token){
   setAuthReady(true)
   return
@@ -117,7 +117,6 @@ try{
 const response = await signUpApi(data)
     
         localStorage.setItem("accessToken",response.data.accessToken)
-      localStorage.setItem("refreshToken", response.data.refreshToken);
 
       showAlert("Success", "You have been logged in successfully !");
      
@@ -149,14 +148,7 @@ const response = await signUpApi(data)
 
   const refreshSession = async () => {
     try {
-       const response = await axios.post(`${import.meta.env.VITE_API}/auth/refresh`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("refreshToken")}`,
-            },
-          },
-        );
+       const response = await refreshApi();
     
         localStorage.setItem("accessToken",response.data.accessToken)
     
@@ -180,7 +172,7 @@ const response = await signUpApi(data)
 
     
         localStorage.setItem("accessToken",response.data.accessToken)
-      localStorage.setItem("refreshToken", response.data.refreshToken);
+    
       await initFCM()
       queryClient.invalidateQueries(["Me"])
         showAlert("Success", "You have been logged in successfully !");
@@ -265,7 +257,7 @@ await logoutApi()
       console.log("Logout API failed")
         }
         finally{
-          localStorage.removeItem("refreshToken");
+          
           localStorage.removeItem("accessToken");
           queryClient.removeQueries()
  

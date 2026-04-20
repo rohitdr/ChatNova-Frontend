@@ -31,6 +31,6 @@ export const updateUserApi =(data)=>{
 export const logoutApi =()=>{
    return  api.post("/auth/logout");
 }
-// export const refreshSessionApi =()=>{
-//    return  api.get("/auth/getUser");
-// }
+export const refreshApi =()=>{
+   return  api.post("/auth/refresh");
+}
