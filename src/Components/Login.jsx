@@ -13,11 +13,6 @@ export default function Login() {
 const navigate = useNavigate()
 
   const { login, isServerDown ,showAlert,Me} =  useContext(AuthContext);
- useEffect(()=>{
- if (Me) {
-    navigate("/", { replace: true });
-  }
- },[Me])
   const [formData, setFormData] = useState({ email: "", password: "" });
  const onChangeHandler = ({target:{name,value}}) => {
 
@@ -75,7 +70,7 @@ return isServerDown  ? (
 
       <form onSubmit={handleSubmit} className="space-y-5">
 
-        {/* Email */}
+
         <div>
           <label className="text-sm text-gray-600" htmlFor="login-email">Email</label>
           <div className={`flex items-center mt-1 rounded-lg border 
@@ -101,7 +96,6 @@ return isServerDown  ? (
           </div>
         </div>
 
-        {/* Password */}
         <div>
           <div className="flex justify-between">
             <label className="text-sm text-gray-600" htmlFor="login-password">Password</label>
@@ -133,7 +127,6 @@ return isServerDown  ? (
           </div>
         </div>
 
-        {/* Button */}
         <button
         disabled={!isFormValid}
           type="submit"
@@ -146,7 +139,6 @@ return isServerDown  ? (
 
       </form>
 
-      {/* Footer */}
       <p className="text-center text-sm text-gray-500 mt-6">
         Don’t have an account?{" "}
         <Link to="/SignUp" className="text-indigo-600 hover:underline">

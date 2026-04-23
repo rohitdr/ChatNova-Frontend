@@ -13,7 +13,7 @@ const Message= React.memo((props) =>{
   const [replyIcon,setReplyIcon]=useState("hidden")
   const queryclient = useQueryClient();
   const { message, send } = props;
- 
+
   const { Me } =  useContext(AuthContext);
 
   const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} =  useContext(ChatNovaContext);
@@ -182,7 +182,7 @@ let status = messageStatus(message,currentChatUserId)
         loading="lazy"
           className="w-[40px] h-[38px]        lg:w-[40px]  lg:h-[41px] rounded-full  border-white border-4"
           src={send ? Me?.image?.url : message?.senderId?.image?.url}
-          alt=""
+          alt="User"
         />
       </div>
       <div className="flex max-w-[85%] flex-col mb-2 relative  ">

@@ -29,7 +29,7 @@ function TypingIndicator({typingUsers=[]}) {
         
          <div
           className={`flex text-xs pt-0.5 justify-start my-2`}
-        > <span>{names} {console.log(activeTypers)} is typing</span>
+        > <span>{names} is typing</span>
                  <span className='dot rounded-full bg-[#9ca3af] h-2 w-2 my-1  mx-1'></span>
             <span className='dot  rounded-full bg-[#9ca3af] h-2 w-2 my-1 mx-1' ></span>
             <span className='dot  rounded-full bg-[#9ca3af] h-2 w-2 my-1 mx-1'></span>

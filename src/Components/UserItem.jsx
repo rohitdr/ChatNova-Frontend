@@ -26,7 +26,6 @@ const UserItem = React.memo(
     },[]);
     const handleClick = ()=>{
       if(mode === "chat"){
-
         handleUserClick(element);
       }
     }

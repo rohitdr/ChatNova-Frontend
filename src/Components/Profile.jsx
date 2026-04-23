@@ -33,7 +33,7 @@ const aboutItem =useMemo(()=>[
         <div className="relative">
           <img
             className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
-            src={Me?.image?.url ||"https://via.placeholder.com/150"}
+            src={Me?.image?.url ||"https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"}
             alt="User"
             loading="lazy"
           />

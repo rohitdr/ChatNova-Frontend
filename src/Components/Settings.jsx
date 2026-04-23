@@ -123,7 +123,6 @@ const handleUpdate = (e) => {
  queryClient.setQueryData(["Me"],(oldData)=>{
   if(!oldData) return
     return {...oldData,...userToSend}
-
   })
 
       }

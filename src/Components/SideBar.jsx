@@ -11,7 +11,7 @@ import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
 export default function SideBar() {
   const {setIsGroup} =useContext(ChatNovaContext)
-  const { logout, Me, setActivePage, activePage } = useContext(AuthContext);;
+  const { logout, Me, setActivePage, activePage } = useContext(AuthContext);
   const [showMenu, setShowMenu] = useState(false);
   const logoutHandler = () => {
     logout();
@@ -99,7 +99,7 @@ const menuItems = [
           <img
           loading="lazy"
             onClick={() => {setShowMenu(prev=>!prev)}}
-            src={Me?.image?.url || "https://via.placeholder.com/150"}
+            src={Me?.image?.url || "https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"}
             alt="User Image"
             className=" 2xs:h-7 2xs:w-7 border-black cursor-pointer border-2 2xs:mr-2 xs:mr-5 lg:mx-0 lg:h-10 lg:w-10 h-8 w-8 xs:mb-1 rounded-full"
           />
