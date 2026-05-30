@@ -7,6 +7,7 @@ import {
   PowerIcon,
   Cog8ToothIcon,
 } from "@heroicons/react/24/solid";
+import { AnimatePresence, motion } from "framer-motion";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
 export default function SideBar() {
@@ -105,7 +106,7 @@ const menuItems = [
           />
         </div>
       </div>
-
+<AnimatePresence>
       {showMenu && (
          <div
           className="fixed z-50 inset-0 bg-black/20"
@@ -113,13 +114,17 @@ const menuItems = [
             setShowMenu(false);
           }}
         >
-          <div
-            className="fixed shadow-xl   bg-white h-44 w-44 bottom-14 right-4 lg:bottom-14 lg:left-4"
+          <motion.div
+          initial={{opacity:0,scale:0}}
+          animate={{opacity:1,scale:1}}
+          exit={{opacity:0,scale:0}}
+          transition={{duration:0.3}}
+            className="fixed shadow-xl rounded-2xl  bg-white h-44 w-44 bottom-14 right-4 lg:bottom-14 lg:left-4"
             onClick={(e) => {
               e.stopPropagation();
             }}
           >
-            {dropdownItems.map(({ id, name, Icon, action })=>(<div key={id} className="border cursor-pointer  border-gray-50 hover:bg-slate-100"
+            {dropdownItems.map(({ id, name, Icon, action })=>(<div key={id} className="border rounded-2xl cursor-pointer  border-gray-50 hover:bg-slate-100"
                onClick={action}>
                 <div
                   className="flex m-4  mb-4 text-gray-700 justify-between font-medium"
@@ -135,9 +140,10 @@ const menuItems = [
 
 
            
-          </div>
+          </motion.div>
         </div>
       )}
+      </AnimatePresence>
     </>
   );
 }

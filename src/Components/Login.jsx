@@ -8,11 +8,15 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
+import { useAuthMutations } from "./Hooks/useAuthMutations";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 export default function Login() {
+
 const navigate = useNavigate()
 
-  const { login, isServerDown ,showAlert,Me} =  useContext(AuthContext);
+  const { login, isServerDown ,showAlert,Me,handleError} =  useContext(AuthContext);
+    const {loginMutation}=useAuthMutations(handleError)
   const [formData, setFormData] = useState({ email: "", password: "" });
  const onChangeHandler = ({target:{name,value}}) => {
 
@@ -47,8 +51,7 @@ const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.le
     showAlert("Warning",error)
     return
    }
-  
-      login(formData.email.trim(), formData.password);
+  loginMutation.mutate({email:formData.email.trim(), password:formData.password})
   
     
    
@@ -128,13 +131,13 @@ return isServerDown  ? (
         </div>
 
         <button
-        disabled={!isFormValid}
+        disabled={!isFormValid || loginMutation.isPending}
           type="submit"
-          className="w-full h-11 rounded-lg font-medium transition-all duration-200 
-         
+          className="w-full flex justify-center items-center h-11 rounded-lg font-medium transition-all duration-200 
             bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 disabled:active:scale-100"
         >
-          Sign in
+        {loginMutation.isPending ? <ArrowPathIcon className="text-white animate-spin w-5 h-5 "></ArrowPathIcon>:"Sign in"} 
+    
         </button>
 
       </form>

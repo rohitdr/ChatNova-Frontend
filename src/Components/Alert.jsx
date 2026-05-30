@@ -10,11 +10,11 @@ import AuthContext from "../Context/AuthContext";
 export default function Alert(props) {
   const type = props?.alert?.type;
   const message = props?.alert?.message;
-
   const authcontext = useContext(AuthContext);
   const { alert, setAlert } = authcontext;
   const [leaving, setLeaving] = useState(false);
   useEffect(() => {
+
     if (!alert) return;
     setLeaving(false);
     const timer = setTimeout(() => {
@@ -33,9 +33,9 @@ export default function Alert(props) {
 return (
   <div className="fixed top-5 right-5 z-50">
     <div
-      className={`flex items-start gap-3 w-80 md:w-96 p-4 rounded-xl shadow-xl 
+      className={`flex items-start gap-3 w-72 md:w-96 p-4 rounded-xl shadow-xl 
       backdrop-blur-lg border transition-all duration-300
-      ${leaving ? "opacity-0 translate-x-10 hidden" : "opacity-100 translate-x-0 "}
+      ${leaving ? "opacity-0 translate-x-10  " : "opacity-100 translate-x-0 "}
       
       ${type === "Success" && "bg-green-50/80 border-green-300"}
       ${type === "Error" && "bg-red-50/80 border-red-300"}
@@ -57,13 +57,18 @@ return (
 
       {/* Content */}
       <div className="flex-1">
-        <p className="font-normal sm:font-medium text-gray-800">{type}</p>
-        <p className="text-xs sm:text-sm text-gray-600">{message}</p>
+        <p className="font-normal sm:font-medium text-xs sm:text-md text-gray-800">{type}</p>
+        <p className="text-2xs sm:text-sm text-gray-600 text-nowrap">{message}</p>
       </div>
 
       {/* Close */}
       <button
-        onClick={() => setLeaving(true)}
+     onClick={() => {
+  setLeaving(true);
+  setTimeout(() => {
+    setAlert(null);
+  }, 300);
+}}
         className="text-gray-400 hover:text-gray-600 transition"
       >
         <XMarkIcon className="w-5 h-5" />

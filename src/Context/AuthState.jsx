@@ -304,7 +304,8 @@ isMeLoading,
         progress,
         setProgress,
         login,
-handleError
+handleError,
+setAlert
       }}
     >
       {props.children}
