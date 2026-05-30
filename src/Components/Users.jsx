@@ -162,7 +162,7 @@ export default function Users() {
           Chats
         </div>
 
-        <div className="flex p-2 pr-0 rounded-xl border-none mx-3 sm:mx-4 my-2 bg-white shadow">
+        <div className="flex p-2 pr-0 rounded-xl border-none mx-3 sm:mx-4 my-2 bg-white shadow-xl">
           <MagnifyingGlassIcon className="w-5 h-5 pt-1 text-gray-700 cursor-pointer" />
 
           <input
@@ -180,6 +180,10 @@ export default function Users() {
             searchClick && "overflow-y-auto scrollbar-hide"
           } lg:mb-0 sm:p-2 px-3 lg:px-4 h-full`}
         >
+             {NormalizedChattedUsers?.length===0 && !searchClick && <div className="h-full">
+           <EmptyChat mode="users"></EmptyChat></div>
+          
+           }
           {!isSearchLoading && searchClick && (
             <>
               {NormalizedDatabaseUsers?.length > 0 ? (
@@ -198,10 +202,7 @@ export default function Users() {
               )}
             </>
           )}
-          {NormalizedChattedUsers.length===0 && <div className="h-full">
-           <EmptyChat mode="users"></EmptyChat></div>
-          
-           }
+       
           {!isUsersListLoading && !searchClick && (
             <div className="h-full">
               <Virtuoso

@@ -9,6 +9,7 @@ import ChatNovaContext from "../Context/ChatNovaContext";
 import SocketContext from "../Context/SocketContext";
 import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem";
+import EmptyChat from "./EmptyChat";
 
 export default function Group() {
   
@@ -242,7 +243,7 @@ export default function Group() {
           </div>
         </div>
 
-        <div className="flex p-2 pr-0 rounded-xl border-none mx-4 my-2 bg-white">
+        <div className="flex p-2 pr-0 rounded-xl border-none mx-4 my-2 bg-white shadow-xl">
           <MagnifyingGlassIcon className="w-5 h-5 pt-1 text-gray-700 cursor-pointer" />
           
           <input
@@ -254,9 +255,11 @@ export default function Group() {
             id="usersearch"
           />
         </div>
-
         <div className="flex pt-2 flex-col mb-14 lg:mb-0 p-2 px-4 overflow-y-auto scrollbar-hide">
-          
+  {allNormalizedGroups?.length===0 && searchClick && 
+           <EmptyChat mode="groups"></EmptyChat>
+           }
+         
           {!searchClick &&
             filteredNormalizedGroups &&
             filteredNormalizedGroups.length !== 0 &&

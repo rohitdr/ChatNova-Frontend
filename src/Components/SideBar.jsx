@@ -76,7 +76,7 @@ const menuItems = [
 ]
   return (
     <>
-      <div className={`2xs:h-14 xs:h-16 lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white z-50 fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
+      <div className={`2xs:h-14 xs:h-16 border border-black/20  shadow-2xl m-2 lg:shadow-none lg:m-0 lg:rounded-none  rounded-3xl lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white z-50 fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
         <div className="flex items-start lg:items-start  mt-4 lg:justify-center lg:mb-2 justify-start">
           <img
           loading="lazy"

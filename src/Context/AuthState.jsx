@@ -127,7 +127,6 @@ try{
         localStorage.setItem("accessToken",response.data.accessToken)
     
     } catch (error) {
-   
     localStorage.clear();
     throw error
     
@@ -252,7 +251,7 @@ const formdata = new FormData();
         setIsServerDown,
         alert,
         showAlert,
-        signUp,
+    
         updateUserImage,
         activePage,
         setActivePage,
