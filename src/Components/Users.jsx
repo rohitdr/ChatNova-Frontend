@@ -21,6 +21,7 @@ import UserItem from "./UserItem";
 
 import useDebounce from "./Hooks/Debouncer.jsx";
 import { Virtuoso } from "react-virtuoso";
+import EmptyChat from "./EmptyChat.jsx";
 
 const Profile = lazy(() => import("./Profile"));
 const Settings = lazy(() => import("./Settings"));
@@ -197,7 +198,10 @@ export default function Users() {
               )}
             </>
           )}
-
+          {NormalizedChattedUsers.length===0 && <div className="h-full">
+           <EmptyChat mode="users"></EmptyChat></div>
+          
+           }
           {!isUsersListLoading && !searchClick && (
             <div className="h-full">
               <Virtuoso

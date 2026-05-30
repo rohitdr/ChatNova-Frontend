@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { loginApi } from "../../Api/UsersApi"
+import { loginApi, signUpApi } from "../../Api/UsersApi"
 import initFCM from "../Notification"
 import { useNavigate } from "react-router-dom"
 import { useContext } from "react"
@@ -26,8 +26,23 @@ const loginMutation=useMutation({
     
     }
 })
+const signUpMutation=useMutation({
+    mutationFn:async(data)=>{
+        const response = await signUpApi(data)
+        return response
+    },
+    onError:handleError,
+    onSuccess:(response)=>{
+            localStorage.setItem("accessToken",response.data.accessToken)
+
+      showAlert("Success", "You have been logged in successfully !");
+     
+      navigate("/additionaldetails");
+    }
+})
 
     return{
-    loginMutation
+    loginMutation,
+    signUpMutation
     }
 }

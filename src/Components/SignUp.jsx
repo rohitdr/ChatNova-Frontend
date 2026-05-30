@@ -1,4 +1,5 @@
 import {
+  ArrowPathIcon,
   EnvelopeIcon,
   LockClosedIcon,
   UserIcon
@@ -7,6 +8,7 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
+import { useAuthMutations } from "./Hooks/useAuthMutations";
 export default function SignUp() {
   const [formData, setFormData] = useState({
     email: "",
@@ -14,7 +16,8 @@ export default function SignUp() {
     username: "",
   });
 
-  const { signUp, isServerDown,showAlert } = useContext(AuthContext);
+  const {  isServerDown,showAlert,handleError } = useContext(AuthContext);
+  const {signUpMutation}=useAuthMutations(handleError)
   const onChange = ({target:{name,value}}) => {
     setFormData(prev=>({ ...prev, [name]:value }));
   
@@ -44,8 +47,8 @@ const error = validate()
     return showAlert("Warning", error);
   }
 
-
-   signUp(formData.email.trim(), formData.password, formData.username.trim());
+   signUpMutation.mutate({email:formData.email.trim(), password:formData.password, username:formData.username.trim()})
+  
 
 
     
@@ -136,10 +139,10 @@ return isServerDown ? (
         {/* Button */}
         <button
           type="submit"
-          disabled={!isFormValid}
-          className="w-full h-11 rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!isFormValid || signUpMutation.isPending}
+          className="w-full h-11 flex justify-center items-center rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Create Account
+          {!signUpMutation.isPending?<ArrowPathIcon className="text-white animate-spin w-5 h-5"></ArrowPathIcon>:"Create Account"}
         </button>
 
       </form>

@@ -103,30 +103,7 @@ try{
 
  init();
   },[])
-  // route to signup
-  const signUp = async (email, password, username) => {
-    try {
-      await runWithProgress(async ()=>{
-        const data={
-        email: email,
-        password: password,
-        username: username,
-      }
-const response = await signUpApi(data)
-    
-        localStorage.setItem("accessToken",response.data.accessToken)
 
-      showAlert("Success", "You have been logged in successfully !");
-     
-      navigate("/additionaldetails");
-  
-      }) 
-    } catch (error) {
-      handleError(error)
-    
-    }
-  };
- 
 
   const getLoggedUser = async () => {
     try {
@@ -159,26 +136,7 @@ const response = await signUpApi(data)
     }
   };
 
-  const login = async (email, password) => {
-    try {
-  await runWithProgress(async()=>{
-    const data ={ email, password }
- const response = await loginApi(data)
-        localStorage.setItem("accessToken",response.data.accessToken)
-      await initFCM()
-      queryClient.invalidateQueries(["Me"])
-        showAlert("Success", "You have been logged in successfully!");
-      navigate("/",{replace:true});
-    
-  
-  })
 
-     
-    } catch (error) {
-       handleError(error)
-
-    }
-  };
 /// update password when user is login
   const updatePassword = async (oldPassword,newPassword) => {
     try {
@@ -303,7 +261,7 @@ const formdata = new FormData();
 isMeLoading,
         progress,
         setProgress,
-        login,
+       
 handleError,
 setAlert
       }}

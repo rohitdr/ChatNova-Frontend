@@ -260,7 +260,7 @@ const {
           </div>
         </div>
       ) : (
-        <EmptyChat></EmptyChat>
+        <EmptyChat mode="chat"></EmptyChat>
       )}
 
       {mediaSendModal && (
