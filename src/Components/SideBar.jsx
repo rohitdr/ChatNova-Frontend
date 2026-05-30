@@ -1,11 +1,11 @@
 import  { useContext, useState } from "react";
 import {
-  UserCircleIcon,
-  ChatBubbleLeftRightIcon,
+ 
+  ChatBubbleOvalLeftEllipsisIcon,
   Cog6ToothIcon,
-  UserGroupIcon,
   PowerIcon,
-  Cog8ToothIcon,
+  UserIcon,
+  UsersIcon,
 } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
 import AuthContext from "../Context/AuthContext";
@@ -20,13 +20,13 @@ export default function SideBar() {
 const menuItems = [
   {
     id: 1,
-    icon: UserCircleIcon,
+    icon: UserIcon,
     action: () => setActivePage(1),
-    className: "md:w-9 w-7 h-7 sm:ml-12 lg:w-9 lg:h-9 lg:mb-4 mx-4 lg:mx-2",
+    className: "md:w-9 w-6 h-6 sm:ml-12 lg:w-9 lg:h-9 lg:mb-4 mx-4 lg:mx-2",
   },
   {
     id: 0,
-    icon: ChatBubbleLeftRightIcon,
+    icon:ChatBubbleOvalLeftEllipsisIcon ,
     action: () => {
       setIsGroup(false);
       setActivePage(0);
@@ -35,13 +35,13 @@ const menuItems = [
   },
   {
     id: 2,
-    icon: UserGroupIcon,
+    icon: UsersIcon,
     action: () => setActivePage(2),
     className: "lg:w-9 w-7 md:w-9 lg:my-2 h-7 md:h-9 sm:ml-12 mx-4 lg:mx-2",
   },
   {
     id: 3,
-    icon: Cog8ToothIcon,
+    icon: Cog6ToothIcon,
     action: () => setActivePage(3),
     className: "lg:w-9 md:w-9 w-7 sm:ml-12 lg:my-6 h-7 md:h-9 xs:mx-4 lg:mx-2",
   },
@@ -53,7 +53,7 @@ const menuItems = [
                     setShowMenu(false);
                   },
         name:"Profile",
-        Icon:UserCircleIcon,
+        Icon:UserIcon,
     },
    {
         id:2,
