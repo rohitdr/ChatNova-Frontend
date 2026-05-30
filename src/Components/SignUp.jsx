@@ -14,7 +14,6 @@ export default function SignUp() {
     username: "",
   });
 
-
   const { signUp, isServerDown,showAlert } = useContext(AuthContext);
   const onChange = ({target:{name,value}}) => {
     setFormData(prev=>({ ...prev, [name]:value }));

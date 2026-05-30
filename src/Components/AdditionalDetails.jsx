@@ -33,7 +33,6 @@ const InputRef = useRef(null)
 const validateForm = () => {
     const name = formData.name.trim();
     const phone = formData.phone_number.trim();
-
     if (name.length < 3 || name.length > 20) {
      return "Name must be 3–20 characters"
     
@@ -42,7 +41,6 @@ const validateForm = () => {
       return "Enter a valid 10-digit phone number"
    
     }
-
     return null;
   };
   const handleSubmit = async(e) => {

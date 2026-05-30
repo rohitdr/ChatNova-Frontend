@@ -18,7 +18,6 @@ export default function AuthState(props) {
   const [activePage, setActivePage] = useState(0);
   const [alert, setAlert] = useState(null);
 
-
   const queryClient = useQueryClient()
   const [authReady,setAuthReady]=useState(false)
   const showAlert =useCallback((type, message) => {
@@ -106,7 +105,6 @@ try{
   },[])
   // route to signup
   const signUp = async (email, password, username) => {
-  
     try {
       await runWithProgress(async ()=>{
         const data={
@@ -135,7 +133,6 @@ const response = await signUpApi(data)
       const res = await getLoggedUserApi()
       return res.data.user
     } catch (error) {
-
      throw error
      
     }
@@ -167,15 +164,10 @@ const response = await signUpApi(data)
   await runWithProgress(async()=>{
     const data ={ email, password }
  const response = await loginApi(data)
-
-
-
-    
         localStorage.setItem("accessToken",response.data.accessToken)
-    
       await initFCM()
       queryClient.invalidateQueries(["Me"])
-        showAlert("Success", "You have been logged in successfully !");
+        showAlert("Success", "You have been logged in successfully!");
       navigate("/",{replace:true});
     
   
@@ -283,7 +275,6 @@ const formdata = new FormData();
      await updateUserApi(data)
        queryClient.invalidateQueries(["Me"])
   })
-   
     } catch (error) {
        handleError(error)
     }

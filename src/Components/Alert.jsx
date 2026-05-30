@@ -35,7 +35,7 @@ return (
     <div
       className={`flex items-start gap-3 w-80 md:w-96 p-4 rounded-xl shadow-xl 
       backdrop-blur-lg border transition-all duration-300
-      ${leaving ? "opacity-0 translate-x-10" : "opacity-100 translate-x-0"}
+      ${leaving ? "opacity-0 translate-x-10 hidden" : "opacity-100 translate-x-0 "}
       
       ${type === "Success" && "bg-green-50/80 border-green-300"}
       ${type === "Error" && "bg-red-50/80 border-red-300"}
