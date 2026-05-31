@@ -89,9 +89,9 @@ const menuItems = [
 
         
              {menuItems.map(({id,icon:Icon,action,className})=> {
-               return <div key={id}> <Icon  className={`cursor-pointer ${className} ${
-      activePage === id ? "text-blue-700" : "text-black"
-    }`} onClick={action} ></Icon></div>
+               return <motion.div whileHover={{scale:1.05}} whileTap={{scale:0.95}} key={id} > <Icon  className={`cursor-pointer ${className} ${
+      activePage === id ? "text-blue-700 " : "text-black"
+    }`} onClick={action} ></Icon></motion.div>
              })}
          
          

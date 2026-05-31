@@ -177,18 +177,18 @@ let status = messageStatus(message,currentChatUserId)
    onPointerUp={()=>{clearTimeout(presstimer.current)}} 
       className={` w-full flex ${send ? "flex-row-reverse" : ""}  relative `}
     >
-      <div className=" flex flex-col justify-end max-w-[15%] ">
+      <div className=" flex flex-col justify-end max-w-[15%] px-1">
         <img
         loading="lazy"
-          className="w-[40px] h-[38px]        lg:w-[40px]  lg:h-[41px] rounded-full  border-white border-4"
+          className="w-[40px] h-[38px]  shadow-xl   lg:w-[40px]  lg:h-[41px] rounded-full  border-black/30 border-2"
           src={send ? Me?.image?.url : message?.senderId?.image?.url}
           alt="User"
         />
       </div>
-      <div className="flex max-w-[85%] flex-col mb-2 relative  ">
+      <div className="flex max-w-[85%] flex-col mb-2 relative">
         <span className="text-2xs m-1 mx-2  text-black">{!send && activeGroupChat&& message?.senderId?.name}</span>
         <div
-          className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base ${message.type === "image" || message.type === "video" ? "px-1 " : "px-4 lg:p-3"} py-1  ${send ? "bg-[#6C63FF] text-white" : "bg-[#F1F3F6] text-black"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
+          className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base  ${message.type === "image" || message.type === "video" ? "px-1 " : "px-4 lg:p-3"} py-1  ${send ? "bg-[#6C63FF] text-white shadow-xl border border-black/20 " : "bg-[#F1F3F6] text-black  border border-black/20 shadow-xl"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
         onMouseEnter={onMouseEnterMessage} onMouseLeave={onMouseLeaveMessage} 
         > 
      
@@ -230,6 +230,8 @@ let status = messageStatus(message,currentChatUserId)
       className="
         max-w-[180px] sm:max-w-[220px] lg:max-w-[260px]
         max-h-[220px]
+        border-black
+        border
         object-cover
         rounded-xl
         cursor-pointer
@@ -297,7 +299,7 @@ let status = messageStatus(message,currentChatUserId)
           }</div>
       </div>
     
-     {message.reaction &&  <div  className={` absolute rounded-3xl shadow-2xl bottom-0  ${send?"right-9":"left-9"}  `}>
+     {message.reaction &&  <div  className={` absolute rounded-3xl shadow-2xl bottom-0  ${send?"right-11":"left-11"}  `}>
           {message.reaction?.map(element => {
              return <span key={element.user+element.emoji}>{element.emoji}</span> 
           })}</div>}

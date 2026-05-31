@@ -188,7 +188,7 @@ export default function Users() {
             <>
               {NormalizedDatabaseUsers?.length > 0 ? (
                 NormalizedDatabaseUsers.map((element) => (
-                  <div key={element._id} style={{ height: 65 }}>
+                  <div key={element._id}  style={{height:"74px"}}>
                     <UserItem
                       user={element}
                       handleUserClick={handleDatabaseUserClick}

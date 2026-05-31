@@ -255,7 +255,7 @@ export default function Group() {
             id="usersearch"
           />
         </div>
-        <div className="flex pt-2 flex-col mb-14 lg:mb-0 p-2 px-4 overflow-y-auto scrollbar-hide">
+        <div className="flex pt-2 flex-col gap-1 mb-14 lg:mb-0 p-2 px-4 overflow-y-auto scrollbar-hide">
   {allNormalizedGroups?.length===0 && searchClick && 
            <EmptyChat mode="groups"></EmptyChat>
            }

@@ -142,9 +142,8 @@ return isServerDown ? (
           disabled={!isFormValid || signUpMutation.isPending}
           className="w-full h-11 flex justify-center items-center rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {!signUpMutation.isPending?<ArrowPathIcon className="text-white animate-spin w-5 h-5"></ArrowPathIcon>:"Create Account"}
+          {signUpMutation.isPending?<ArrowPathIcon className="text-white animate-spin w-5 h-5"></ArrowPathIcon>:"Create Account"}
         </button>
-
       </form>
 
       {/* Footer */}

@@ -45,19 +45,19 @@ transition={{ duration: 0.15 }}
         onMouseEnter={preload}
         onTouchStart={preload}
         onClick={handleClick}
-        className={`flex border min-h-[72px] cursor-pointer rounded-2xl my-2.5 px-3 py-2  transition ${
+        className={`flex  min-h-[72px] cursor-pointer rounded-2xl my-2.5 px-3 py-2 border-black/20 border transition ${
           isSelected
             ? "bg-blue-50 border-blue-400"
-            : "bg-white hover:bg-gray-50 hover:shadow-md"
+            : "bg-white hover:bg-gray-50 hover:shadow-md "
         }`}
       >
         <div className="">
           <img
             loading="lazy"
             className=" min-w-9  mt-1 min-h-10 w-12 h-12
-
+border border-black/30
 ring-2 ring-white
-shadow-sm rounded-full border-white  object-cover"
+shadow-sm rounded-full   object-cover"
             src={image}
             alt={name}
           />
