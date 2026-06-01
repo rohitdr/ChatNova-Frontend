@@ -16,6 +16,7 @@ import { chattedUsersApi, getCurrentChattingUserApi, searchUserApi } from "../Ap
 import { useSendMessage } from "../Components/Hooks/UseSendMessage.jsx";
 import { getMessagesApi, sendMediaApi, uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 import { useGroupMutation } from "../Components/Hooks/UseGroupMutation.jsx";
+import { useUploadMediaMutation } from "../Components/Hooks/useUploadMediaMutation.jsx";
 
 export default function ChatNovaState(props) {
 
@@ -108,6 +109,7 @@ setIsSearchLoading(false)
   });
     
   }
+
   /// function to get User whom with logged in user has chats
 
   /// function to get the coversation id between the current chatter and logged in user
@@ -237,12 +239,13 @@ const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
   //function to upload a image or video or file
   const uploadCloudinary = async (id, file,tempId) => {
     try {
-      setProgress(10);
+   
+
       const formdata = new FormData();
       formdata.append("file", file);
       formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
       const res = await uploadCloudinaryApi(formdata)
-      setProgress(30);
+
       const message = {
         publicId: res.data.public_id,
         bytes: res.data.bytes,
@@ -251,12 +254,12 @@ const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
         tempId:tempId
       };
 
-      setProgress(60);
+   
       sendMedia(id, message);
-      setProgress(100);
+    
     } catch (error) {
-   handleError(error)
-      setProgress(100);
+  throw error
+     
     }
   };
   /// function to get all groups
@@ -272,7 +275,7 @@ const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
       throw error
     }
   }
-
+  const uploadMediaMutation=useUploadMediaMutation(uploadCloudinary,handleError)
   //function to get group by id
   const getGroupById=async(id)=>{
      try {
@@ -469,7 +472,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         hasMoreUsers,
         chattedUsers,
         queryClient,
-    
+    uploadMediaMutation,
         isAdmin,
     leaveGroup,
         loadingGroups,selectedGroup,

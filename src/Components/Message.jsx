@@ -3,20 +3,26 @@ import React from "react";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import {
+  ArrowPathIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "@tanstack/react-query";
 import SocketContext from "../Context/SocketContext";
 import { ArrowUturnLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { useUploadMediaMutation } from "./Hooks/useUploadMediaMutation";
+import { FaSpinner } from "react-icons/fa6";
+
+
  const REACTIONS =["👍", "❤️", "😂", "😮", "😢", "👏"]
 const Message= React.memo((props) =>{
+
   const [replyIcon,setReplyIcon]=useState("hidden")
   const queryclient = useQueryClient();
   const { message, send } = props;
 
   const { Me } =  useContext(AuthContext);
 
-  const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage} =  useContext(ChatNovaContext);
+  const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage,uploadMediaMutation} =  useContext(ChatNovaContext);
   const [mediaView,setMediaView]=useState(false)
  
  const [display,setDisplay]=useState("hidden")
@@ -169,7 +175,6 @@ const onMouseLeaveMessage=()=>{
 }
 let status = messageStatus(message,currentChatUserId)
 
-
   return(
    <> 
   {message.type !=="system" ?<div  onPointerDown={(e)=>{presstimer.current = setTimeout(()=>{setDisplay("flex");ignoreClick.current = true;},500)}}
@@ -177,7 +182,8 @@ let status = messageStatus(message,currentChatUserId)
    onPointerUp={()=>{clearTimeout(presstimer.current)}} 
       className={` w-full flex ${send ? "flex-row-reverse" : ""}  relative `}
     >
-      <div className=" flex flex-col justify-end max-w-[15%] px-1">
+      <div className=" flex flex-col justify-end max-w-[15%] px-1 relative">
+       
         <img
         loading="lazy"
           className="w-[40px] h-[38px]  shadow-xl   lg:w-[40px]  lg:h-[41px] rounded-full  border-black/30 border-2"
@@ -186,6 +192,7 @@ let status = messageStatus(message,currentChatUserId)
         />
       </div>
       <div className="flex max-w-[85%] flex-col mb-2 relative">
+           { message?.status==="sending" && uploadMediaMutation.isPending &&<div className="absolute inset-0 bg-white/80 flex justify-center items-center z-10"><FaSpinner className="text-blue-800 w-10 h-10 animate-spin"></FaSpinner></div>}
         <span className="text-2xs m-1 mx-2  text-black">{!send && activeGroupChat&& message?.senderId?.name}</span>
         <div
           className={` 2xs:text-sm  xs:text-lg md:text-xl lg:text-base  ${message.type === "image" || message.type === "video" ? "px-1 " : "px-4 lg:p-3"} py-1  ${send ? "bg-[#6C63FF] text-white shadow-xl border border-black/20 " : "bg-[#F1F3F6] text-black  border border-black/20 shadow-xl"} rounded-xl lg:rounded-2xl ${send ? " rounded-br-none lg:rounded-br-none " : " rounded-bl-none lg:rounded-bl-none"} `}
@@ -222,14 +229,14 @@ let status = messageStatus(message,currentChatUserId)
           <div className="">
           {message.type === "text" && message.text}
 {message.type === "image" && message.media?.url?.split('.').pop().toLowerCase() !== "pdf" && (
-  <div className="relative group">
+  <div className="relative group overflow-hidden">
     <img
       loading="lazy"
       src={message.media?.url}
       onClick={() => setMediaView(true)}
       className="
-        max-w-[180px] sm:max-w-[220px] lg:max-w-[260px]
-        max-h-[220px]
+          w-[220px]
+      h-[220px]
         border-black
         border
         object-cover
@@ -246,11 +253,11 @@ let status = messageStatus(message,currentChatUserId)
   </div>
 )}
           {message.type === "video" && (
-  <div className="relative">
+  <div className="relative overflow-hidden">
     <video
       className="
-        max-w-[180px] sm:max-w-[220px] lg:max-w-[260px]
-        max-h-[220px]
+         w-[220px]
+      h-[220px]
         object-cover
         rounded-xl
         shadow-md
@@ -298,7 +305,7 @@ let status = messageStatus(message,currentChatUserId)
             
           }</div>
       </div>
-    
+ 
      {message.reaction &&  <div  className={` absolute rounded-3xl shadow-2xl bottom-0  ${send?"right-11":"left-11"}  `}>
           {message.reaction?.map(element => {
              return <span key={element.user+element.emoji}>{element.emoji}</span> 

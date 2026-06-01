@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import { useAuthMutations } from "./Hooks/useAuthMutations";
+import { FaSpinner } from "react-icons/fa6";
 export default function SignUp() {
   const [formData, setFormData] = useState({
     email: "",
@@ -142,7 +143,7 @@ return isServerDown ? (
           disabled={!isFormValid || signUpMutation.isPending}
           className="w-full h-11 flex justify-center items-center rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {signUpMutation.isPending?<ArrowPathIcon className="text-white animate-spin w-5 h-5"></ArrowPathIcon>:"Create Account"}
+          {signUpMutation.isPending?<FaSpinner className="text-white animate-spin w-5 h-5"></FaSpinner>:"Create Account"}
         </button>
       </form>
 

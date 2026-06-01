@@ -1,7 +1,10 @@
-import { useCallback } from "react"
+import { useCallback, useContext, useEffect } from "react"
+import { useUploadMediaMutation } from "../../Hooks/useUploadMediaMutation"
+import ChatNovaContext from "../../../Context/ChatNovaContext"
 
 
 export default function useSendMessage({queryclient,uploadCloudinary,conversationId,sendingMessage,Me,replyMessage,uploadedImage,uploadedVideo,sendMessages,currentChatUserId}) {
+const {uploadMediaMutation}=useContext(ChatNovaContext)
 
    const addMessageToCache=useCallback((message)=>{
  queryclient.setQueryData(["messages",conversationId],(oldData)=>{
@@ -40,6 +43,7 @@ export default function useSendMessage({queryclient,uploadCloudinary,conversatio
           media: {
             url: url,
           },
+          status:"sending"
         };
 
       case "video":
@@ -49,6 +53,7 @@ export default function useSendMessage({queryclient,uploadCloudinary,conversatio
           media: {
             url: url,
           },
+          status:"sending"
         };
 
       default:
@@ -74,22 +79,13 @@ export default function useSendMessage({queryclient,uploadCloudinary,conversatio
     // setSendingMessage("");
     // setReplyMessage(null);
   },[sendingMessage,conversationId,currentChatUserId,replyMessage,addMessageToCache,])
-
-
   const createUploadImage = useCallback(async() => {
     if (!uploadedImage) return;
   const objectUrl=URL.createObjectURL(uploadedImage)
     const tempMessage = createTempMessage("image",objectUrl);
-    addMessageToCache(tempMessage);
-try{
-await uploadCloudinary(conversationId, uploadedImage, tempMessage._id)
-}finally{
- if (objectUrl) URL.revokeObjectURL(objectUrl);
-}
+ 
+   uploadMediaMutation.mutate({conversationId,file:uploadedImage,tempId:tempMessage._id,message:tempMessage,previewUrl:objectUrl})
   
-
-    // setMediaSendModal(false);
-    // setUploadedImage(null);
   },[conversationId,uploadedImage,addMessageToCache,uploadCloudinary])
 
 
@@ -97,18 +93,7 @@ await uploadCloudinary(conversationId, uploadedImage, tempMessage._id)
     if (!uploadedVideo) return;
     const objectUrl=URL.createObjectURL(uploadedVideo)
     const tempMessage = createTempMessage("video",objectUrl);
-
-    addMessageToCache(tempMessage);
-    try{
- await uploadCloudinary(conversationId, uploadedVideo, tempMessage._id)
-    }finally{
-  if (objectUrl) URL.revokeObjectURL(objectUrl);
-}
-    
-
-
-    // setMediaSendModal(false);
-    // setUploadedVideo(null);
+  uploadMediaMutation.mutate({conversationId,file:uploadedVideo, tempId:tempMessage._id,message:tempMessage,previewUrl:objectUrl})
   },[conversationId,uploadedVideo,addMessageToCache,uploadCloudinary])
    return {
     createSendMessage,

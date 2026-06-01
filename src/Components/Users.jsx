@@ -154,9 +154,9 @@ export default function Users() {
   return (
     <>
       <div
-        className={`h-screen ${
+        className={`h-screen  ${
           activePage === 0 ? "block" : "hidden"
-        } xs:p-2 lg:p-0 flex bg-gradient-to-br from-indigo-50 to-purple-50 flex-col`}
+        } xs:p-2 lg:p-0 flex bg-gradient-to-br from-indigo-50 to-purple-50 flex-col `}
       >
         <div className="m-2 p-2 xs:p-0 text-3xl font-medium">
           Chats
@@ -235,6 +235,7 @@ export default function Users() {
               <UserSkeleton key={i} send={i % 2 === 0} />
             ))}
         </div>
+  
       </div>
 
       <Suspense fallback={null}>

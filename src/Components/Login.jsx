@@ -10,7 +10,7 @@ import NoServer from "./NoServer";
 import AuthContext from "../Context/AuthContext";
 import { useAuthMutations } from "./Hooks/useAuthMutations";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
-
+import { FaSpinner } from "react-icons/fa6";
 export default function Login() {
 
 const navigate = useNavigate()
@@ -136,7 +136,7 @@ return isServerDown  ? (
           className="w-full flex justify-center items-center h-11 rounded-lg font-medium transition-all duration-200 
             bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 disabled:active:scale-100"
         >
-        {loginMutation.isPending ? <ArrowPathIcon className="text-white animate-spin w-5 h-5 "></ArrowPathIcon>:"Sign in"} 
+        {loginMutation.isPending ? <FaSpinner className="text-white animate-spin w-5 h-5 "></FaSpinner>:"Sign in"} 
     
         </button>
 
