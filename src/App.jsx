@@ -2,8 +2,6 @@ import { useContext} from "react";
 
 import "./App.css";
 import "./index.css";
-import SignUp from "./Components/SignUp";
-import Login from "./Components/Login";
 import ChatPage from "./Components/ChatPage";
 import { Routes, Route } from "react-router-dom";
 import LoadingBar from "react-top-loading-bar";
@@ -15,9 +13,11 @@ import { Suspense,lazy } from "react";
 import AppLoader from "./Components/AppLoader";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import PublicRoute from "./Components/PublicRoute";
+import Login from "./pages/Login";
 
   const ForgetPassword = lazy(()=>import("./Components/ForgetPassword"))
   const AdditionalDetails=lazy(()=> import("./Components/AdditionalDetails"))
+import SignUp from './pages/SignUp';
 
 function App() {
 

@@ -3,73 +3,33 @@ import {
   LockClosedIcon,
 
 } from "@heroicons/react/24/outline";
-
-import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import NoServer from "./NoServer";
-import AuthContext from "../Context/AuthContext";
-import { useAuthMutations } from "./Hooks/useAuthMutations";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa6";
-export default function Login() {
-
-const navigate = useNavigate()
-
-  const { login, isServerDown ,showAlert,Me,handleError} =  useContext(AuthContext);
-    const {loginMutation}=useAuthMutations(handleError)
+import { emailRegex, validateLoginForm } from "../schemas/login.schema";
+import { useLogin } from './../hooks/useLogin';
+import AuthContext from "../../../Context/AuthContext";
+export default function LoginForm() {
+  const { showAlert} =  useContext(AuthContext);
+    const loginMutation=useLogin()
   const [formData, setFormData] = useState({ email: "", password: "" });
  const onChangeHandler = ({target:{name,value}}) => {
-
-
   setFormData(prev=>({...prev,[name]:value}));
-
-};
-  const emailRegex = /^\S+@\S+\.\S+$/;
- const validate = () => {
-  if(!formData.email.trim()){
-  return "Email cannot be empty";
-}
-
-  if (!emailRegex.test(formData.email.trim())) {
-    return "Invalid email format";
-  }
-  if (!formData.password) {
-  return "Password cannot be empty";
-}
-  if (formData.password.length < 8) {
-    return "Password must be at least 8 characters";
-  }
- 
-  return null;
 };
 const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.length>=8 
 
   const handleSubmit =  (e) => {
     e.preventDefault();
-   const error = validate()
+   const error = validateLoginForm(formData)
    if(error){
     showAlert("Warning",error)
     return
    }
   loginMutation.mutate({email:formData.email.trim(), password:formData.password})
   
-    
-   
   };
-return isServerDown  ? (
-  <NoServer />
-) : (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4">
-    
-    <div className="w-full max-w-md bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8">
-      
-      {/* Logo */}
-      <h1 className="text-3xl font-semibold text-center text-gray-800 mb-2">
-        ChatNova
-      </h1>
-      <p className="text-center text-gray-500 mb-6">
-        Welcome back 👋
-      </p>
+return (
+
 
       <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -142,14 +102,6 @@ return isServerDown  ? (
 
       </form>
 
-      <p className="text-center text-sm text-gray-500 mt-6">
-        Don’t have an account?{" "}
-        <Link to="/SignUp" className="text-indigo-600 hover:underline">
-          Sign up
-        </Link>
-      </p>
-
-    </div>
-  </div>
+     
 );
 }

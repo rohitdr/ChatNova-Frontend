@@ -10,15 +10,11 @@ export const chattedUsersApi =(limit,page)=>{
 export const getCurrentChattingUserApi =(id)=>{
    return  api.get(`/users/getUser/${id}`);
 }
-export const signUpApi =(data)=>{
-   return  api.post("/auth/createUser",data );
-}
+
 export const getLoggedUserApi =()=>{
    return  api.get("/auth/getUser");
 }
-export const loginApi =(data)=>{
-   return  api.post("/auth/login",data );
-}
+
 export const updatePasswordApi =(data)=>{
    return  api.put("/auth/updatePassword",data);
 }

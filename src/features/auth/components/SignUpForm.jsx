@@ -1,74 +1,38 @@
 import {
-  ArrowPathIcon,
   EnvelopeIcon,
   LockClosedIcon,
   UserIcon
 } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import AuthContext from "../Context/AuthContext";
-import NoServer from "./NoServer";
-import { useAuthMutations } from "./Hooks/useAuthMutations";
 import { FaSpinner } from "react-icons/fa6";
-export default function SignUp() {
+import { emailRegex } from "../schemas/login.schema";
+import { validateSignUpForm } from "../schemas/signUp.schema";
+import { useSignUp } from "../hooks/useSignUp";
+import AuthContext from "../../../Context/AuthContext";
+export default function SignUpForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     username: "",
   });
-
-  const {  isServerDown,showAlert,handleError } = useContext(AuthContext);
-  const {signUpMutation}=useAuthMutations(handleError)
+  const {  showAlert } = useContext(AuthContext);
+  const signUpMutation=useSignUp()
   const onChange = ({target:{name,value}}) => {
     setFormData(prev=>({ ...prev, [name]:value }));
   
   };
-    const emailRegex = /^\S+@\S+\.\S+$/;
- const validate = () => {
-  if(!formData.email.trim() || !formData.username.trim()){
-  return "Fields cannot be empty";
-}
 
-  if (!emailRegex.test(formData.email.trim())) {
-    return "Invalid email format";
-  }
-  if (formData.password.length < 8) {
-    return "Password must be at least 8 characters";
-  }
-  if (formData.username.trim().length < 8) {
-    return "Username must be at least 8 characters";
-  }
-  return null;
-};
 const isFormValid=emailRegex.test(formData.email.trim()) && formData.password.length>=8 && formData.username.trim().length>=8
   const handleSubmit = (e) => {
     e.preventDefault();
-const error = validate()
+const error = validateSignUpForm(formData)
    if (error) {
     return showAlert("Warning", error);
   }
-
    signUpMutation.mutate({email:formData.email.trim(), password:formData.password, username:formData.username.trim()})
-  
 
-
-    
   };
-return isServerDown ? (
-  <NoServer />
-) : (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100  px-4">
-    
-    <div className="w-full max-w-md bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8">
-      
-     
-      <h1 className="text-3xl font-semibold text-center text-gray-800 mb-2">
-        ChatNova
-      </h1>
-      <p className="text-center text-gray-500 mb-6">
-        Create your account 🚀
-      </p>
-
+return  (
       <form onSubmit={handleSubmit} className="space-y-5">
 
      
@@ -145,17 +109,6 @@ return isServerDown ? (
         >
           {signUpMutation.isPending?<FaSpinner className="text-white animate-spin w-5 h-5"></FaSpinner>:"Create Account"}
         </button>
-      </form>
-
-      {/* Footer */}
-      <p className="text-center text-sm text-gray-500 mt-6">
-        Already have an account?{" "}
-        <Link to="/login" className="text-indigo-600 hover:underline">
-          Sign in
-        </Link>
-      </p>
-
-    </div>
-  </div>
+      </form>    
 );
 }

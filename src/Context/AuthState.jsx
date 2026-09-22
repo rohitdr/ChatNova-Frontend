@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
-import api from "../Api/Axios.jsx";
-import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 import {  useQueryClient } from "@tanstack/react-query";
 import { useMe } from "../Components/Hooks/UseMe.jsx";
-import initFCM from "../Components/Notification.jsx";
-import { forgetPasswordApi, getLoggedUserApi, loginApi, logoutApi, refreshApi, signUpApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
+import { forgetPasswordApi, getLoggedUserApi, logoutApi, refreshApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
 import { uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 
 export default function AuthState(props) {
