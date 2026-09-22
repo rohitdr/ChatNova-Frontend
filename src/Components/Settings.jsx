@@ -11,17 +11,20 @@ import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext"
 import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
+import { useAuthMutations } from "./Hooks/useAuthMutations";
+import { FaSpinner } from "react-icons/fa";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
   const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
 const imageRef =useRef(null)
-  const { Me, updateUserImage,updatePassword, isServerDown,showAlert ,updateUser} = useContext(AuthContext);
+  const { Me, updateUserImage,updatePassword, isServerDown,showAlert ,updateUser,handleError} = useContext(AuthContext);
   const [settingsImage, setSettingsImage] = useState(null);
   const [formData,setFormData]=useState(null)
   const [originaldata,setOriginalData]=useState(null)
  const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
 const [preview,setPreview]=useState(null)
+const {userUpdatedMutation}=useAuthMutations(handleError)
   useEffect(()=>{
       if (Me) {
     const initial = {
@@ -47,9 +50,12 @@ const [preview,setPreview]=useState(null)
     return ()=> URL.revokeObjectURL(url)
   },[settingsImage])
  const handleImageUpdate=()=>{
-            updateUserImage(settingsImage);
-            setSettingsImage(null);
-            setPreview(null)
+  userUpdatedMutation.mutate({data:{},file:settingsImage})
+            // updateUserImage(settingsImage);
+            setTimeout(() => {
+              setSettingsImage(null);
+              setPreview(null)
+            }, 500);
          
  }
   const handleChange=({target:{name,value}})=>{
@@ -100,16 +106,13 @@ const validate = () => {
 
 const handleUpdate = (e) => {
   e.preventDefault();
-
   const { error, payload } = validate();
 
   if (error) {
     showAlert("Error", error);
     return;
   }
-
-  updateUser(payload);
-  setEditMenu(false);
+  userUpdatedMutation.mutate({data:payload})
   setOriginalData(formData);
 };
 
@@ -177,6 +180,7 @@ e.preventDefault()
   <div className="mx-4 bg-white rounded-2xl shadow-sm p-6 flex flex-col items-center">
     
     <div className="relative">
+    {userUpdatedMutation.isPending &&<FaSpinner className=" absolute inset-0 animate-spin text-black w-5 h-5"></FaSpinner>}
       <input
       ref={imageRef}
         type="file"
@@ -283,9 +287,9 @@ e.preventDefault()
 
         <div className="flex justify-end">
           <button
-          disabled={!isChanged}
+          disabled={!isChanged || userUpdatedMutation.isPending}
            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-50">
-            Update
+           {userUpdatedMutation.isPending ? <FaSpinner className="animate-spin w-5 h-5 text-white"></FaSpinner>:"Update"} 
           </button>
         </div>
       </form>

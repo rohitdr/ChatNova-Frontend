@@ -27,7 +27,8 @@ function App() {
 
   return (
     <>
-      {alert && <Alert alert={alert}></Alert>}
+
+      {alert.length!==0 && <Alert alert={alert}></Alert>}
       <LoadingBar
         color="#f11946"
         progress={progress}

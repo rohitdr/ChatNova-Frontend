@@ -16,15 +16,22 @@ export default function AuthState(props) {
   const [progress, setProgress] = useState(0);
 
   const [activePage, setActivePage] = useState(0);
-  const [alert, setAlert] = useState(null);
+  const [alert, setAlert] = useState([]);
 
   const queryClient = useQueryClient()
   const [authReady,setAuthReady]=useState(false)
   const showAlert =useCallback((type, message) => {
-    setAlert({
-      type: type,
-      message: message,
-    });
+    const id=Date.now()
+    setAlert(prev=>([
+      ...prev,
+      {
+        id,
+        type: type,
+      message: message}]
+    ));
+    // setTimeout(() => {
+    //   setAlert(prev=>prev.filter((prev)=>prev.id!==id));
+    // }, 3500);
   },[])
 
 const handleError =(error)=>{
@@ -178,29 +185,30 @@ const response = await forgetPasswordApi(data)
     }
   };
   /// update user information
-  const updateUser = async (data) => {
+  const updateUser = async (data,file) => {
     try {
-    await runWithProgress(async()=>{
+      if(file){
+const formdata = new FormData();
+      formdata.append("file", file);
+      formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
+      const res = await uploadCloudinaryApi(formdata);
+      let image = {
+        publicId: res.data.public_id,
+        url: res.data.secure_url,
+      };
+      
+       data.image =  image 
 
-      const response = await updateUserApi(data)
-    
-      if (response.status === 200) {
-       queryClient.invalidateQueries(["Me"])
-        showAlert("Success", "You information has been updated");
-       
       }
-    })
-  
+      const response = await updateUserApi(data)
+return response.data
     } catch (error) {
-       handleError(error)
+      throw error
     }
   };
   const logout = async () => {
     try {
-   
 await logoutApi()
-   
-     
      
     } catch (error) {
       console.log("Logout API failed")
@@ -219,16 +227,7 @@ await logoutApi()
   const updateUserImage = async (file) => {
     try {
   await runWithProgress(async()=>{
-const formdata = new FormData();
-      formdata.append("file", file);
-      formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
-      const res = await uploadCloudinaryApi(formdata);
-    
-      let image = {
-        publicId: res.data.public_id,
-        url: res.data.secure_url,
-      };
-      const data = { image }
+
      await updateUserApi(data)
        queryClient.invalidateQueries(["Me"])
   })

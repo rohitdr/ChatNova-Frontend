@@ -180,7 +180,7 @@ export default function Users() {
             searchClick && "overflow-y-auto scrollbar-hide"
           } lg:mb-0 sm:p-2 px-3 lg:px-4 h-full`}
         >
-             {NormalizedChattedUsers?.length===0 && !searchClick && <div className="h-full">
+             {NormalizedChattedUsers?.length===0  && !isSearchLoading && !searchClick && <div className="h-full">
            <EmptyChat mode="users"></EmptyChat></div>
           
            }

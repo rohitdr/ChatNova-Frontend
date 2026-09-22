@@ -100,7 +100,7 @@ const menuItems = [
           <img
           loading="lazy"
             onClick={() => {setShowMenu(prev=>!prev)}}
-            src={Me?.image?.url || "https://res.cloudinary.com/do2twyxai/image/upload/v1773486472/ChatGPT_Image_Mar_14_2026_04_35_32_PM_owgv9l.png"}
+            src={Me?.image?.url || "/logo.png"}
             alt="User Image"
             className=" 2xs:h-7 2xs:w-7 border-black cursor-pointer border-2 2xs:mr-2 xs:mr-5 lg:mx-0 lg:h-10 lg:w-10 h-8 w-8 xs:mb-1 rounded-full"
           />

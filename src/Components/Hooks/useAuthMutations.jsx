@@ -6,7 +6,7 @@ import { useContext } from "react"
 import AuthContext from "../../Context/AuthContext"
 
 export const useAuthMutations=(handleError)=>{
-    const {showAlert}=useContext(AuthContext)
+    const {showAlert,updateUser}=useContext(AuthContext)
     const navigate=useNavigate()
     const queryClient=useQueryClient()
 const loginMutation=useMutation({
@@ -21,7 +21,9 @@ const loginMutation=useMutation({
      queryClient.invalidateQueries({
   queryKey: ["Me"],
 });
-        showAlert("Success", "You have been logged in successfully!");
+        showAlert("Success", "You have been  logged in successfully!");
+    
+       
       navigate("/",{replace:true});
     
     }
@@ -33,16 +35,26 @@ const signUpMutation=useMutation({
     },
     onError:handleError,
     onSuccess:(response)=>{
-            localStorage.setItem("accessToken",response.data.accessToken)
 
+            localStorage.setItem("accessToken",response.data.accessToken)
       showAlert("Success", "You have been logged in successfully !");
      
       navigate("/additionaldetails");
     }
 })
+const userUpdatedMutation=useMutation({
+    mutationFn:({data,file})=>{
+        return updateUser(data,file)},
+    onError:handleError,
+    onSuccess:()=>{
+          queryClient.invalidateQueries(["Me"])
+        showAlert("Success", "You information has been updated");
+    }
+})
 
     return{
     loginMutation,
-    signUpMutation
+    signUpMutation,
+    userUpdatedMutation
     }
 }
