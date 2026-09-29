@@ -7,6 +7,7 @@ import ChatNovaContext from "../Context/ChatNovaContext";
 import {motion} from 'framer-motion'
 import { PlusIcon, MinusIcon, CheckIcon,UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import AuthContext from "../Context/AuthContext";
+import { useMe } from "../features/users/hooks/UseMe";
 
 const UserItem = React.memo(
   ({
@@ -30,7 +31,7 @@ const UserItem = React.memo(
       }
     }
     const {capitalizeFirstLetter,isAdmin} = useContext(ChatNovaContext)
-    const {Me}=useContext(AuthContext)
+     const {data:Me}=useMe()
     const time = lastMessage?.createdAt
   ? new Date(lastMessage.createdAt).toLocaleTimeString([], {
       hour: "2-digit",

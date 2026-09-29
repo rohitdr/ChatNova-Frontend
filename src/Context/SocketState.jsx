@@ -2,11 +2,12 @@ import { useContext, useEffect, useRef, useState } from "react";
 import SocketContext from "./SocketContext";
 import { io } from "socket.io-client";
 import AuthContext from "./AuthContext";
+import { useMe } from "../features/users/hooks/UseMe";
 
 export default function SocketState({ children }) {
   const socketRef = useRef(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const { Me } = useContext(AuthContext);
+   const {data:Me}=useMe()
 
   useEffect(() => {
     if (!Me?._id) return;

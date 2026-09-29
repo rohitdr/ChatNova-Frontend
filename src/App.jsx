@@ -11,13 +11,16 @@ import AuthContext from "./Context/AuthContext";
 
 import { Suspense,lazy } from "react";
 import AppLoader from "./Components/AppLoader";
-import ProtectedRoute from "./Components/ProtectedRoute";
-import PublicRoute from "./Components/PublicRoute";
+
 import Login from "./pages/Login";
 
-  const ForgetPassword = lazy(()=>import("./Components/ForgetPassword"))
+  const ForgetPassword = lazy(()=>import( "./pages/ForgetPassword"))
+  
   const AdditionalDetails=lazy(()=> import("./Components/AdditionalDetails"))
 import SignUp from './pages/SignUp';
+import ProtectedRoute from './features/auth/components/ProtectedRoute';
+import PublicRoute from './features/auth/components/PublicRoute';
+
 
 function App() {
 

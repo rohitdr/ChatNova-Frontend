@@ -17,13 +17,15 @@ import ChatInput from "./ChatInput";
 import MediaModal from "./MediaModal";
 import useTyping from "./Hooks/useTyping";
 import useSendMessage from "./Hooks/useSendMessage";
+import { useMe } from './../../features/users/hooks/UseMe';
 
 export default function ChatLayout() {
     
   const [sendingMessage, setSendingMessage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadedVideo, setUploadedVideo] = useState(null);
-  const { showAlert, setActivePage,Me } = useContext(AuthContext);
+  const { showAlert, setActivePage, } = useContext(AuthContext);
+  const {data:Me}=useMe()
 const isPaginationRef=useRef(false)
 
   const [mediaSendModal, setMediaSendModal] = useState(false);

@@ -22,6 +22,7 @@ import UserItem from "./UserItem";
 import useDebounce from "./Hooks/Debouncer.jsx";
 import { Virtuoso } from "react-virtuoso";
 import EmptyChat from "./EmptyChat.jsx";
+import { useMe } from "../features/users/hooks/UseMe.jsx";
 
 const Profile = lazy(() => import("./Profile"));
 const Settings = lazy(() => import("./Settings"));
@@ -51,7 +52,8 @@ export default function Users() {
   const [searchValue, setSearchValue] = useState("");
 
   const authContext = useContext(AuthContext);
-  const { activePage, Me } = authContext;
+  const { activePage } = authContext;
+    const {data:Me}=useMe()
 
   const socketcontext = useContext(SocketContext);
   const { socket } = socketcontext;

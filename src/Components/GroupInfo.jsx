@@ -25,6 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import UserItem from "./UserItem";
 import useDebounce from "./Hooks/Debouncer";
 import UserSkeleton from "./UserSkeleton";
+import { useMe } from "../features/users/hooks/UseMe";
 
 export default function GroupInfo() {
 
@@ -50,7 +51,8 @@ export default function GroupInfo() {
 
   const [searchValue, setSearchValue] = useState("");
 
-  const { isServerDown, Me } = useContext(AuthContext);
+  const { isServerDown } = useContext(AuthContext);
+    const {data:Me}=useMe()
 
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);

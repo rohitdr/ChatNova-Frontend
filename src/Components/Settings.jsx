@@ -13,12 +13,14 @@ import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
 import { useAuthMutations } from "./Hooks/useAuthMutations";
 import { FaSpinner } from "react-icons/fa";
+import { useMe } from "../features/users/hooks/UseMe";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
   const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
 const imageRef =useRef(null)
-  const { Me, updateUserImage,updatePassword, isServerDown,showAlert ,updateUser,handleError} = useContext(AuthContext);
+  const {data:Me}=useMe()
+  const {  updateUserImage,updatePassword, isServerDown,showAlert ,updateUser,handleError} = useContext(AuthContext);
   const [settingsImage, setSettingsImage] = useState(null);
   const [formData,setFormData]=useState(null)
   const [originaldata,setOriginalData]=useState(null)

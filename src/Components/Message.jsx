@@ -11,6 +11,7 @@ import SocketContext from "../Context/SocketContext";
 import { ArrowUturnLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useUploadMediaMutation } from "./Hooks/useUploadMediaMutation";
 import { FaSpinner } from "react-icons/fa6";
+import { useMe } from './../features/users/hooks/UseMe';
 
 
  const REACTIONS =["👍", "❤️", "😂", "😮", "😢", "👏"]
@@ -20,7 +21,7 @@ const Message= React.memo((props) =>{
   const queryclient = useQueryClient();
   const { message, send } = props;
 
-  const { Me } =  useContext(AuthContext);
+  const {data:Me}=useMe()
 
   const { currentChatUserId,conversationId,activeGroupChat ,setReplyMessage,uploadMediaMutation} =  useContext(ChatNovaContext);
   const [mediaView,setMediaView]=useState(false)

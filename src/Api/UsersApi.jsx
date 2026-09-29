@@ -11,16 +11,11 @@ export const getCurrentChattingUserApi =(id)=>{
    return  api.get(`/users/getUser/${id}`);
 }
 
-export const getLoggedUserApi =()=>{
-   return  api.get("/auth/getUser");
-}
 
 export const updatePasswordApi =(data)=>{
    return  api.put("/auth/updatePassword",data);
 }
-export const forgetPasswordApi =(data)=>{
-   return  api.put("/auth/forgetPassword",data);
-}
+
 export const updateUserApi =(data)=>{
    return  api.post("/auth/update",data);
 }

@@ -17,10 +17,12 @@ import { useSendMessage } from "../Components/Hooks/UseSendMessage.jsx";
 import { getMessagesApi, sendMediaApi, uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 import { useGroupMutation } from "../Components/Hooks/UseGroupMutation.jsx";
 import { useUploadMediaMutation } from "../Components/Hooks/useUploadMediaMutation.jsx";
+import { useMe } from "../features/users/hooks/UseMe.jsx";
 
 export default function ChatNovaState(props) {
 
-  const { setProgress,Me,setActivePage,handleError } =  useContext(AuthContext);
+  const { setProgress,setActivePage,handleError } =  useContext(AuthContext);
+    const {data:Me}=useMe()
 const {socket} =useContext(SocketContext) 
   const [dataBaseUsers, setDataBaseUsers] = useState(null);
  

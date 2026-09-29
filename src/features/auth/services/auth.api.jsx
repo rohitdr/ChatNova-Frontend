@@ -6,3 +6,6 @@ export const loginApi =(data)=>{
 export const signUpApi =(data)=>{
    return  api.post("/auth/createUser",data );
 }
+export const forgetPasswordApi =(data)=>{
+   return  api.put("/auth/forgetPassword",data);
+}

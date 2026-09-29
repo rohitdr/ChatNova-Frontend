@@ -10,11 +10,13 @@ import SocketContext from "../Context/SocketContext";
 import UserSkeleton from "./UserSkeleton";
 import UserItem from "./UserItem";
 import EmptyChat from "./EmptyChat";
+import { useMe } from "../features/users/hooks/UseMe";
 
 export default function Group() {
   
   const { socket } = useContext(SocketContext);
-  const { isServerDown, setActivePage, Me } = useContext(AuthContext);
+  const { isServerDown, setActivePage } = useContext(AuthContext);
+  const {data:Me}=useMe()
 
   const {
     setIsGroup,

@@ -12,12 +12,14 @@ import ChatNovaContext from "../Context/ChatNovaContext"
 import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
 import ProfileCard from "./ProfileCard";
+import { useMe } from "../../features/users/hooks/UseMe";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
   const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
   const authContext = useContext(AuthContext);
-  const { Me, updateUserImage,updatePassword, isServer,showAlert ,updateUser} = authContext;
+  const {data:Me}=useMe()
+  const {  updateUserImage,updatePassword, isServer,showAlert ,updateUser} = authContext;
   const [settingsImage, setSettingsImage] = useState(null);
   const [formData,setFormData]=useState({phone_number:Me?.phone_number,email:Me?.email,name:Me?.name,username:Me?.username})
   const [originaldata,setOriginalData]=useState({settingsPhoneNumber:Me?.phone_number,settingsEmail:Me?.email,settingsName:Me?.name,settingsUsername:Me?.username})

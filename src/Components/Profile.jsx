@@ -6,8 +6,10 @@ import { useContext, useMemo } from "react";
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
+import { useMe } from "../features/users/hooks/UseMe";
 export default function Profile() {
-  const { Me, isServerDown } =  useContext(AuthContext);
+  const { isServerDown } =  useContext(AuthContext);
+    const {data:Me}=useMe()
   const { capitalizeFirstLetter } = useContext(ChatNovaContext);
 const aboutItem =useMemo(()=>[
   {id:1,name:"Name",value:Me?.name},

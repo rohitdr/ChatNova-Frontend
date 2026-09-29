@@ -10,9 +10,11 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import AuthContext from "../Context/AuthContext";
 import ChatNovaContext from "../Context/ChatNovaContext";
+import { useMe } from "../features/users/hooks/UseMe";
 export default function SideBar() {
   const {setIsGroup} =useContext(ChatNovaContext)
-  const { logout, Me, setActivePage, activePage } = useContext(AuthContext);
+  const { logout,  setActivePage, activePage } = useContext(AuthContext);
+    const {data:Me}=useMe()
   const [showMenu, setShowMenu] = useState(false);
   const logoutHandler = () => {
     logout();

@@ -3,8 +3,8 @@ import AuthContext from "./AuthContext";
 
 import { useNavigate } from "react-router-dom";
 import {  useQueryClient } from "@tanstack/react-query";
-import { useMe } from "../Components/Hooks/UseMe.jsx";
-import { forgetPasswordApi, getLoggedUserApi, logoutApi, refreshApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
+import { useMe } from "../features/users/hooks/UseMe.jsx";
+import {  logoutApi, refreshApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
 import { uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 
 export default function AuthState(props) {
@@ -98,7 +98,7 @@ try{
  await refreshSession()
 }catch(error)
 {
-  console.log("Refress Failed")
+  console.log("Refress Failed"+error.message)
   localStorage.clear()
 }finally{
   setAuthReady(true)
@@ -110,20 +110,9 @@ try{
   },[])
 
 
-  const getLoggedUser = async () => {
-    try {
-      const res = await getLoggedUserApi()
-      return res.data.user
-    } catch (error) {
-     throw error
-     
-    }
-  };
 
 
-  const {data:Me,isLoading:isMeLoading}=useMe(getLoggedUser,authReady)
 
- 
 
   const refreshSession = async () => {
     try {
@@ -162,29 +151,10 @@ try{
        handleError(error)
     }
   };
-/// update password when user is not login
-  const forgetPassword = async (email,password,username) => {
-    try {
 
-  await runWithProgress(async()=>{
-    const data={email:email,password:password,username:username}
-const response = await forgetPasswordApi(data)
-    
-      if (response.status === 200) {
-        
-        showAlert("Success", "You Password has been changed successfully");
-    
-        navigate('/login')
-    }})
-      
-      
-    } catch (error) {
-      handleError(error)
-    }
-  };
   /// update user information
   const updateUser = async (data,file) => {
-    try {
+
       if(file){
 const formdata = new FormData();
       formdata.append("file", file);
@@ -200,9 +170,7 @@ const formdata = new FormData();
       }
       const response = await updateUserApi(data)
 return response.data
-    } catch (error) {
-      throw error
-    }
+  
   };
   const logout = async () => {
     try {
@@ -240,7 +208,6 @@ await logoutApi()
   return (
     <AuthContext.Provider
       value={{
-        Me,
      authReady,
         updatePassword,
         updateUser,
@@ -253,8 +220,6 @@ await logoutApi()
         activePage,
         setActivePage,
         logout,
-        forgetPassword,
-isMeLoading,
         progress,
         setProgress,
        

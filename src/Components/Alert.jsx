@@ -7,7 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import AuthContext from "../Context/AuthContext";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence,motion } from "framer-motion";
 
 export default function Alert() {
   const { alert, setAlert } = useContext(AuthContext);

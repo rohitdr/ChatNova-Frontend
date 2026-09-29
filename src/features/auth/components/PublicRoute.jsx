@@ -1,13 +1,15 @@
 import { useContext } from "react"
-import AuthContext from "../Context/AuthContext"
+import AuthContext from "../../../Context/AuthContext"
 import { Navigate } from "react-router-dom"
-import AppLoader from "./AppLoader"
+import AppLoader from "../../../Components/AppLoader"
+import { useMe } from './../../users/hooks/UseMe';
 
 
 export default function PublicRoute({children}) {
-const {Me,authReady}=useContext(AuthContext)
+const {authReady}=useContext(AuthContext)
+const {data}=useMe()
 if(!authReady) return <AppLoader></AppLoader>
-if(Me){
+if(data){
     return <Navigate to="/" replace/>
 }
 

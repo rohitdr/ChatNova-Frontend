@@ -1,10 +1,11 @@
 import React, { useContext, useMemo } from "react"
 
 import AuthContext from "../Context/AuthContext"
+import { useMe } from "../features/users/hooks/UseMe";
 
 
 function TypingIndicator({typingUsers=[]}) {
-    const {Me} = useContext(AuthContext)
+    const {data:Me}=useMe()
 
   const activeTypers = useMemo(() => {
     if (!Me?._id) return [];
