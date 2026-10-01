@@ -19,8 +19,10 @@ import {
 import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
-import UserItem from "./UserItem";
+
 import useDebounce from "./Hooks/Debouncer";
+import { useMe } from './../features/users/hooks/UseMe';
+import UserItem from './../features/users/components/UserItem';
 
 export default function CreateGroup() {
 
@@ -29,12 +31,12 @@ export default function CreateGroup() {
     dataBaseUsers,
     createGroup,
     chattedUsersList,
-    capitalizeFirstLetter,
+    isAdmin
   } = useContext(ChatNovaContext);
 
   const { isServerDown, showAlert, setActivePage } =
     useContext(AuthContext);
-
+const {data:Me}=useMe()
   const [groupImage, setGroupImage] = useState(null);
 
   const [addUser, setAddUser] = useState(false);
@@ -297,6 +299,8 @@ export default function CreateGroup() {
                   onRemove={handleRemoveMember}
                   showActions
                   mode="select"
+                  isAdmin={isAdmin}
+                  currentUser={Me}
                 />
               ))}
             </div>
@@ -325,6 +329,7 @@ export default function CreateGroup() {
                     onRemove={handleRemoveMember}
                     showActions
                     mode="select"
+                    isAdmin={isAdmin}
                   />
                 ))}
             </div>

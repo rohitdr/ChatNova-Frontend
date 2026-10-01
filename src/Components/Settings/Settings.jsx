@@ -13,10 +13,11 @@ import SocketContext from "../Context/SocketContext"
 import NoServer from "./NoServer";
 import ProfileCard from "./ProfileCard";
 import { useMe } from "../../features/users/hooks/UseMe";
+import captalize from "../../utils/captalise";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
-  const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
+  const {queryClient} = useContext(ChatNovaContext)
   const authContext = useContext(AuthContext);
   const {data:Me}=useMe()
   const {  updateUserImage,updatePassword, isServer,showAlert ,updateUser} = authContext;
@@ -136,7 +137,7 @@ e.preventDefault()
     updateUserImage(settingsImage);
     setSettingsImage(null);
   }}
-  formatName={capitalizeFirstLetter}
+  formatName={captalize}
 />
 
   {/* Bio */}

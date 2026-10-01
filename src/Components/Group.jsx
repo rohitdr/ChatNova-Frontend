@@ -7,8 +7,9 @@ import {
 } from "@heroicons/react/24/outline";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import SocketContext from "../Context/SocketContext";
-import UserSkeleton from "./UserSkeleton";
-import UserItem from "./UserItem";
+import UserSkeleton from "../features/users/components/UserSkeleton";
+
+import UserItem from './../features/users/components/UserItem';
 import EmptyChat from "./EmptyChat";
 import { useMe } from "../features/users/hooks/UseMe";
 
@@ -27,6 +28,7 @@ export default function Group() {
     setConversationId,
     conversationId,
     setActiveGroupChat,
+    isAdmin
   } = useContext(ChatNovaContext);
 
   const [filteredGroups, setFilteredGroups] = useState([]);
@@ -270,6 +272,8 @@ export default function Group() {
                 key={element._id}
                 user={element}
                 handleUserClick={handleGroupClick}
+                isAdmin={isAdmin}
+                currentUser={Me}
               />
             ))}
 
@@ -282,6 +286,7 @@ export default function Group() {
                   <UserItem
                     user={element}
                     handleUserClick={handleGroupClick}
+                     isAdmin={isAdmin}
                   />
                 </div>
               ))

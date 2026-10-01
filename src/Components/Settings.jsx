@@ -14,10 +14,11 @@ import NoServer from "./NoServer";
 import { useAuthMutations } from "./Hooks/useAuthMutations";
 import { FaSpinner } from "react-icons/fa";
 import { useMe } from "../features/users/hooks/UseMe";
+import captalize from "../utils/captalise";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
-  const {capitalizeFirstLetter,queryClient} = useContext(ChatNovaContext)
+  const {queryClient} = useContext(ChatNovaContext)
 const imageRef =useRef(null)
   const {data:Me}=useMe()
   const {  updateUserImage,updatePassword, isServerDown,showAlert ,updateUser,handleError} = useContext(AuthContext);
@@ -217,7 +218,7 @@ e.preventDefault()
     </div>
 
     <p className="mt-4 text-lg font-semibold text-gray-800">
-      {capitalizeFirstLetter(Me?.name)}
+      {captalize(Me?.name)}
     </p>
 
     <p className="text-sm text-gray-500">@{Me?.username}</p>

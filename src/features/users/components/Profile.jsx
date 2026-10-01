@@ -2,15 +2,11 @@ import {
 
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
-import { useContext, useMemo } from "react";
-import AuthContext from "../Context/AuthContext";
-import NoServer from "./NoServer";
-import ChatNovaContext from "../Context/ChatNovaContext";
-import { useMe } from "../features/users/hooks/UseMe";
+import {  useMemo } from "react";
+import { useMe } from "../hooks/UseMe";
+import captalize from "../../../utils/captalise";
 export default function Profile() {
-  const { isServerDown } =  useContext(AuthContext);
     const {data:Me}=useMe()
-  const { capitalizeFirstLetter } = useContext(ChatNovaContext);
 const aboutItem =useMemo(()=>[
   {id:1,name:"Name",value:Me?.name},
   {id:2,name:"Email",value:Me?.email},
@@ -18,9 +14,7 @@ const aboutItem =useMemo(()=>[
   {id:4,name:"Phone Number",value:Me?.phone_number},
  
 ],[Me])
-  return isServerDown ? (
-    <NoServer />
-  ) : (
+  return (
     <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide">
 
     
@@ -42,7 +36,7 @@ const aboutItem =useMemo(()=>[
         </div>
 
         <p className="mt-4 text-lg font-semibold text-gray-800">
-          {capitalizeFirstLetter(Me?.name||"")}
+          {captalize(Me?.name||"")}
         </p>
 
         <p className="text-sm text-gray-500">@{Me?.username}</p>

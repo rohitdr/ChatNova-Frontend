@@ -10,21 +10,22 @@ import {
 } from "react";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 
 import ChatNovaContext from "../Context/ChatNovaContext";
 import AuthContext from "../Context/AuthContext";
 import SocketContext from "../Context/SocketContext";
 
-import UserSkeleton from "./UserSkeleton";
-import UserItem from "./UserItem";
+import UserSkeleton from "../features/users/components/UserSkeleton.jsx";
+
+import UserItem from './../features/users/components/UserItem';
 
 import useDebounce from "./Hooks/Debouncer.jsx";
 import { Virtuoso } from "react-virtuoso";
 import EmptyChat from "./EmptyChat.jsx";
 import { useMe } from "../features/users/hooks/UseMe.jsx";
 
-const Profile = lazy(() => import("./Profile"));
+const Profile = lazy(() => import("../features/users/components/Profile.jsx"));
+
 const Settings = lazy(() => import("./Settings"));
 const GroupInfo = lazy(() => import("./GroupInfo"));
 const CreateGroup = lazy(() => import("./CreateGroup"));
@@ -45,7 +46,8 @@ export default function Users() {
     setConversationId,
     chattedUsersList,
     userListFetchNextPage,
-    isUsersListLoading
+    isUsersListLoading,
+    isAdmin
   } = context;
 
   const [searchClick, setSearchClick] = useState(false);
@@ -194,6 +196,8 @@ export default function Users() {
                     <UserItem
                       user={element}
                       handleUserClick={handleDatabaseUserClick}
+                       isAdmin={isAdmin}
+                       currentUser={Me}
                     />
                   </div>
                 ))
@@ -225,6 +229,8 @@ export default function Users() {
                     <UserItem
                       user={element}
                       handleUserClick={handleUserClick}
+                       isAdmin={isAdmin}
+                       currentUser={Me}
                     />
                   </div>
                 )}

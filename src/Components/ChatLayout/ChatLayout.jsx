@@ -18,6 +18,7 @@ import MediaModal from "./MediaModal";
 import useTyping from "./Hooks/useTyping";
 import useSendMessage from "./Hooks/useSendMessage";
 import { useMe } from './../../features/users/hooks/UseMe';
+import captalize from "../../utils/captalise";
 
 export default function ChatLayout() {
     
@@ -44,8 +45,6 @@ setReplyMessage,
  setConversationId,
 getmessages,
     sendMessages,
-  
-    capitalizeFirstLetter,
     conversationId,
     firstItemIndexRef,
     activeGroupChat,
@@ -219,7 +218,7 @@ const {
   onlineUsers={onlineUsers}
   setActiveChat={setActiveChat}
   setActivePage={setActivePage}
-  capitalizeFirstLetter={capitalizeFirstLetter}
+  capitalizeFirstLetter={captalize}
   formatLastSeen={formatLastSeen}
   socket={socket}
   conversationId={conversationId} 

@@ -411,13 +411,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
 }
 
 
-  const capitalizeFirstLetter = (string) => {
-    // Check if the input is a non-empty string to avoid errors
-    if (typeof string !== "string" || string.length === 0) {
-      return string;
-    }
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
+ 
 
 
   return (
@@ -452,7 +446,6 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         activeChat,
         setActiveChat,
         uploadCloudinary,
-        capitalizeFirstLetter,
         searchUser,
         sendMessages,
         setConversationId,

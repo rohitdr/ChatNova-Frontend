@@ -2,42 +2,51 @@
  * The `UserItem` component in JavaScript React is a memoized functional component that renders a user
  * item with specified props and event handlers.
  */
-import React, { useCallback, useContext } from "react";
-import ChatNovaContext from "../Context/ChatNovaContext";
-import {motion} from 'framer-motion'
-import { PlusIcon, MinusIcon, CheckIcon,UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
-import AuthContext from "../Context/AuthContext";
-import { useMe } from "../features/users/hooks/UseMe";
+import React, { useCallback } from "react";
+import { motion } from 'framer-motion'
+import { PlusIcon, MinusIcon, CheckIcon } from "@heroicons/react/24/solid";
 
+
+import captalize from "../../../utils/captalise";
+import GroupRemoveItem from "../../groups/components/GroupRemoveItem";
+import GroupAddItem from "../../groups/components/GroupAddItem";
 const UserItem = React.memo(
   ({
     user,
+    currentUser,
     handleUserClick,
     isSelected=false,
     onAdd,
     onRemove,
     showActions=false,
-    mode="chat"
+    mode="chat",
+    isAdmin
   }) => {
-
-
+  
     const {image,lastMessage,name,element,unreadCount} =user
     const preload = useCallback(() => {
-      import("./ChatLayout/ChatLayout");
+      import("../../../Components/ChatLayout/ChatLayout");
     },[]);
     const handleClick = ()=>{
       if(mode === "chat"){
         handleUserClick(element);
       }
     }
-    const {capitalizeFirstLetter,isAdmin} = useContext(ChatNovaContext)
-     const {data:Me}=useMe()
+  
     const time = lastMessage?.createdAt
   ? new Date(lastMessage.createdAt).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     })
   : "";
+  const handleRemove=(e)=>{
+        e.stopPropagation();
+     onRemove?.(user._id,name)
+ }
+  const handleAdd=(e)=>{
+        e.stopPropagation();
+    onAdd?.(user._id,name)
+ }
     return (
       <motion.div
        whileHover={{ scale: 1.01, y:-2 }}
@@ -70,7 +79,7 @@ shadow-sm rounded-full   object-cover"
         <div className="flex flex-col w-full justify-between py-1">
           <div className="flex  flex-1 justify-between items-center pl-2 ">
             <p className="font-medium text-xs  text-black">
-              {capitalizeFirstLetter(name)} { mode==="groupRemove"&& user._id === Me._id && "(You)"}
+              {captalize(name)} { mode==="groupRemove"&& user._id === currentUser._id && "(You)"}
             </p>
              
             { mode ==="chat" &&lastMessage && (
@@ -124,18 +133,8 @@ bg-blue-500 text-white bg xs:text-xs flex items-center justify-center">
             )}
           </div>
         )}
-        {mode==="groupRemove"&& Me._id !== user._id && <div className=" flex flex-col justify-center">
-
-       <UserMinusIcon className={`w-5 font-medium   h-5 text-red-500 cursor-pointer ${!isAdmin&& "hidden"}`}
-         onClick={(e)=>{  e.stopPropagation(); onRemove?.(user._id,name)}}
-         />
-        </div>}
-        {mode==="groupAdd"&& Me._id !== user._id && <div className=" flex flex-col justify-center">
-
-       <UserPlusIcon className={`w-5 font-medium   h-5 text-blue-500 cursor-pointer`}
-         onClick={(e)=>{  e.stopPropagation(); onAdd?.(user._id,name)}}
-         />
-        </div>}
+        {mode==="groupRemove"&& currentUser._id !== user._id && <GroupRemoveItem handleRemove={handleRemove} isAdmin={isAdmin}></GroupRemoveItem>}
+        {mode==="groupAdd"&& currentUser._id !== user._id && <GroupAddItem handleAdd={handleAdd}></GroupAddItem>}
           </motion.div>
 
    

@@ -22,10 +22,12 @@ import AuthContext from "../Context/AuthContext";
 import NoServer from "./NoServer";
 import ChatNovaContext from "../Context/ChatNovaContext";
 import { useQueryClient } from "@tanstack/react-query";
-import UserItem from "./UserItem";
+
+import UserItem from './../features/users/components/UserItem';
 import useDebounce from "./Hooks/Debouncer";
-import UserSkeleton from "./UserSkeleton";
+import UserSkeleton from "../features/users/components/UserSkeleton";
 import { useMe } from "../features/users/hooks/UseMe";
+import captalize from "../utils/captalise";
 
 export default function GroupInfo() {
 
@@ -43,7 +45,6 @@ export default function GroupInfo() {
     conversationId,
     updateGroupImage,
     chattedUsersList,
-    capitalizeFirstLetter,
     isDeletingGroup,
     isLeavingGroup,
     isSearchLoading,
@@ -340,7 +341,7 @@ export default function GroupInfo() {
               </div>
 
               <p className="font-medium">
-                {capitalizeFirstLetter(selectedGroup?.name)}
+                {captalize(selectedGroup?.name)}
               </p>
 
             </div>
@@ -372,6 +373,8 @@ export default function GroupInfo() {
                   key={element._id}
                   onRemove={removeMemberhandler}
                   mode="groupRemove"
+                   isAdmin={isAdmin}
+                   currentUser={Me}
                 />
               ))}
             </div>
@@ -420,6 +423,7 @@ export default function GroupInfo() {
                     key={element._id}
                     onAdd={addMemberhandler}
                     mode="groupAdd"
+                     isAdmin={isAdmin}
                   />
                 );
               })}
@@ -435,6 +439,7 @@ export default function GroupInfo() {
                     key={element._id}
                     onAdd={addMemberhandler}
                     mode="groupAdd"
+                     isAdmin={isAdmin}
                   />
                 );
               })}
