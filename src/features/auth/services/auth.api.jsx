@@ -9,3 +9,6 @@ export const signUpApi =(data)=>{
 export const forgetPasswordApi =(data)=>{
    return  api.put("/auth/forgetPassword",data);
 }
+export const logoutApi =()=>{
+   return  api.post("/auth/logout");
+}

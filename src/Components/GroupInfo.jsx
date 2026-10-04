@@ -28,32 +28,37 @@ import useDebounce from "./Hooks/Debouncer";
 import UserSkeleton from "../features/users/components/UserSkeleton";
 import { useMe } from "../features/users/hooks/UseMe";
 import captalize from "../utils/captalise";
+import { useConversation } from "../features/chat/hooks/useConversation";
+import { useParams } from "react-router-dom";
 
 export default function GroupInfo() {
 
   const {
     searchUser,
     addMember,
-    isAdmin,
     isGroup,
     deleteGroup,
     leaveGroup,
     queryClient,
-    selectedGroup,
+  
     dataBaseUsers,
     removeMember,
-    conversationId,
     updateGroupImage,
     chattedUsersList,
     isDeletingGroup,
     isLeavingGroup,
     isSearchLoading,
   } = useContext(ChatNovaContext);
+  const {conversationId}=useParams()
+const {data:conversation}=useConversation(conversationId)
 
   const [searchValue, setSearchValue] = useState("");
 
   const { isServerDown } = useContext(AuthContext);
     const {data:Me}=useMe()
+     const isAdmin = conversation?.participents?.some(
+  (p) => p.user._id === Me._id && p.role === "admin"
+);
 
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -263,13 +268,13 @@ export default function GroupInfo() {
 
   const NormalizedSelectedGroup = useMemo(() => {
 
-    if (!selectedGroup) return;
+    if (!conversation) return;
 
-    return selectedGroup.participents?.map((element) =>
+    return conversation.participents?.map((element) =>
       normalizeItem(element, "chat")
     );
 
-  }, [selectedGroup, normalizeItem]);
+  }, [conversation, normalizeItem]);
 
   const NormalizedChattedUsers = useMemo(() =>
     chattedUsersList?.map((element) =>
@@ -286,10 +291,10 @@ export default function GroupInfo() {
   );
 
   const isSelectedUser = useMemo(() => (id) => {
-    return selectedGroup?.participents?.some(
+    return conversation?.participents?.some(
       (p) => p.user._id === id
     );
-  }, [selectedGroup]);
+  }, [conversation]);
 
   // ---------------- UI ----------------
   return isServerDown ? (
@@ -335,13 +340,13 @@ export default function GroupInfo() {
                 <img
                   loading="lazy"
                   className="w-28 shadow-md h-28 rounded-full border-white border-4"
-                  src={preview || selectedGroup?.avtar.url}
+                  src={preview || conversation?.avtar.url}
                   alt="Group Image"
                 />
               </div>
 
               <p className="font-medium">
-                {captalize(selectedGroup?.name)}
+                {captalize(conversation?.name)}
               </p>
 
             </div>
@@ -355,7 +360,7 @@ export default function GroupInfo() {
               <div className="flex font-medium pt-2 pb-1">
                 <UserGroupIcon className="w-6 mx-2 h-6 text-black" />
                 <div className="text-xl">
-                  {selectedGroup?.participents?.length} Members
+                  {conversation?.participents?.length} Members
                 </div>
               </div>
 
@@ -424,6 +429,7 @@ export default function GroupInfo() {
                     onAdd={addMemberhandler}
                     mode="groupAdd"
                      isAdmin={isAdmin}
+                     currentUser={Me}
                   />
                 );
               })}
@@ -439,6 +445,7 @@ export default function GroupInfo() {
                     key={element._id}
                     onAdd={addMemberhandler}
                     mode="groupAdd"
+                    currentUser={Me}
                      isAdmin={isAdmin}
                   />
                 );

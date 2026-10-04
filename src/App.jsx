@@ -21,6 +21,12 @@ import SignUp from './pages/SignUp';
 import ProtectedRoute from './features/auth/components/ProtectedRoute';
 import PublicRoute from './features/auth/components/PublicRoute';
 
+import Settings from "./Components/Settings";
+import Profile from "./features/users/components/Profile";
+import Group from "./Components/Group";
+import GroupInfo from "./Components/GroupInfo";
+import ChatUsersList from './features/chat/components/ChatUsersList';
+
 
 function App() {
 
@@ -40,7 +46,21 @@ function App() {
 
       <Routes>
         <Route  path="/login" element={<PublicRoute><Login/></PublicRoute> }></Route>
-        <Route  path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}></Route>
+        <Route  path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}>
+         <Route path="profile"  element={<Profile></Profile>}/>
+         <Route index  element={<ChatUsersList></ChatUsersList>}/>
+         <Route path="settings"  element={<Settings></Settings>}/>
+         <Route path="group"  element={<Group></Group>}/>
+          <Route path="group/:conversationId" element={<Group />} />
+          <Route path="group/:conversationId/info" element={<GroupInfo></GroupInfo>} />
+         <Route path="chat/:conversationId"  element={<ChatUsersList></ChatUsersList>}/>
+         <Route path="chat/new/:userId"  element={<ChatUsersList></ChatUsersList>}/>
+        </Route>
+
+
+
+
+
         <Route  path="/additionaldetails"  element={
       <Suspense fallback={<AppLoader />}>
        <ProtectedRoute> <AdditionalDetails /></ProtectedRoute>

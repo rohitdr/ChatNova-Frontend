@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { getUserById } from "../api/user.api";
 
 
 
-const useSelectedUser=(id,getCureentChattingUser)=>{
+const useUser=(id)=>{
   return useQuery({
     queryKey:["user",id],
-    queryFn:({queryKey }) => {
-      const [, id] = queryKey; 
-      return getCureentChattingUser( id);
+    queryFn:async()=>{
+      const response=await getUserById(id);
+      return response.data.user
     },
     staleTime:5000,
     enabled:!!id,
@@ -15,4 +16,4 @@ const useSelectedUser=(id,getCureentChattingUser)=>{
      keepPreviousData:false
   })
 }
-export default useSelectedUser
+export default useUser

@@ -1,38 +1,34 @@
 
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useConversation } from './../../features/chat/hooks/useConversation';
+import ChatHeaderSkeleton from './../ChatHeaderSkeleton';
 
-
-export default function ChatHeader({ selectedUser,
-  selectedGroup,
-  activeGroupChat,
+import { Link } from "react-router-dom";
+import useUser from "../../features/users/hooks/useUser";
+import captalize from './../../utils/captalise';
+export default function ChatHeader({ 
   onlineUsers,
-  setActiveChat,
-  setActivePage,
-  capitalizeFirstLetter,
+userId,
 formatLastSeen,
 socket,
 conversationId,
-setConversationId
+currentUser
 }) {
-  const handleBack=()=>{
-  
-   if (!socket) return;
+const {data:user}=useUser(userId)
+  const {data:conversation,isLoading}=useConversation(conversationId)
+const otherUser=user?user:conversation?.participents?.find((participent)=>participent.user._id !== currentUser._id)?.user
 
+  const handleBack=()=>{
+   if (!socket) return;
  if(conversationId) {
       socket.emit("leave_group",conversationId)
-    
     }
-    setConversationId(null)
-       setActiveChat(false)
+    // setConversationId(null)
+    //    setActiveChat(false)
   }
-  const handleGroupClick=()=>{
-  
-      if (activeGroupChat) {
-                        setActivePage(4);
-                        setActiveChat(false);
-                      }
-  }
-     const isOnline=onlineUsers?.includes(selectedUser?._id)
+ 
+     const isOnline=onlineUsers?.includes(otherUser?._id)
+     if(isLoading) return <ChatHeaderSkeleton></ChatHeaderSkeleton>
   return (
    
        <div
@@ -41,51 +37,53 @@ setConversationId
 bg-white/80 backdrop-blur-md border-b shadow-sm"
               >
                 <div className="flex items-center gap-3">
+                <Link to={`${conversation?.type==="group"?"/group":"/"}`}>
                   <ArrowLeftIcon
                     className="w-6 h-6 text-gray-700 cursor-pointer lg:hidden hover:scale-110 transition"
                     onClick={handleBack}
-                  />
+                  /></Link>
 
                   <div className="relative">
                     <img
                       loading="lazy"
                       className="lg:h-12 lg:w-12 h-10 w-10 rounded-full object-cover border-2 border-white shadow"
-                      src={activeGroupChat? 
-                        selectedGroup?.avtar?.url || "https://res.cloudinary.com/do2twyxai/image/upload/v1776158903/nqlnpx7qfsdj2mzvdfvt.jpg"
-                        : selectedUser?.image?.url || "https://res.cloudinary.com/do2twyxai/image/upload/v1776158903/nqlnpx7qfsdj2mzvdfvt.jpg"
+                      src={conversation?.type==="group"? 
+                        conversation?.avtar?.url || "https://res.cloudinary.com/do2twyxai/image/upload/v1776158903/nqlnpx7qfsdj2mzvdfvt.jpg"
+                        : otherUser?.image?.url || "https://res.cloudinary.com/do2twyxai/image/upload/v1776158903/nqlnpx7qfsdj2mzvdfvt.jpg"
                       }
-                     alt={activeGroupChat ? "Group avatar" : selectedUser?.name || "User"}
+                     alt={conversation?.type==="group" ? "Group avatar" : otherUser?.name || "User"}
                     />
 
-                    {!activeGroupChat &&
+                    {conversation?.type==="private" &&
                       isOnline && (
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                       )}
                   </div>
 
-                  <div
+                  <Link
                     className="flex flex-col cursor-pointer"
-                   onClick={handleGroupClick}
+                  to={`/group/${conversation?._id}/info`}
                   >
                     <h2 className="text-sm lg:text-lg font-semibold text-gray-900">
-                      {capitalizeFirstLetter(
-                        activeGroupChat
-                          ? selectedGroup?.name
-                          : selectedUser?.name,
+                      {captalize(
+                        conversation?.type==="group"
+                          ? conversation?.name
+                          : otherUser?.name,
                       )}
                     </h2>
 
-                    {!activeGroupChat &&
+                    {conversation?.type==="private" &&
                       ( isOnline? (
                         <span className="text-xs text-green-500 font-medium">
                           online
                         </span>
                       ) : (
                         <span className="text-xs text-gray-400">
-                          {formatLastSeen(selectedUser?.lastSeen || "")}
+                          {formatLastSeen(otherUser?.lastSeen || "")}
                         </span>
                       ))}
-                  </div>
+                  
+                  </Link>
                 </div>
 
 {/*             

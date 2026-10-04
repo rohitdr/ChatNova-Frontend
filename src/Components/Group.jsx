@@ -12,6 +12,7 @@ import UserSkeleton from "../features/users/components/UserSkeleton";
 import UserItem from './../features/users/components/UserItem';
 import EmptyChat from "./EmptyChat";
 import { useMe } from "../features/users/hooks/UseMe";
+import { NavLink } from "react-router-dom";
 
 export default function Group() {
   
@@ -20,7 +21,6 @@ export default function Group() {
   const {data:Me}=useMe()
 
   const {
-    setIsGroup,
     allGroup,
     isAllGroupLoading,
     setActiveChat,
@@ -63,10 +63,6 @@ export default function Group() {
         userId: Me?._id,
       });
 
-      setConversationId(element._id);
-      setActiveGroupChat(true);
-      setActiveChat(true);
-      setIsGroup(true);
     },
     [socket, conversationId, Me?._id]
   );
@@ -165,7 +161,6 @@ export default function Group() {
         setActiveChat(false);
       }
     };
-
     socket.on("group_deleted", groupDeleteHandler);
     socket.on("group_leaved", groupLeaveHandler);
     socket.on("group_created", groupHandler);
@@ -282,13 +277,15 @@ export default function Group() {
               allNormalizedGroups &&
               allNormalizedGroups.length !== 0 &&
               allNormalizedGroups.map((element) => (
-                <div className="h-[72px]" key={element._id}>
-                  <UserItem
+          
+                      <NavLink to={`/group/${element._id}`} className="h-[72px]" key={element._id}>
+                  <UserItem 
                     user={element}
                     handleUserClick={handleGroupClick}
                      isAdmin={isAdmin}
                   />
-                </div>
+                  </NavLink>
+               
               ))
             : [...Array(10)].map((_, i) => (
                 <UserSkeleton key={i} send={i % 2 === 0} />

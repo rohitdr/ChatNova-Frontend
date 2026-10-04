@@ -1,7 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
+import { useMe } from "../../users/hooks/UseMe"
+import { chattedUsers } from "../services/chatUser"
 
 
-const useUsers = (chattedUsers,Me)=>{
+const useChatUsers = ()=>{
+  const {data:Me}=useMe()
   return useInfiniteQuery({
     queryKey:["users"],
     queryFn:({pageParam=1})=>{ return chattedUsers(pageParam)},
@@ -17,4 +20,4 @@ enabled:!!Me
 
   })
 }
-export default useUsers;
+export default useChatUsers;

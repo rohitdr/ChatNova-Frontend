@@ -1,4 +1,5 @@
-import React from 'react'
+import { UserMinusIcon } from '@heroicons/react/24/solid'
+
 
 export default function GroupRemoveItem({isAdmin,handleRemove}) {
   return (

@@ -7,12 +7,10 @@ import ChatNovaContext from "./ChatNovaContext";
 import AuthContext from "./AuthContext.jsx";
 import SocketContext from "./SocketContext.jsx";
 import { useQueryClient } from "@tanstack/react-query";
-import useUsers from "../Components/Hooks/useUsers.jsx";
-import useSelectedUser from "../Components/Hooks/useSelectedUser.jsx";
 import useSelectedGroup from "../Components/Hooks/useSelectedGroup.jsx";
 import useGroups from "../Components/Hooks/useGroups.jsx";
 import {  getAllGroupsApi, getConversationIdApi, getGroupByIdApi, uploadGroupImageApi } from "../Api/GroupApi.jsx";
-import { chattedUsersApi, getCurrentChattingUserApi, searchUserApi } from "../Api/UsersApi.jsx";
+
 import { useSendMessage } from "../Components/Hooks/UseSendMessage.jsx";
 import { getMessagesApi, sendMediaApi, uploadCloudinaryApi } from "../Api/MessageApi.jsx";
 import { useGroupMutation } from "../Components/Hooks/UseGroupMutation.jsx";
@@ -136,66 +134,11 @@ setIsSearchLoading(false)
     
     }
   };
-  // function to search users from database to chat with search query
-  const searchUser =useCallback(async (searchValue) => {
-    try {
-      setIsSearchLoading(true)
-      const res = await searchUserApi(searchValue)
-      if (res.status === 200) {
-        setDataBaseUsers(res.data.users);
-        setTimeout(() => {
-           setIsSearchLoading(false)
-        }, 1000);
-    
-      }
-    } catch (error) {
 
-handleError(error)
-        setTimeout(() => {
-           setIsSearchLoading(false)
-        }, 1000);
-    
-      
-    }
-  },[])
 
-  //function to serach the users with whom logged in user have chatted
-  const chattedUsers = async (page) => {
-    try {
-     let limit =15
-      const res =await chattedUsersApi(limit,page)
-      if (res.status === 200) {
-    
-     
-         return  {
-  users: res.data.users,
-  page: page,
-  hasMore: res.data.hasMore
-}
 
-      }
-    } catch (error) {
-      handleError(error)
-      throw  error
-    }
-  };
  
 
-  // function to get current chatting user
-  const getCurrentChattingUser = async (id) => {
-    try {
-   
-      const res = await getCurrentChattingUserApi(id)
-  
-
-    return  res.data.user
-    
-    
-    } catch (error) {
-      handleError(error)
-   throw error
-    }
-  };
 
   const getmessages = async (id,cursor) => {
     try {
@@ -219,10 +162,6 @@ handleError(error)
 
 
 
-const {data:usersList,isLoading:isUsersListLoading,fetchNextPage:userListFetchNextPage}=useUsers(chattedUsers,Me)
-const chattedUsersList = usersList?.pages.flatMap(page => page.users) || [];
-
-   const {data:selectedUser,isLoading:selectedUserLoading}=useSelectedUser(currentChatUserId,getCurrentChattingUser);
 
 //sendmessagee do it 
   const sendMessages = async (message) => {
@@ -432,9 +371,7 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         replyMessage,
         allGroup,
         setReplyMessage,
-   
-     selectedUser,
-     selectedUserLoading,
+
 
         isAllGroupLoading,
    updateGroupImage,
@@ -446,7 +383,6 @@ const createGroup =async(participents,name,inviteCode,file)=>{
         activeChat,
         setActiveChat,
         uploadCloudinary,
-        searchUser,
         sendMessages,
         setConversationId,
         dataBaseUsers,
@@ -457,15 +393,11 @@ const createGroup =async(participents,name,inviteCode,file)=>{
       getConversationId,
       setpage,
       isLeavingGroup,
-        getCurrentChattingUser,
         setDataBaseUsers,
         setCurrentChatUserId,
         currentChatUserId,
-     userListFetchNextPage,
-     isUsersListLoading,
-        chattedUsersList,
         hasMoreUsers,
-        chattedUsers,
+   
         queryClient,
     uploadMediaMutation,
         isAdmin,

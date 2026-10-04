@@ -20,7 +20,7 @@ const UserItem = React.memo(
     onRemove,
     showActions=false,
     mode="chat",
-    isAdmin
+    isAdmin=false
   }) => {
   
     const {image,lastMessage,name,element,unreadCount} =user
@@ -89,7 +89,7 @@ shadow-sm rounded-full   object-cover"
               </p>
             )}
           </div>
-           { mode==="groupRemove" &&element.role==="admin" &&<span className="bg-blue-100 text-blue-600 rounded-full px-2 py-0.5">
+           { mode ==="groupRemove" &&element.role==="admin" &&<span className="bg-blue-100 w-fit text-blue-600 rounded-full px-2 py-0.5">
                     Admin
                </span>}
           <div className="flex justify-between">
@@ -133,8 +133,8 @@ bg-blue-500 text-white bg xs:text-xs flex items-center justify-center">
             )}
           </div>
         )}
-        {mode==="groupRemove"&& currentUser._id !== user._id && <GroupRemoveItem handleRemove={handleRemove} isAdmin={isAdmin}></GroupRemoveItem>}
-        {mode==="groupAdd"&& currentUser._id !== user._id && <GroupAddItem handleAdd={handleAdd}></GroupAddItem>}
+        {mode==="groupRemove" && currentUser._id !== user._id && <GroupRemoveItem handleRemove={handleRemove} isAdmin={isAdmin}></GroupRemoveItem>}
+        {mode==="groupAdd" && currentUser._id !== user._id && <GroupAddItem handleAdd={handleAdd}></GroupAddItem>}
           </motion.div>
 
    

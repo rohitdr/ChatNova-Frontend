@@ -1,4 +1,4 @@
-import  { useContext, useState } from "react";
+import  {  useState } from "react";
 import {
  
   ChatBubbleOvalLeftEllipsisIcon,
@@ -8,74 +8,78 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
-import AuthContext from "../Context/AuthContext";
-import ChatNovaContext from "../Context/ChatNovaContext";
 import { useMe } from "../features/users/hooks/UseMe";
+import { NavLink, useLocation ,Link} from "react-router-dom";
+import { useLogout } from "../features/auth/hooks/useLogout";
+
 export default function SideBar() {
-  const {setIsGroup} =useContext(ChatNovaContext)
-  const { logout,  setActivePage, activePage } = useContext(AuthContext);
-    const {data:Me}=useMe()
+  const logout=useLogout()
+  const location=useLocation()
+  const {data:Me}=useMe()
+  const isChatsRoute =
+  location.pathname === "/" ||
+  location.pathname.startsWith("/chat/");
+  const isgroupRoute =
+  location.pathname === "/group" ||
+  location.pathname.startsWith("/group/");
   const [showMenu, setShowMenu] = useState(false);
-  const logoutHandler = () => {
-    logout();
-  };
+
 const menuItems = [
   {
     id: 1,
     icon: UserIcon,
-    action: () => setActivePage(1),
+  path:"/profile",
     className: "md:w-9 w-6 h-6 sm:ml-12 lg:w-9 lg:h-9 lg:mb-4 mx-4 lg:mx-2",
   },
   {
     id: 0,
     icon:ChatBubbleOvalLeftEllipsisIcon ,
-    action: () => {
-      setIsGroup(false);
-      setActivePage(0);
-    },
-    className: "lg:w-9 sm:ml-12 w-7 h-7 md:w-9 md:h-9 2xs:mx-2 xs:mx-4 lg:my-2 lg:mx-2",
+    path:"/",
+    className: ` ${isChatsRoute? "text-blue-700":"text-black"} lg:w-9 sm:ml-12 w-7 h-7 md:w-9 md:h-9 2xs:mx-2 xs:mx-4 lg:my-2 lg:mx-2`,
   },
   {
     id: 2,
     icon: UsersIcon,
-    action: () => setActivePage(2),
-    className: "lg:w-9 w-7 md:w-9 lg:my-2 h-7 md:h-9 sm:ml-12 mx-4 lg:mx-2",
+      path:"/group",
+  
+    className: `${isgroupRoute? "text-blue-700":"text-black"} lg:w-9 w-7 md:w-9 lg:my-2 h-7 md:h-9 sm:ml-12 mx-4 lg:mx-2`,
   },
   {
     id: 3,
     icon: Cog6ToothIcon,
-    action: () => setActivePage(3),
+      path:"/settings",
     className: "lg:w-9 md:w-9 w-7 sm:ml-12 lg:my-6 h-7 md:h-9 xs:mx-4 lg:mx-2",
   },
 ];
     const dropdownItems=[{
         id:1,
         action:() => {
-                    setActivePage(1);
                     setShowMenu(false);
                   },
+                    path:"/profile",
         name:"Profile",
         Icon:UserIcon,
     },
    {
         id:2,
         action:() => {
-                  setActivePage(3);
                   setShowMenu(false);
                 },
+                  path:"/settings",
         name:"Settings",
         Icon:Cog6ToothIcon,
     },
   {
         id:3,
-        action:() => {
-  logoutHandler();
+        action:async () => {
+  await logout.mutateAsync();
   setShowMenu(false);
 },
         name:"Logout",
         Icon:PowerIcon,
     }
 ]
+
   return (
     <>
       <div className={`2xs:h-14 xs:h-16 border border-black/20  shadow-2xl m-2 lg:shadow-none lg:m-0 lg:rounded-none  rounded-3xl lg:h-full lg:grid lg:grid-rows-[35%_55%_10%] lg:static bg-white z-50 fixed bottom-0 left-0 right-0 flex  justify-between lg:justify-center `}>
@@ -90,10 +94,8 @@ const menuItems = [
         <div className="flex lg:h-[20rem] h-full flex-row lg:flex-col items-center justify-between">
 
         
-             {menuItems.map(({id,icon:Icon,action,className})=> {
-               return <motion.div whileHover={{scale:1.05}} whileTap={{scale:0.95}} key={id} > <Icon  className={`cursor-pointer ${className} ${
-      activePage === id ? "text-blue-700 " : "text-black"
-    }`} onClick={action} ></Icon></motion.div>
+             {menuItems.map(({id,icon:Icon,className, path})=> {
+               return <NavLink end to={path} className={({isActive})=>(isActive )?"text-blue-700":"text-black" } whileHover={{scale:1.05}} whileTap={{scale:0.95}} key={id} > <Icon  className={ `cursor-pointer ${className}`}  ></Icon></NavLink>
              })}
          
          
@@ -126,9 +128,9 @@ const menuItems = [
               e.stopPropagation();
             }}
           >
-            {dropdownItems.map(({ id, name, Icon, action })=>(<div key={id} className="border rounded-2xl cursor-pointer  border-gray-50 hover:bg-slate-100"
+            {dropdownItems.map(({ id, name, Icon , action,path })=>(<div key={id} className="border rounded-2xl cursor-pointer  border-gray-50 hover:bg-slate-100"
                onClick={action}>
-                <div
+                <Link to={path}
                   className="flex m-4  mb-4 text-gray-700 justify-between font-medium"
                  
                 >
@@ -136,7 +138,7 @@ const menuItems = [
                   <div>
                     <Icon className="w-4 h-4 mt-1.5 text-black cursor-pointer" />
                   </div>
-                </div>
+                </Link>
               </div>))}
 
 

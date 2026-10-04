@@ -183,8 +183,7 @@ await logoutApi()
           
           localStorage.removeItem("accessToken");
           queryClient.removeQueries()
- 
-      
+
         showAlert("Success", "You have been logged out successfully !");
         navigate("/login");
         }

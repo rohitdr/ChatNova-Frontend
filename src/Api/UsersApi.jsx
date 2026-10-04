@@ -1,15 +1,9 @@
 import api from "./Axios";
 
 
-export const searchUserApi =(value)=>{
-   return api.get(`/users/search?search=${value}`);
-}
-export const chattedUsersApi =(limit,page)=>{
-   return  api.get(`/users/chattedUsers?limit=${limit}&page=${page}`);
-}
-export const getCurrentChattingUserApi =(id)=>{
-   return  api.get(`/users/getUser/${id}`);
-}
+
+
+
 
 
 export const updatePasswordApi =(data)=>{
@@ -19,9 +13,7 @@ export const updatePasswordApi =(data)=>{
 export const updateUserApi =(data)=>{
    return  api.post("/auth/update",data);
 }
-export const logoutApi =()=>{
-   return  api.post("/auth/logout");
-}
+
 export const refreshApi =()=>{
    return  api.post("/auth/refresh");
 }

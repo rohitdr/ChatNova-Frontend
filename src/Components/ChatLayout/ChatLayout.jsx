@@ -20,7 +20,7 @@ import useSendMessage from "./Hooks/useSendMessage";
 import { useMe } from './../../features/users/hooks/UseMe';
 import captalize from "../../utils/captalise";
 
-export default function ChatLayout() {
+export default function ChatLayout({conversationId,userId}) {
     
   const [sendingMessage, setSendingMessage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -28,7 +28,6 @@ export default function ChatLayout() {
   const { showAlert, setActivePage, } = useContext(AuthContext);
   const {data:Me}=useMe()
 const isPaginationRef=useRef(false)
-
   const [mediaSendModal, setMediaSendModal] = useState(false);
   const [typingUser, setTypingUser] = useState([]);
 
@@ -45,7 +44,7 @@ setReplyMessage,
  setConversationId,
 getmessages,
     sendMessages,
-    conversationId,
+  
     firstItemIndexRef,
     activeGroupChat,
 selectedGroup,
@@ -208,7 +207,7 @@ const {
   };
   return  (
     <>  
-      {currentChatUserId || activeGroupChat ? (
+       
         <div className={`h-[100dvh] md:h-screen bg-white overflow-hidden`}>
           <div className="flex h-full flex-col ">
             {!selectedUserLoading  || messages.length!==0 ? (
@@ -222,6 +221,8 @@ const {
   formatLastSeen={formatLastSeen}
   socket={socket}
   conversationId={conversationId} 
+  currentUser={Me}
+  userId={userId}
   setConversationId={setConversationId}></ChatHeader>
 //           
             ) : (
@@ -260,9 +261,7 @@ const {
             </div>
           </div>
         </div>
-      ) : (
-        <EmptyChat mode="chat"></EmptyChat>
-      )}
+      
 
       {mediaSendModal && (
         
