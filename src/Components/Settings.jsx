@@ -7,27 +7,28 @@ import {
 } from "@heroicons/react/24/solid";
 import { useContext, useEffect, useRef, useState } from "react";
 import AuthContext from "../Context/AuthContext";
-
 import ChatNovaContext from "../Context/ChatNovaContext"
 import SocketContext from "../Context/SocketContext"
-import NoServer from "./NoServer";
-import { useAuthMutations } from "./Hooks/useAuthMutations";
 import { FaSpinner } from "react-icons/fa";
 import { useMe } from "../features/users/hooks/UseMe";
 import captalize from "../utils/captalise";
+import { useChangePassword } from "../features/auth/hooks/useChangePassword";
+import { useUpdateUser } from "../features/users/hooks/useUpdateUser";
 export default function Settings() {
   const {socket }= useContext(SocketContext)
   const [editMenu,setEditMenu]=useState(false)
+  
   const {queryClient} = useContext(ChatNovaContext)
 const imageRef =useRef(null)
   const {data:Me}=useMe()
-  const {  updateUserImage,updatePassword, isServerDown,showAlert ,updateUser,handleError} = useContext(AuthContext);
+  const updatePassword=useChangePassword()
+  const {  showAlert } = useContext(AuthContext);
   const [settingsImage, setSettingsImage] = useState(null);
   const [formData,setFormData]=useState(null)
   const [originaldata,setOriginalData]=useState(null)
  const [passwordData,setPasswordData]=useState({oldPassword:"",newPassword:"",confirmPassword:""})
 const [preview,setPreview]=useState(null)
-const {userUpdatedMutation}=useAuthMutations(handleError)
+const updateUser=useUpdateUser()
   useEffect(()=>{
       if (Me) {
     const initial = {
@@ -53,7 +54,7 @@ const {userUpdatedMutation}=useAuthMutations(handleError)
     return ()=> URL.revokeObjectURL(url)
   },[settingsImage])
  const handleImageUpdate=()=>{
-  userUpdatedMutation.mutate({data:{},file:settingsImage})
+  updateUser.mutate({data:{},file:settingsImage})
             // updateUserImage(settingsImage);
             setTimeout(() => {
               setSettingsImage(null);
@@ -115,7 +116,7 @@ const handleUpdate = (e) => {
     showAlert("Error", error);
     return;
   }
-  userUpdatedMutation.mutate({data:payload})
+  updateUser.mutate({data:payload})
   setOriginalData(formData);
 };
 
@@ -143,7 +144,8 @@ const handleUpdate = (e) => {
      setPasswordData(prev=>({...prev,[name]:value}))
   }
   const validatePassword=()=>{
- if(passwordData.oldPassword.length<8 || passwordData.newPassword.length<8 || passwordData.confirmPassword.length<8  ){
+ if( passwordData.newPassword.length<=8 || passwordData.confirmPassword.length<=8  ){
+  console.log(passwordData)
       return "Password should be of length 8"
     }
   if(passwordData.confirmPassword !== passwordData.newPassword){
@@ -165,13 +167,12 @@ e.preventDefault()
   showAlert("Error",error)
   return
  }
-  updatePassword(passwordData.oldPassword,passwordData.newPassword)
+ 
+  updatePassword.mutate({newPassword:passwordData.newPassword,oldPassword:passwordData.oldPassword})
    setPasswordData({oldPassword:"",newPassword:"",confirmPassword:""})
     
   }
-  return isServerDown  ? (
-    <NoServer></NoServer>
-  ) : (
+  return  (
   <div className="flex h-full flex-col bg-gradient-to-br from-[#EEF2F7] to-[#F8FAFC] overflow-y-auto scrollbar-hide mb-20">
 
 
@@ -290,9 +291,9 @@ e.preventDefault()
 
         <div className="flex justify-end">
           <button
-          disabled={!isChanged || userUpdatedMutation.isPending}
+          disabled={!isChanged || updateUser.isPending}
            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-50">
-           {userUpdatedMutation.isPending ? <FaSpinner className="animate-spin w-5 h-5 text-white"></FaSpinner>:"Update"} 
+           {updateUser.isPending ? <FaSpinner className="animate-spin w-5 h-5 text-white"></FaSpinner>:"Update"} 
           </button>
         </div>
       </form>

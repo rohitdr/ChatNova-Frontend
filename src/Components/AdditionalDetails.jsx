@@ -8,7 +8,6 @@ import { useAuthMutations } from "./Hooks/useAuthMutations";
 export default function AdditionalDetails() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [image, setImage] = useState(null);
- 
 
   const navigate = useNavigate();
   const InputRef = useRef(null);

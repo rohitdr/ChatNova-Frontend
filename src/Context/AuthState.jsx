@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
 
-import { useNavigate } from "react-router-dom";
+
 import {  useQueryClient } from "@tanstack/react-query";
-import { useMe } from "../features/users/hooks/UseMe.jsx";
-import {  logoutApi, refreshApi, updatePasswordApi, updateUserApi } from "../Api/UsersApi.jsx";
-import { uploadCloudinaryApi } from "../Api/MessageApi.jsx";
+import {   refreshApi, updateUserApi } from "../Api/UsersApi.jsx";
 
 export default function AuthState(props) {
   const [isServerDown, setIsServerDown] = useState(false);
-  const navigate = useNavigate();
-
   const [progress, setProgress] = useState(0);
 
   const [activePage, setActivePage] = useState(0);
@@ -130,64 +126,11 @@ try{
   };
 
 
-/// update password when user is login
-  const updatePassword = async (oldPassword,newPassword) => {
-    try {
-  await runWithProgress(async()=>{
-    const data ={oldPassword,newPassword}
-      const response = await updatePasswordApi(data)
-  
-      if (response.status === 200) {
-     queryClient.invalidateQueries(["Me"])
-       showAlert("Success", "You Password has been updated");
-       setTimeout(async() => {
-           await logout()
-       }, 500);
-  
-      }
-  })
-    
-    } catch (error) {
-       handleError(error)
-    }
-  };
+
 
   /// update user information
-  const updateUser = async (data,file) => {
 
-      if(file){
-const formdata = new FormData();
-      formdata.append("file", file);
-      formdata.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
-      const res = await uploadCloudinaryApi(formdata);
-      let image = {
-        publicId: res.data.public_id,
-        url: res.data.secure_url,
-      };
-      
-       data.image =  image 
 
-      }
-      const response = await updateUserApi(data)
-return response.data
-  
-  };
-  const logout = async () => {
-    try {
-await logoutApi()
-     
-    } catch (error) {
-      console.log("Logout API failed")
-        }
-        finally{
-          
-          localStorage.removeItem("accessToken");
-          queryClient.removeQueries()
-
-        showAlert("Success", "You have been logged out successfully !");
-        navigate("/login");
-        }
-  };
 
   const updateUserImage = async (file) => {
     try {
@@ -208,8 +151,6 @@ await logoutApi()
     <AuthContext.Provider
       value={{
      authReady,
-        updatePassword,
-        updateUser,
         isServerDown,
         setIsServerDown,
         alert,
@@ -218,7 +159,6 @@ await logoutApi()
         updateUserImage,
         activePage,
         setActivePage,
-        logout,
         progress,
         setProgress,
        

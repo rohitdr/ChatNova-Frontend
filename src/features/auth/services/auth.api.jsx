@@ -12,3 +12,7 @@ export const forgetPasswordApi =(data)=>{
 export const logoutApi =()=>{
    return  api.post("/auth/logout");
 }
+export const updatePasswordApi =(data)=>{
+   return  api.put("/auth/updatePassword",data);
+}
+
