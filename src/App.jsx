@@ -26,6 +26,7 @@ import Profile from "./features/users/components/Profile";
 import Group from "./Components/Group";
 import GroupInfo from "./Components/GroupInfo";
 import ChatUsersList from './features/chat/components/ChatUsersList';
+import ProfileSettings from "./pages/ProfileSetting";
 
 
 function App() {
@@ -49,7 +50,7 @@ function App() {
         <Route  path="/" element={<ProtectedRoute><ChatPage/></ProtectedRoute>}>
          <Route path="profile"  element={<Profile></Profile>}/>
          <Route index  element={<ChatUsersList></ChatUsersList>}/>
-         <Route path="settings"  element={<Settings></Settings>}/>
+         <Route path="settings"  element={<ProfileSettings></ProfileSettings>}/>
          <Route path="group"  element={<Group></Group>}/>
           <Route path="group/:conversationId" element={<Group />} />
           <Route path="group/:conversationId/info" element={<GroupInfo></GroupInfo>} />

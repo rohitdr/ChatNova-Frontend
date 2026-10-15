@@ -3,7 +3,7 @@ import AuthContext from "./AuthContext";
 
 
 import {  useQueryClient } from "@tanstack/react-query";
-import {   refreshApi, updateUserApi } from "../Api/UsersApi.jsx";
+import {   refreshApi } from "../Api/UsersApi.jsx";
 
 export default function AuthState(props) {
   const [isServerDown, setIsServerDown] = useState(false);
